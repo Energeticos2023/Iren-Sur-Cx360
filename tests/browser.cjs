@@ -5,7 +5,8 @@ const uid='10000000-0000-4000-8000-000000000001';
 const user={id:uid,aud:'authenticated',role:'authenticated',email:'synthetic-admin@cx360.invalid',email_confirmed_at:new Date().toISOString(),app_metadata:{provider:'email'},user_metadata:{}};
 const member={user_id:uid,email:user.email,full_name:'SINTÉTICO · Prueba de interfaz',role:'admin',active:true,specialty:null};
 const now=new Date().toISOString();
-let snapshot={cut:now,members:[member],records:[],files:[],events:[],settings:{custody_authorized:false,current_schedule:null}};
+let snapshot={cut:now,members:[member],records:[{id:'20000000-0000-4000-8000-000000000001',kind:'system',specialty:'IIEE',state:'BORRADOR',version:1,created_by:uid,updated_by:uid,payload:{code:'SYN-SYS',title:'SINTÉTICO · red BT',assets:[]}}],files:[],events:[],settings:{custody_authorized:false,current_schedule:null}};
+snapshot.records.push({id:'20000000-0000-4000-8000-000000000002',kind:'protocol',specialty:'IIEE',state:'BORRADOR',version:1,created_by:uid,updated_by:uid,payload:{code:'SYN-P',title:'SINTÉTICO · formato fuente',revision:'R1',system_id:'20000000-0000-4000-8000-000000000001',stage:'PRECOMISIONAMIENTO',fields:[{key:'v',label:'SYN dato',unit:'V'}],form_schema:{format:'word-table-v1',review_state:'PENDIENTE_DE_REVISION',tables:[{rows:[[{key:'v',editable:true,printed_reference:'380',text:''}]]}]}}});
 let failSnapshot=false;const calls=[];
 (async()=>{
  const browser=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});
@@ -29,8 +30,18 @@ let failSnapshot=false;const calls=[];
   });
   const p=await context.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));
   await p.goto('http://127.0.0.1:4173');await p.getByRole('heading',{name:'Control de comisionamiento',exact:true}).waitFor();
-  await p.getByRole('heading',{name:'Control técnico por disciplina, sistema y equipo/TAG'}).waitFor();
+  await p.getByRole('heading',{name:'Especialidades y sistemas a intervenir'}).waitFor();
   assert.equal(await p.locator('body').evaluate(e=>e.scrollWidth<=window.innerWidth),true,'Panel sin desbordamiento');
+  await p.getByRole('button',{name:'Abrir IIEE',exact:true}).click();await p.getByRole('button',{name:'Abrir sistema',exact:true}).click();
+  for(const name of ['Alcance e inventario','Precomisionamiento','Comisionamiento','Pruebas integradas','Puesta en marcha','Manual de operación y mantenimiento','Capacitaciones','Cierre y entrega','Protocolos del sistema']){await p.getByRole('button',{name,exact:true}).click();assert.equal(await p.locator('nav[aria-label="Procesos del sistema"]').count(),1)}
+  await p.getByRole('button',{name:'Alcance e inventario',exact:true}).click();await p.getByRole('button',{name:'Registrar equipo, pozo, malla, barra o circuito',exact:true}).click();
+  await p.locator('#f-tag').fill('SYN-PT-01');await p.locator('#f-type').selectOption('POZO_TIERRA');await p.locator('#f-location').fill('SINTÉTICO · ambiente 1');await p.locator('#f-network_code').fill('SYN-BT');await p.locator('#f-source_ref').fill('SINTÉTICO R1');await p.locator('#f-inspection_access').fill('SYN cámara');await p.locator('#f-connections').fill('SYN-Destino | SYN-C1 | SYN-B1 | SYN-R1');
+  await p.getByRole('button',{name:'Guardar identificación con auditoría'}).click();await p.getByRole('cell',{name:'SYN-PT-01',exact:false}).waitFor();
+  assert.ok(calls.some(c=>c.path.endsWith('cx_save_record')&&JSON.parse(c.body).p_payload.assets?.[0]?.connections[0].circuit==='SYN-C1'));
+  await p.getByRole('button',{name:'Precomisionamiento',exact:true}).click();await p.getByRole('button',{name:'Llenar borrador no operativo'}).click();
+  await p.locator('#f-code').fill('SYN-T');await p.locator('#f-title').fill('SINTÉTICO · borrador');await p.locator('#f-asset_id').selectOption(snapshot.records.find(r=>r.kind==='system').payload.assets[0].id);
+  assert.equal(await p.locator('#src-v').inputValue(),'');await p.locator('#src-v').fill('0');await p.getByRole('button',{name:'Guardar y comprobar',exact:true}).click();
+  assert.ok(calls.some(c=>{if(!c.path.endsWith('cx_save_record'))return false;const x=JSON.parse(c.body);return x.p_kind==='test'&&x.p_state==='BORRADOR'&&x.p_payload.measurements.v.value==='0'&&x.p_payload.asset_snapshot.network_code==='SYN-BT'}),'Formato guarda borrador con identidad, red y valor cero');
   for(const name of ['Actividades','Cronogramas','Sistemas','Documentos','Protocolos','Pruebas','Restricciones','Instrumentos','O&M','Capacitación','Entrega y cierre','Reprogramaciones','Cobertura de avance','Historial','Administración']){
    await p.getByRole('button',{name,exact:true}).click();await p.getByRole('heading',{name:name==='Administración'?'Administración y seguridad':name==='Historial'?'Historial y trazabilidad':name,exact:true}).waitFor();
   }

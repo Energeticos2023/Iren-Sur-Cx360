@@ -1,0 +1,13 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const m=require('../site/system-model.cjs');
+const ui=require('../site/system-ui.cjs');
+const {sourceForm}=require('../site/source-form.cjs');
+const system={id:'sys',kind:'system',specialty:'IIEE',payload:{code:'BT',title:'SINTÉTICO',assets:[]}};
+test('Inventario pendiente no se convierte en cero pozos de diseño',()=>{const x=m.inventory(system);assert.equal(x.designCount,null);assert.equal(x.fieldCount,null);assert.equal(x.unknown,true);});
+test('Inventario rechaza TAG repetido con espacios y mayúsculas',()=>{assert.match(m.validateAssets([{id:'1',tag:' PT-1 ',type:'POZO_TIERRA'},{id:'2',tag:'pt-1',type:'POZO_TIERRA'}]).join(),/duplicado/);});
+test('Pozo requiere red, ubicación, plano, acceso y conexión significativa',()=>{assert.equal(m.assetGaps({type:'POZO_TIERRA',connections:[{}]}).length,6);assert.deepEqual(m.assetGaps({type:'POZO_TIERRA',tag:'SYN',location:'SYN',source_ref:'SYN R1',network_code:'BT',inspection_access:'SYN',connections:[{busbar:'SYN-B'}]}),[]);});
+test('Los procesos no mezclan sistemas ni especialidades',()=>{const p={id:'p',kind:'protocol',specialty:'IIEE',payload:{system_id:'sys',stage:'PRECOMISIONAMIENTO'}};const t={id:'t',kind:'test',specialty:'IIEE',payload:{protocol_id:'p'}};const other={id:'o',kind:'test',specialty:'IISS',payload:{system_code:'BT'}};assert.deepEqual(m.processRecords([system,p,t,other],system,'pre').map(x=>x.id),['p','t']);assert.equal(m.processRecords([p,t],system,'cx').length,0);});
+test('Los botones de procesos están dentro del sistema seleccionado',()=>{const html=ui.workspace([system],system,'scope',()=> '');for(const p of m.processes)assert.ok(html.includes('data-action="process:'+p.key+'"'));assert.match(html,/aria-label="Procesos del sistema"/);assert.match(html,/No es una cantidad de cero/);});
+test('Valores impresos no se precargan como medición y HTML se escapa',()=>{const protocol={payload:{source_ref:'SYN',fields:[{key:'v',label:'Tensión'}],form_schema:{tables:[{rows:[[{editable:true,key:'v',printed_reference:'380',text:'<script>'}]]}]}}};const html=sourceForm(protocol,{},true);assert.match(html,/Impreso en fuente: 380/);assert.match(html,/value=""/);assert.doesNotMatch(html,/value="380"|<script>/);assert.match(sourceForm(protocol,{v:{value:'0'}},true),/value="0"/);});
+test('Paquete no convierte borradores en formatos operativos',()=>{const r={id:'p',kind:'protocol',state:'PUBLICADO',payload:{code:'S',title:'S',form_schema:{review_state:'VERIFICADO'}}};assert.equal(m.validateScopePack({format:'cx360-scope-pack-v1',documents:[],systems:[],protocols:[r]}).length,2);});

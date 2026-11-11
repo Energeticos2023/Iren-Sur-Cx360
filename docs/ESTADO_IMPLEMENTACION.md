@@ -2,6 +2,20 @@
 
 Versión de piloto privado para activación y validación de usuarios. No equivale a aceptación para operación de campo. Continúa desde 247a199cd1dca62684028741ffad6f4edcfd7b3a; conserva frontend y esquema originales como antecedentes, sin ejecutarlos.
 
+## Procesos e inventario por sistema — revisión del 11/11/2026
+
+Se implementó navegación especialidad → sistema → proceso, con botones internos de alcance/inventario, precomisionamiento, comisionamiento, pruebas integradas, puesta en marcha, manual O&M, capacitaciones, cierre y protocolos. La identificación de activos conserva TAG, tipo, ubicación, red/malla, plano/revisión, acceso y conexiones destino/circuito/barra/fuente. Los registros relacionados se filtran por sistema y etapa; no se atribuye toda una especialidad a un sistema.
+
+Las migraciones 009/010 están aplicadas en el backend exclusivo: requieren sistema y activo concretos antes de registrar una intervención; los pozos requieren red, acceso y conexión significativa. El servidor conserva una copia de identificación/topología por intervención y evita cambiar activos ya utilizados. Los protocolos operativos requieren sistema concreto y bloquean criterios marcados pendientes. Las transcripciones fuente requieren cotejo/clasificación y archivo aceptado coincidente por SHA-256. La importación de borradores es atómica, idempotente por ID y rechaza códigos repetidos con otro ID.
+
+Revisión local de Plan, anexos IIEE/IISS/IIMM/TIC/EM, tablas DOCX, EETT eléctricas PDF 47–48 y detalles de tierras: paquete privado de 45 entradas de catálogo, 49 formatos fuente y 7 documentos. Incluye duplicidad de Telesalud, familias de equipos y subdivisiones propuestas: no acredita 45 sistemas instalados. Las 2981 celdas candidatas requieren cotejo semántico; no son campos de medición operativos validados. Se conservan datos impresos como referencia y respuestas vacías, sin firmas ficticias. La captura y guardado de borradores fuente se comprobó con datos sintéticos; no se acredita disponibilidad operativa de los 49 formatos.
+
+La matriz completa por sistema y el índice de formatos quedan locales en private/technical_review/Alcance_por_sistema_IREN_Sur_R01.html, junto al paquete JSON y plantilla vacía de inventario. No se publican expedientes en el bundle ni en GitHub. No se revisaron íntegramente las 143 páginas escaneadas de EETT ni se acreditó aplicación contractual de anexos complementarios.
+
+La consulta actual reemplaza el diagnóstico histórico de base vacía: hay 268 registros, una cuenta administrativa activa del titular, 40 sistemas de catálogo y 50 protocolos borrador del Plan Cx C01 V3 señalado como borrador no emitido. Hay cero archivos y custodia=false. No se modificó ni duplicó ese catálogo con el paquete local nuevo. Falta conciliar fuentes y correspondencias antes de incorporar más sistemas; no inferir aceptación del V3 por estar cargado. No se comprobó la entrega de correo, MFA del usuario o prueba completa con roles reales.
+
+Validación: 31 pruebas locales; 21 casos de seguridad y 15 de flujo/identificación en SQL transaccional revertido; Chrome real con API simulada (360/390/430/1440), navegación de procesos, alta de pozo/conexiones y llenado/guardado de formato fuente en BORRADOR, además de importación, XLSX y recuperación ante fallo. Dispositivos físicos y aceptación técnica del piloto pendientes.
+
 ## Corrección de enfoque — comisionamiento
 
 Tras la aclaración del usuario se verificó que la versión publicada 1 corresponde al commit 07c863b y no contiene módulos de valorización monetaria. Se reorganizó la pantalla principal como control técnico de comisionamiento: acceso directo a pruebas, procedimientos/protocolos y restricciones/liberaciones; detalle por las cinco disciplinas, sistemas, equipos/TAG y siete etapas. No se incorporan resultados ficticios cuando falta información.
@@ -31,7 +45,7 @@ Esta corrección modifica presentación y reporte; no cambia base de datos, perm
 - 21 pruebas locales de frontend/control: consulta fallida sin falsos ceros ni datos anteriores, filtros, HTML, fechas Lima, CSV, validación y cálculo por revisión vigente.
 - 21 casos reales de base: anonimato, especialidad ajena, escritura asignada, suplantación, roles, revocación, auditoría, autoaprobación, fechas de origen y rechazo atómico de importación inválida.
 - 8 casos reales adicionales: ejecución→revisión→cierre independiente, mediciones inmutables, línea base/vigencia, cobertura y custodia con MFA.
-- Pruebas SQL revertidas al terminar. Consulta posterior: cero miembros, cero registros y cero archivos; custodia no autorizada. No se crearon integrantes operativos ficticios.
+- Pruebas SQL revertidas al terminar. La consulta histórica de base vacía fue reemplazada por el corte actual indicado arriba; no se crearon integrantes operativos ficticios en las pruebas.
 - Chrome real con API simulada, anchos 360/390/430/1440: módulos, creación RPC, importación, XLSX y recuperación de error. No es E2E con usuarios reales ni certificación Safari o dispositivos físicos.
 - npm audit: cero vulnerabilidades informadas en dependencias de producción al corte.
 

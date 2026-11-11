@@ -34,10 +34,10 @@ select pg_temp.ok(not exists(select 1 from public.cx_records where payload->>'co
 select pg_temp.reject('update public.cx_members set role=''admin'' where user_id=auth.uid()','Autoedición de rol bloqueada');
 select pg_temp.reject('delete from public.cx_events','Auditoría no borrable');
 select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000003',true);
-select pg_temp.ok((select count(*)=0 from public.cx_records),'Especialidad ajena sin lectura');
+select pg_temp.ok((select count(*)=0 from public.cx_records where payload->>'code' like 'SYN-%'),'Especialidad ajena sin lectura');
 select pg_temp.reject($q$select public.cx_save_record(gen_random_uuid(),'activity','IIEE','10000000-0000-4000-8000-000000000003','NO INICIADO','{"code":"SYN-X","title":"SINTETICO","stage":"PRECOMISIONAMIENTO"}',0)$q$,'Especialidad ajena sin escritura');
 select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000002',true);
-select pg_temp.ok((select count(*)=2 from public.cx_records),'Especialista ve su disciplina');
+select pg_temp.ok((select count(*)=2 from public.cx_records where payload->>'code' like 'SYN-%'),'Especialista ve su disciplina');
 select public.cx_save_record('20000000-0000-4000-8000-000000000001','activity','IIEE','10000000-0000-4000-8000-000000000002','REPORTADO','{"code":"SYN-A","title":"SINTETICO","stage":"PRECOMISIONAMIENTO","planned_start":"2026-01-01","planned_finish":"2026-01-02","notes":"hecho sintético"}',1);
 select pg_temp.ok((select version=2 and updated_by=auth.uid() from public.cx_records where payload->>'code'='SYN-A'),'Ejecutor asignado puede reportar y queda auditado');
 reset role;
