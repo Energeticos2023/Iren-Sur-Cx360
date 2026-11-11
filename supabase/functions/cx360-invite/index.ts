@@ -1,11 +1,13 @@
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.119.0';
-const origin='https://iren-sur-cx360.energ-ticos-7536.chatgpt.site';
-const headers={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'POST,OPTIONS','Content-Type':'application/json','Cache-Control':'no-store'};
-const reply=(status:number,body:unknown)=>new Response(JSON.stringify(body),{status,headers});
+const origins:Record<string,string>={'https://iren-sur-cx360.energ-ticos-7536.chatgpt.site':'https://iren-sur-cx360.energ-ticos-7536.chatgpt.site/','https://energeticos2023.github.io':'https://energeticos2023.github.io/Iren-Sur-Cx360/'};
+const baseHeaders={'Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'POST,OPTIONS','Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin'};
 Deno.serve(async(req:Request)=>{
+ const requestOrigin=req.headers.get('origin')||'',origin=origins[requestOrigin]?requestOrigin:'',site=origins[requestOrigin]||'';
+ const headers:Record<string,string>={...baseHeaders,...(origin?{'Access-Control-Allow-Origin':origin}:{})};
+ const reply=(status:number,body:unknown)=>new Response(JSON.stringify(body),{status,headers});
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers});
  if(req.method!=='POST')return reply(405,{error:'Método no permitido'});
- if(req.headers.get('origin')!==origin)return reply(403,{error:'Origen no autorizado'});
+ if(!origin)return reply(403,{error:'Origen no autorizado'});
  const token=req.headers.get('authorization')?.replace(/^Bearer /,'');if(!token)return reply(401,{error:'Sesión requerida'});
  const db=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,{auth:{persistSession:false}});
  const {data:{user},error}=await db.auth.getUser(token);if(error||!user)return reply(401,{error:'Identidad no verificada'});
@@ -20,7 +22,7 @@ Deno.serve(async(req:Request)=>{
  if((specialty&&!['IIEE','IISS','IIMM','TIC','EM'].includes(specialty))||(['especialista_anin','especialista_supervision'].includes(role)&&!specialty))return reply(400,{error:'Especialidad requerida o inválida'});
  if((role==='gp'||role==='especialista_anin')&&organization!=='ANIN'||(role==='kp1'||role==='especialista_supervision')&&organization!=='SUPERVISION')return reply(400,{error:'Rol y organización incompatibles'});
  const prior=await db.from('cx_members').select('user_id').eq('email',email).maybeSingle();if(prior.data)return reply(409,{error:'El profesional ya está registrado. Gestione su estado; no se duplicó la invitación.'});
- const invited=await db.auth.admin.inviteUserByEmail(email,{redirectTo:origin+'/'});if(invited.error||!invited.data.user)return reply(400,{error:'No se completó la invitación; revisar correo y configuración de Auth'});
+ const invited=await db.auth.admin.inviteUserByEmail(email,{redirectTo:site});if(invited.error||!invited.data.user)return reply(400,{error:'No se completó la invitación; revisar correo y configuración de Auth'});
  const inserted=await db.from('cx_members').insert({user_id:invited.data.user.id,email,full_name:name,role,specialty,organization,active:true});
  if(inserted.error)return reply(500,{error:'Correo enviado; membresía no completada. No reenvíe: solicite reconciliación del administrador.'});
  return reply(200,{success:true,email});

@@ -1,11 +1,13 @@
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.119.0';
-const origin='https://iren-sur-cx360.energ-ticos-7536.chatgpt.site';
-const headers={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization,apikey,content-type,x-file-name','Access-Control-Allow-Methods':'POST,OPTIONS','Content-Type':'application/json','Cache-Control':'no-store'};
-const reply=(status:number,body:unknown)=>new Response(JSON.stringify(body),{status,headers});
+const origins:Record<string,string>={'https://iren-sur-cx360.energ-ticos-7536.chatgpt.site':'https://iren-sur-cx360.energ-ticos-7536.chatgpt.site/','https://energeticos2023.github.io':'https://energeticos2023.github.io/Iren-Sur-Cx360/'};
+const baseHeaders={'Access-Control-Allow-Headers':'authorization,apikey,content-type,x-file-name','Access-Control-Allow-Methods':'POST,OPTIONS','Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin'};
 Deno.serve(async(req:Request)=>{
+ const requestOrigin=req.headers.get('origin')||'',origin=origins[requestOrigin]?requestOrigin:'',site=origins[requestOrigin]||'';
+ const headers:Record<string,string>={...baseHeaders,...(origin?{'Access-Control-Allow-Origin':origin}:{})};
+ const reply=(status:number,body:unknown)=>new Response(JSON.stringify(body),{status,headers});
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers});
  if(req.method!=='POST')return reply(405,{error:'Método no permitido'});
- if(req.headers.get('origin')!==origin)return reply(403,{error:'Origen no autorizado'});
+ if(!origin)return reply(403,{error:'Origen no autorizado'});
  const bearer=req.headers.get('authorization')||'';
  if(!bearer.startsWith('Bearer '))return reply(401,{error:'Sesión requerida'});
  const url=Deno.env.get('SUPABASE_URL')!,key=Deno.env.get('SUPABASE_ANON_KEY')!,serviceKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

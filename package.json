@@ -5,13 +5,18 @@
   "scripts": {
     "build": "node scripts/build.cjs",
     "test": "node --test tests/*.test.cjs",
-    "preview": "node scripts/preview.cjs"
+    "preview": "node scripts/preview.cjs",
+    "deploy:pages": "bash scripts/deploy-pages.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.119.0",
     "read-excel-file": "9.3.14",
     "write-excel-file": "4.1.1"
   },
-  "devDependencies": { "esbuild": "0.28.2" },
-  "engines": { "node": ">=22" }
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
 }

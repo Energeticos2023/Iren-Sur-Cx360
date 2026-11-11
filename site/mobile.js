@@ -130,8 +130,8 @@ document.addEventListener('submit',async e=>{
  try{
   if(!navigator.onLine)throw Error('Sin conexión. No se guardó ningún cambio; reintente al recuperar internet.');
   if(f.id==='login'){const r=await db.auth.signInWithPassword({email:String(data.get('email')).trim(),password:String(data.get('password'))});if(r.error)throw r.error;await load();render();}
-  else if(f.id==='activate'){const r=await db.auth.signUp({email:'jose.zena.p@uni.pe',password:String(data.get('password')),options:{emailRedirectTo:location.origin+'/'}});if(r.error)throw r.error;login('Revise jose.zena.p@uni.pe y confirme su correo. Después ingrese con su contraseña.');}
-  else if(f.id==='recover-form'){const r=await db.auth.resetPasswordForEmail(String(data.get('email')),{redirectTo:location.origin+'/'});if(r.error)throw r.error;closeModal();notice('Si la cuenta existe, recibirá instrucciones en su correo.');}
+  else if(f.id==='activate'){const r=await db.auth.signUp({email:'jose.zena.p@uni.pe',password:String(data.get('password')),options:{emailRedirectTo:location.origin+location.pathname}});if(r.error)throw r.error;login('Revise jose.zena.p@uni.pe y confirme su correo. Después ingrese con su contraseña.');}
+  else if(f.id==='recover-form'){const r=await db.auth.resetPasswordForEmail(String(data.get('email')),{redirectTo:location.origin+location.pathname});if(r.error)throw r.error;closeModal();notice('Si la cuenta existe, recibirá instrucciones en su correo.');}
   else if(f.id==='password-form'){const r=await db.auth.updateUser({password:String(data.get('password'))});if(r.error)throw r.error;S.recovery=false;closeModal();notice('Contraseña actualizada.');await load();render();}
   else if(f.id==='record-form')await saveRecord(f);
   else if(f.id==='current-form'){const r=await db.rpc('cx_set_current_schedule',{p_id:f.dataset.id,p_reference:data.get('reference')});if(r.error)throw r.error;await load();closeModal();render();notice('Vigencia registrada con historial conservado.');}
