@@ -1,3 +1,35 @@
+# CX360 v2.1 — Estado verificado, 11/11/2026 (tarde)
+
+Continúa desde 07c863b. Lo de v2 (más abajo) sigue vigente salvo lo que aquí se indica.
+
+## Implementado en v2.1
+
+- **Publicación en GitHub Pages**: destino https://energeticos2023.github.io/Iren-Sur-Cx360/ (rama `gh-pages`). Cada push a `main` ejecuta pruebas, compila y publica (`.github/workflows/pages.yml`); también `npm run deploy:pages`. Requiere repositorio público y Pages activado desde `gh-pages` (acción del titular). La URL de ChatGPT Sites se mantiene como origen permitido.
+- **Funciones Edge** `cx360-upload` (v3) y `cx360-invite` (v2): lista de orígenes permitidos (Sites y Pages); la invitación redirige al sitio de origen. Redirecciones de la app según la ruta real (`location.pathname`).
+- **Catálogo provisional Plan Cx C01 V3** (lote `PLANCX-V3`, 268 registros) en `cx_private.catalog_seed`, no expuesto por la API ni versionado en Git: 40 sistemas, 8 paquetes/documentos, 50 protocolos de campo (644 ítems tomados de los formatos de los Anexos 1–5 y de las fichas; 91 criterios «POR FIJAR» según Apéndice V), 55 pruebas (27 presenciadas con fecha límite de aviso ACONEX), 35 hitos/actividades (hitos H, liberaciones por sector, llegadas de equipos del Cronograma de Avance, olas de traslado), 8 capacitaciones, 9 hitos OyM y 63 restricciones (D-01–D-10, R-01–R-13, INC-01–26, V-01–V-14).
+- `cx_load_catalog(batch)`: carga atómica e idempotente solo por el administrador autenticado, con su identidad como autor y auditoría por registro. `cx_catalog_status()` para coordinación. No sobrescribe códigos existentes.
+- Disparador `cx_block_unfixed_criteria`: el servidor rechaza publicar un protocolo con criterios «POR FIJAR».
+- **Pantalla Plan Cx**: matriz sistema × nivel L1–L5 con estado de cada prueba, protocolos con conteo de criterios por fijar, hitos con holgura y criticidad, paquetes documentales. Sin porcentajes: numerador/denominador sobre universo provisional (pesos L1–L5 pendientes, D-09).
+- **Protocolos de campo**: ejecución agrupada por secciones; ítems SÍ/NO/N.A. que proponen CONFORME/NO CONFORME/NO VERIFICABLE; mediciones con unidad, criterio y fuente. Impresión del protocolo en blanco o del registro de prueba con encabezado ANIN, prerrequisitos, equipos de medición, observaciones y firmas (ejecutor/gestor/cliente). El editor de protocolos conserva tipo y sección.
+- **Seguimiento y alertas**: avisos ACONEX (vencido, por vencer ≤ 7 d, programado, registrado), próximas 2 semanas, vencidas según línea base y restricciones abiertas por tipo; CSV e impresión. Registro de la referencia del aviso ACONEX y de la fecha real de presentación de documentos o cumplimiento OyM, sin cambiar el estado ni remitir nada.
+- Correcciones: el formulario conserva estados no listados (p. ej. NO INICIADO) y el vínculo a protocolos en borrador; se muestran los campos adicionales del catálogo en modo lectura.
+
+## Probado en v2.1
+
+- 29 pruebas automáticas locales (21 previas + 8 de `plan-core`).
+- Chrome real con API simulada (`tests/browser-plan.cjs`): carga de catálogo por RPC, matriz con los 40 sistemas, seguimiento, impresión de protocolo con todos sus campos, conservación de estado y vínculo, SÍ→CONFORME, registro de aviso ACONEX; sin desbordamiento a 360/390/430/1440 px; sin errores JS. Ejecutado con datos sintéticos y con el lote real local (no versionado). Revisión visual de PDF A4 del protocolo impreso.
+- Base: lote verificado en servidor (268 registros, 644 ítems, 91 «POR FIJAR»); canal temporal de carga eliminado; asesor de seguridad sin funciones ejecutables por anónimos.
+- No probado: carga real con la cuenta del administrador (la cuenta aún no existe: 0 usuarios), dispositivos físicos, Safari.
+
+## Pendientes inmediatos (titular)
+
+1. Crear la cuenta del administrador (Supabase → Authentication → Users → Add user, *Auto Confirm*).
+2. Repositorio público y Pages desde `gh-pages`; Site URL y Redirect URLs de Auth con la URL de Pages.
+3. Ingresar, configurar MFA y pulsar **Cargar catálogo en CX360** (Plan Cx o Administración).
+4. Fijar los 14 criterios del Apéndice V en los protocolos antes de publicarlos; registrar las presentaciones y avisos reales.
+
+---
+
 # CX360 v2 — Estado verificado, 11/11/2026
 
 Versión de piloto privado para activación y validación de usuarios. No equivale a aceptación para operación de campo. Continúa desde 247a199cd1dca62684028741ffad6f4edcfd7b3a; conserva frontend y esquema originales como antecedentes, sin ejecutarlos.

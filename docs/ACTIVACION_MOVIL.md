@@ -1,6 +1,17 @@
 # Activación de IREN Sur CX360
 
-Sitio privado: https://iren-sur-cx360.energ-ticos-7536.chatgpt.site
+Sitio: **https://energeticos2023.github.io/Iren-Sur-Cx360/** (GitHub Pages). Anterior: https://iren-sur-cx360.energ-ticos-7536.chatgpt.site (ChatGPT Sites, privado).
+
+## Pasos vigentes (v2.1)
+
+1. GitHub → Settings → General → Change visibility → Public. Luego Settings → Pages → Deploy from a branch → `gh-pages` / root.
+2. Supabase → Authentication → URL Configuration: Site URL `https://energeticos2023.github.io/Iren-Sur-Cx360/` y la misma en Redirect URLs.
+3. Supabase → Authentication → Users → Add user: `jose.zena.p@uni.pe`, contraseña elegida por el titular, *Auto Confirm User*. Evita depender del SMTP incorporado.
+4. Abrir el sitio, ingresar, Administración → Configurar/verificar MFA.
+5. Plan Cx → **Cargar catálogo en CX360** (268 registros provisionales del Plan Cx C01 V3).
+
+Lo que sigue es la guía de v2 (ChatGPT Sites); se conserva como antecedente.
+
 
 ## Configuración que el titular decidió realizar personalmente
 
