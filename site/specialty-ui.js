@@ -6,6 +6,7 @@ const {SPECS, STATUS_LABEL, systemsOf, related, levelTrack, specStats} = sc;
 const LEVEL_NAMES = {L1: 'Recepción y FAT', L2: 'Precomisionamiento', L3: 'Arranque', L4: 'Prueba funcional', L5: 'Prueba integrada'};
 const fmt = iso => { if (!iso) return '—'; const [y, m, d] = String(iso).split('-'); return `${d}/${m}/${y}`; };
 const askAction = (q, spec) => 'ask-q:' + encodeURIComponent(spec + '|' + q);
+const n = (k, one, many) => `${k} ${k === 1 ? one : many}`;
 
 export function specBadge(spec, withName = '') {
   return `<span class="sbadge tone-${SPECS[spec].tone}">${icons[spec]}<b>${spec}</b></span>${withName ? `<span class="slabel">${withName}</span>` : ''}`;
@@ -16,7 +17,7 @@ export function specialtyTiles(c) {
   const {records, h, today} = c, all = records();
   return `<div class="esp-tiles">${Object.keys(SPECS).map(k => {
     const st = specStats(all, k, today);
-    const line = st.systems ? `${st.systems} sistemas, ${st.closed} de ${st.tests} pruebas cerradas` : 'Sin sistemas cargados';
+    const line = st.systems ? `${n(st.systems, 'sistema', 'sistemas')}, ${st.closed} de ${n(st.tests, 'prueba cerrada', 'pruebas cerradas')}` : 'Sin sistemas cargados';
     return `<button type="button" class="esp-tile tone-${SPECS[k].tone}" data-nav="esp:${k}"><span class="sbadge tone-${SPECS[k].tone}">${icons[k]}<b>${k}</b></span><strong>${h(SPECS[k].name)}</strong><small>${h(line)}</small>${st.overdueNotices ? `<em class="flag">${st.overdueNotices} avisos ACONEX vencidos</em>` : ''}</button>`;
   }).join('')}</div>`;
 }
@@ -40,7 +41,7 @@ function overview(c, spec, systems) {
   const codes = systems.map(s => s.payload.code);
   const rows = systems.map(s => {
     const rel = related(all, s.payload.code), p = s.payload;
-    return `<button type="button" class="sysrow" data-action="systab:${spec}:${h(p.code)}"><span class="scode">${h(p.code)}</span><span class="stitle"><strong>${h(p.title)}</strong><small>${h(p.leader_support || 'Responsable por confirmar')}${p.sectors ? ', sectores ' + h(p.sectors) : ''}</small></span>${trackHtml(c, rel.tests, true)}<span class="scount">${rel.protocols.length} protocolos<br>${rel.tests.length} pruebas</span>${icons.arrow}</button>`;
+    return `<button type="button" class="sysrow" data-action="systab:${spec}:${h(p.code)}"><span class="scode">${h(p.code)}</span><span class="stitle"><strong>${h(p.title)}</strong><small>${h(p.leader_support || 'Responsable por confirmar')}${p.sectors ? ', sectores ' + h(p.sectors) : ''}</small></span>${trackHtml(c, rel.tests, true)}<span class="scount">${n(rel.protocols.length, 'protocolo', 'protocolos')}<br>${n(rel.tests.length, 'prueba', 'pruebas')}</span>${icons.arrow}</button>`;
   }).join('');
   const f = pc.followup(all, today);
   const mine = r => r.specialty === spec || codes.some(code => sc.refIncludes(r.payload?.system_code, code));
@@ -78,7 +79,7 @@ export function specialtyScreen(c) {
   const tab = (S.espTab || {})[spec] || 'resumen', current = systems.find(s => s.payload.code === tab);
   const stat = (label, value, hint, alert = false) => `<div class="stat${alert ? ' alert' : ''}"><dt>${label}</dt><dd>${value}</dd><small>${hint}</small></div>`;
   const tabs = [['resumen', 'Resumen', ''], ...systems.map(s => [s.payload.code, s.payload.code, s.payload.title])];
-  return `<section class="esp-head tone-${meta.tone}"><div class="esp-id">${specBadge(spec)}<div><h2>${h(meta.name)}</h2><p>${meta.annex} del Plan de Comisionamiento, ${systems.length} sistemas</p></div></div>
+  return `<section class="esp-head tone-${meta.tone}"><div class="esp-id">${specBadge(spec)}<div><h2>${h(meta.name)}</h2><p>${meta.annex} del Plan de Comisionamiento, ${n(systems.length, "sistema", "sistemas")}</p></div></div>
    <div class="esp-actions">${button('Preguntar al asistente', 'ask-esp:' + spec)}${button('Protocolos', 'list-esp:protocol:' + spec, 'btn ghost')}${button('Pruebas', 'list-esp:test:' + spec, 'btn ghost')}</div>
    <dl class="stats">${stat('Protocolos publicados', `${st.published} de ${st.protocols}`, st.pendingCriteria ? `${st.pendingCriteria} con criterios por fijar` : 'Criterios con valor')}${stat('Pruebas cerradas', `${st.closed} de ${st.tests}`, `${st.hp} presenciadas (HP)`)}${stat('Avisos ACONEX vencidos', st.overdueNotices, 'Pruebas presenciadas sin aviso registrado', st.overdueNotices > 0)}${stat('Próxima prueba', st.nextTest ? h(st.nextTest.payload.code) : '—', st.nextTest ? fmt(st.nextTest.payload.planned_start) : 'Sin pruebas futuras')}</dl></section>
   ${systems.length ? `<div class="systabs tone-${meta.tone}" role="tablist" aria-label="Sistemas de ${h(meta.name)}">${tabs.map(([k, label, title]) => `<button type="button" role="tab" aria-selected="${k === (current ? tab : 'resumen')}" class="systab${k === (current ? tab : 'resumen') ? ' on' : ''}" data-action="systab:${spec}:${h(k)}" ${title ? `title="${h(title)}"` : ''}><b>${h(label)}</b>${title ? `<span>${h(title)}</span>` : ''}</button>`).join('')}</div>
