@@ -2,6 +2,14 @@
 
 Versión de piloto privado para activación y validación de usuarios. No equivale a aceptación para operación de campo. Continúa desde 247a199cd1dca62684028741ffad6f4edcfd7b3a; conserva frontend y esquema originales como antecedentes, sin ejecutarlos.
 
+## Corrección de enfoque — comisionamiento
+
+Tras la aclaración del usuario se verificó que la versión publicada 1 corresponde al commit 07c863b y no contiene módulos de valorización monetaria. Se reorganizó la pantalla principal como control técnico de comisionamiento: acceso directo a pruebas, procedimientos/protocolos y restricciones/liberaciones; detalle por las cinco disciplinas, sistemas, equipos/TAG y siete etapas. No se incorporan resultados ficticios cuando falta información.
+
+Los reportes CSV/XLSX/impresión ahora incluyen el detalle técnico de cada prueba: protocolo/revisión y documento fuente, mediciones/unidades/resultados/criterios, instrumentos/calibración, prerrequisitos y liberación declarados, evidencias y hashes, revisión independiente y pendientes. La aceptación documental se informa por separado. Los registros generales y fechas se conservan.
+
+Esta corrección modifica presentación y reporte; no cambia base de datos, permisos, fechas ni hechos de campo. Compilación, 24 pruebas locales y comprobación Chrome móvil/escritorio satisfactorias. Continúan los límites de activación y aceptación del piloto descritos abajo.
+
 ## Implementado
 
 - Aplicación móvil: actividades, sistemas, cronogramas, documentos, protocolos, pruebas, restricciones, instrumentos, O&M, capacitación, entrega, reprogramaciones, cobertura e historial.

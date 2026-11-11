@@ -28,7 +28,8 @@ let failSnapshot=false;const calls=[];
    await route.fulfill({status,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:JSON.stringify(body)});
   });
   const p=await context.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));
-  await p.goto('http://127.0.0.1:4173');await p.getByRole('heading',{name:'Control de hoy',exact:true}).waitFor();
+  await p.goto('http://127.0.0.1:4173');await p.getByRole('heading',{name:'Control de comisionamiento',exact:true}).waitFor();
+  await p.getByRole('heading',{name:'Control técnico por disciplina, sistema y equipo/TAG'}).waitFor();
   assert.equal(await p.locator('body').evaluate(e=>e.scrollWidth<=window.innerWidth),true,'Panel sin desbordamiento');
   for(const name of ['Actividades','Cronogramas','Sistemas','Documentos','Protocolos','Pruebas','Restricciones','Instrumentos','O&M','Capacitación','Entrega y cierre','Reprogramaciones','Cobertura de avance','Historial','Administración']){
    await p.getByRole('button',{name,exact:true}).click();await p.getByRole('heading',{name:name==='Administración'?'Administración y seguridad':name==='Historial'?'Historial y trazabilidad':name,exact:true}).waitFor();
@@ -49,8 +50,8 @@ let failSnapshot=false;const calls=[];
   await p.getByRole('button',{name:'Cerrar',exact:true}).click();await p.getByRole('button',{name:'Hoy',exact:true}).click();
   await p.screenshot({path:'tmp/browser/mobile-390.png',fullPage:true});
   for(const width of [360,430,1440]){await p.setViewportSize({width,height:900});assert.equal(await p.locator('body').evaluate(e=>e.scrollWidth<=window.innerWidth),true,'Sin desbordamiento en '+width)}
-  failSnapshot=true;await p.getByRole('button',{name:'Actualizar',exact:true}).click();await p.getByRole('heading',{name:'Consulta no disponible'}).waitFor();assert.equal(await p.getByRole('heading',{name:'Control de hoy',exact:true}).count(),0,'No hay datos viejos ante fallo');
-  failSnapshot=false;await p.getByRole('button',{name:'Reintentar',exact:true}).click();await p.getByRole('heading',{name:'Control de hoy',exact:true}).waitFor();
+  failSnapshot=true;await p.getByRole('button',{name:'Actualizar',exact:true}).click();await p.getByRole('heading',{name:'Consulta no disponible'}).waitFor();assert.equal(await p.getByRole('heading',{name:'Control de comisionamiento',exact:true}).count(),0,'No hay datos viejos ante fallo');
+  failSnapshot=false;await p.getByRole('button',{name:'Reintentar',exact:true}).click();await p.getByRole('heading',{name:'Control de comisionamiento',exact:true}).waitFor();
   assert.deepEqual(errors,[],'Sin errores JavaScript en navegador');console.log(JSON.stringify({passed:true,modules:15,viewports:[360,390,430,1440],rpcCreate:true,scheduleImport:true,xlsxDownload:true,failedQueryClearsUI:true,api:'SIMULADA; backend probado por separado en SQL'}));
   await context.close();
  }finally{await browser.close()}
