@@ -2,6 +2,7 @@
 'use strict';
 
 const SUGGESTIONS = [
+  '¿Qué actividades se desarrollan en el precomisionamiento de las instalaciones eléctricas (IIEE)?',
   '¿Qué pruebas se hacen al grupo electrógeno y con qué equipos?',
   '¿Qué EPP y equipos de bloqueo se requieren para maniobras en media tensión?',
   '¿Cuál es el alcance del comisionamiento de gases medicinales?',
@@ -12,9 +13,11 @@ const SUGGESTIONS = [
   '¿Qué exige el Anexo 16 para el Manual de OyM?',
   '¿Cuál es la presión de la prueba hidrostática de la red contra incendio?',
   '¿Qué herramientas y equipos de medición se usan en sanitarias?',
+  '¿Qué significan IIEE, IISS, IIMM, TIC y EM?',
+  '¿Cómo se hace el precomisionamiento de TIC?',
 ];
 
-const DOC_SHORT = {A12: 'Anexo 12', A16: 'Anexo 16', PCX: 'Plan Cx ANIN', AN1: 'Anexo 1 IIEE', AN2: 'Anexo 2 IISS', AN3: 'Anexo 3 IIMM', AN4: 'Anexo 4 TIC', AN5: 'Anexo 5 EM', PV3: 'Plan Cx V3 (borrador)'};
+const DOC_SHORT = {A12: 'Anexo 12', A16: 'Anexo 16', PCX: 'Plan Cx ANIN', AN1: 'Anexo 1 IIEE', AN2: 'Anexo 2 IISS', AN3: 'Anexo 3 IIMM', AN4: 'Anexo 4 TIC', AN5: 'Anexo 5 EM', PV3: 'Plan Cx V3 (borrador)', GLO: 'Glosario CX360', GUIA: 'Guía CX360'};
 
 function escapeHtml(v) {
   return String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));

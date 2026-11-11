@@ -1,3 +1,13 @@
+# CX360 v2.3 — Asistente Cx potenciado, 11/11/2026
+
+- **Glosario CX360** (8 fichas) y **Guía CX360** (11 fichas curadas por especialidad: precomisionamiento, pruebas, equipos y herramientas, formatos; con numerales de referencia) agregados a la base documental privada (889 fragmentos).
+- Sinónimos y siglas administrables (`cx_private.kb_synonyms`): IIEE, IISS, IIMM, TIC, EM, L1–L5, precomisionamiento, puesta en marcha, HP, GE, TTA, MT, EPP, PETAR, etc.; prioridad a la especialidad nombrada en la pregunta y al documento citado.
+- Función `cx360-asistente` v2: selección diversa de fuentes (máx. 2 guías y 1 glosario), **respuesta documental compuesta sin IA** (guía o glosario + extractos literales citados), glosario en las instrucciones de la IA, respuestas más completas (hasta 1 800 tokens).
+- Pantalla: etiqueta del tipo de respuesta, fuentes «síntesis CX360», panel de siglas y nuevas preguntas frecuentes.
+- Pruebas: 37 unitarias; `browser-assistant.cjs` (incluye respuesta documental compuesta y glosario) y `browser-plan.cjs` aprobadas; búsqueda verificada en servidor con la cuenta del administrador simulada (la pregunta «¿qué actividades se desarrollan en el precomisionamiento del sistema de instalaciones eléctricas?» devuelve primero la guía IIEE-PRE).
+
+---
+
 # CX360 v2.2 — Asistente Cx, 11/11/2026
 
 Continúa desde v2.1 (61e2eda). Detalle y activación en [ASISTENTE_CX.md](ASISTENTE_CX.md).

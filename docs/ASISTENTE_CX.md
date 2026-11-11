@@ -4,10 +4,10 @@ Pantalla **Asistente Cx** (pestaña y botón flotante rojo «?»). Permite a los
 
 ## Cómo responde
 
-1. La pregunta se busca en la base documental privada (búsqueda en español, sin tildes ni mayúsculas, con sinónimos de siglas como GE, TTA, MT, EPP, DACI, OyM, PETAR).
+1. La pregunta se busca en la base documental privada (búsqueda en español, sin tildes ni mayúsculas). Reconoce siglas y términos del proyecto (IIEE = Instalaciones Eléctricas, IISS, IIMM, TIC, EM, L1–L5, precomisionamiento, HP, GE, TTA, MT, EPP, DACI, OyM, PETAR…) mediante la tabla privada de sinónimos `cx_private.kb_synonyms`, y da prioridad a la especialidad mencionada en la pregunta.
 2. Se toman los 10 fragmentos más pertinentes, cada uno con documento, numeral y página.
 3. **Modo IA con citas** (si está configurada la clave): Claude redacta la respuesta solo con esos fragmentos y cita cada afirmación como [F1], [F2]… Al tocar la cita se abre la fuente; «Ver fragmento completo» muestra el texto original.
-4. **Modo documental** (sin clave, o si la IA no responde): se muestran directamente los fragmentos más pertinentes con el texto resaltado.
+4. **Modo documental** (sin clave, o si la IA no responde): arma una respuesta sin IA con la **Guía CX360** o el **Glosario CX360** pertinente (síntesis curadas con numerales de referencia) y extractos literales de los fragmentos originales, cada uno citado.
 
 Reglas del asistente: no inventa valores, fechas ni resultados; respeta la jerarquía contrato y Alcance → Anexos 12 y 16 → Plan de Comisionamiento ANIN y Anexos 1 a 5 → Plan Cx C01 V3 del Contratista (borrador no emitido, marcado como tal); muestra discrepancias sin resolverlas; distingue al Contratista (ejecuta), a la Supervisión (verifica, presencia y acepta) y al Gerente de Proyecto (decide).
 
@@ -20,8 +20,12 @@ Reglas del asistente: no inventa valores, fechas ni resultados; respeta la jerar
 | PCX | Plan de Comisionamiento ANIN | 56 |
 | AN1 a AN5 | Anexos 1 a 5 (eléctricas, sanitarias, mecánicas, TIC, equipamiento médico), incluidos sus formatos | 437 |
 | PV3 | Plan Cx C01 V3 del Contratista (borrador): capítulos clave, fichas, protocolos, testificación, hitos, decisiones, riesgos, inconsistencias y criterios por precisar | 210 |
+| GLO | Glosario CX360: siglas de especialidades, proceso, testificación, contrato, seguridad, eléctricas, mecánicas, sanitarias, TIC y equipamiento médico | 8 |
+| GUIA | Guía CX360: síntesis por especialidad (precomisionamiento, pruebas, equipos y herramientas, formatos) con referencias a los numerales originales | 11 |
 
 Los textos se guardan en `cx_private.kb_docs` y `cx_private.kb_chunks`, que la API no expone. Solo los miembros activos consultan, mediante `cx_kb_search` (SECURITY DEFINER). El generador (`private/kb/build_kb.py`) y los textos extraídos viven en `private/`, que Git ignora: **el repositorio público no contiene el contenido de los documentos**.
+
+Para ampliar lo que el asistente «sabe»: editar `private/kb/glosario.md` o `private/kb/guia.md` (o agregar sinónimos a `cx_private.kb_synonyms`), regenerar con `build_kb.py` y volver a cargar los fragmentos. La pantalla muestra el glosario completo en «Siglas y términos del comisionamiento».
 
 ## Control de uso
 

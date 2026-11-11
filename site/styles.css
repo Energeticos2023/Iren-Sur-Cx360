@@ -53,3 +53,4 @@ details summary{cursor:pointer;padding:6px 0}
 @keyframes cxdot{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
 @media(max-width:700px){.chatlog{height:58vh;padding:10px}.msg .bubble{max-width:100%;font-size:13.5px}.askbar{padding:10px}.fab{right:12px;bottom:12px;width:50px;height:50px}}
 @media print{.fab,.askbar,.suggest{display:none!important}}
+.chip.blue{background:#e3eefb;color:#1f5a91}.modeline{font-size:11px;font-weight:700;color:#5b7089;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}.glossary .glo{border-top:1px solid var(--line);padding-top:8px;margin-top:8px}.glossary .glo h4{margin:4px 0;font-size:13px;color:var(--navy)}.glossary .answer{font-size:13px}

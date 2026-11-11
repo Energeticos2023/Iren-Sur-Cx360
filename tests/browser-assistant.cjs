@@ -1,7 +1,7 @@
 // Navegador real con API simulada: pantalla Asistente Cx (IA con citas, modo documental, cuota y respaldo por búsqueda directa).
 // No crea cuentas ni toca la base. Datos SINTÉTICOS.
 // Uso: npm run build && (node scripts/preview.cjs &) && node tests/browser-assistant.cjs
-const fs = require('node:fs'), assert = require('node:assert/strict');
+const fs = require('node:fs'), assert = require('node:assert/strict'), ac = require('../site/assistant-core.cjs');
 const pwPath = process.env.PLAYWRIGHT_PATH || ['/opt/npm-tools/node_modules/playwright', 'playwright'].find(p => { try { require.resolve(p); return true; } catch { return false; } });
 const {chromium} = require(pwPath);
 const chrome = process.env.CHROME_PATH || '/usr/bin/google-chrome';
@@ -27,6 +27,7 @@ const calls = [];
       else if (p === '/rest/v1/cx_members') body = [member];
       else if (p === '/rest/v1/rpc/cx_snapshot') body = snapshot;
       else if (p === '/rest/v1/rpc/cx_catalog_status') body = {batches: []};
+      else if (p === '/rest/v1/rpc/cx_kb_glossary') body = [{sec: 'GLO-1', title: 'Siglas de especialidades', body: '- IIEE = Instalaciones Eléctricas.\n- IISS = Instalaciones Sanitarias.'}];
       else if (p === '/rest/v1/rpc/cx_kb_search') body = [src(1), src(2)].map(({n, ...s}) => s);
       else if (p === '/rest/v1/rpc/cx_assistant_configure') { const q = req.postDataJSON(); body = {enabled: q.p_enabled, daily_limit: q.p_daily_limit}; }
       else if (p === '/functions/v1/cx360-asistente') {
@@ -34,6 +35,7 @@ const calls = [];
         if (q.action === 'status') body = {docs: [{code: 'AN1', title: 'SINTÉTICO Anexo eléctrico', nature: 'cliente', chunks: 76}, {code: 'PV3', title: 'SINTÉTICO Plan V3', nature: 'propuesta', chunks: 210}], enabled: true, daily_limit: 80, used_today: used, ai: true};
         else if (mode === 'quota') { status = 429; body = {error: 'Cuota diaria del asistente agotada (80 consultas). Se renueva a medianoche, hora de Lima.'}; }
         else if (mode === 'down') { status = 500; body = {error: 'fallo simulado'}; }
+        else if (mode === 'doc2') { used++; body = {mode: 'documental', answer: '**Guía sintética** [F1]\n- Actividad uno\n\n### Fragmentos originales relacionados\n**Anexo 1 – num. 1.8** [F2]\n- Extracto literal', notice: 'Respuesta documental (sin IA): síntesis y extractos literales de las fuentes.', sources: [src(1, {doc: 'GUIA', nature: 'guia'}), src(2)], used, limit: 80}; }
         else if (mode === 'doc') { used++; body = {mode: 'documental', answer: null, notice: 'Modo documental: se muestran los fragmentos más pertinentes.', sources: [src(1), src(2), src(3)], used, limit: 80}; }
         else { used++; body = {mode: 'ia', answer: 'El grupo electrógeno se prueba en vacío y con banco resistivo [F1].\n- **Equipos:** pértiga y multímetro [F2]\n- Cita inexistente [F7]\n<img src=x onerror=alert(1)>', sources: [src(1), src(2), src(3, {nature: 'propuesta', doc: 'PV3'})], used, limit: 80, truncated: false, history: q.history}; }
       } else { body = {message: 'Solicitud no simulada: ' + p}; status = 400; }
@@ -49,13 +51,15 @@ const calls = [];
     // Sugerencia → respuesta con citas
     await page.locator('.chipbtn').first().click();
     await page.locator('.msg.bot .answer').waitFor();
-    assert.equal(await page.locator('.msg.user .bubble').first().innerText(), '¿Qué pruebas se hacen al grupo electrógeno y con qué equipos?');
-    assert.equal(await page.locator('.answer img').count(), 0, 'HTML de la respuesta no se interpreta');
-    assert.equal(await page.locator('.answer button.cite').count(), 2, 'Solo citas existentes se enlazan');
-    assert.ok((await page.locator('.answer').innerText()).includes('[F7]'));
+    assert.equal(await page.locator('.msg.user .bubble').first().innerText(), ac.SUGGESTIONS[0]);
+    assert.match(await page.locator('.modeline').first().innerText(), /IA/i);
+    await page.locator('details.glossary').waitFor({state: 'attached'}); assert.match(await page.locator('details.glossary').innerText(), /Siglas/);
+    assert.equal(await page.locator('.msg.bot .answer img').count(), 0, 'HTML de la respuesta no se interpreta');
+    assert.equal(await page.locator('.msg.bot .answer button.cite').count(), 2, 'Solo citas existentes se enlazan');
+    assert.ok((await page.locator('.msg.bot .answer').first().innerText()).includes('[F7]'));
     assert.equal(await page.locator('.src.cited').count(), 2, 'Fuentes citadas destacadas');
     assert.equal(await page.locator('.src .chip.orange').count(), 1, 'Fuente del Plan V3 marcada como borrador');
-    await page.locator('.answer button.cite').nth(1).click();
+    await page.locator('.msg.bot .answer button.cite').nth(1).click();
     assert.equal(await page.locator('.src').nth(1).evaluate(e => e.open), true, 'La cita abre su fuente');
     await page.locator('.src').nth(1).getByRole('button', {name: 'Ver fragmento completo'}).click();
     await page.locator('pre.srcbody').waitFor(); assert.match(await page.locator('pre.srcbody').innerText(), /Cuerpo completo sintético 2/);
@@ -76,6 +80,11 @@ const calls = [];
     mode = 'doc'; await page.locator('#f-question').fill('EPP para maniobras de media tensión'); await page.locator('#f-question').press('Enter');
     await page.getByText('Modo documental: se muestran los fragmentos más pertinentes.').waitFor();
     assert.equal(await page.locator('.msg.bot').last().locator('details.src[open]').count(), 3, 'En modo documental se despliegan los primeros fragmentos');
+    // Modo documental con respuesta compuesta (guía + extractos)
+    mode = 'doc2'; await page.locator('#f-question').fill('precomisionamiento IIEE'); await page.getByRole('button', {name: 'Consultar', exact: true}).click();
+    await page.getByText('Respuesta documental (sin IA) · síntesis y extractos literales de las fuentes').last().waitFor();
+    assert.equal(await page.locator('.msg.bot').last().locator('.answer button.cite').count(), 2);
+    assert.equal(await page.locator('.msg.bot').last().locator('.chip.blue').count(), 1, 'Guía marcada como síntesis CX360');
     // Cuota agotada
     mode = 'quota'; await page.locator('#f-question').fill('Otra consulta'); await page.getByRole('button', {name: 'Consultar', exact: true}).click();
     await page.getByText(/Cuota diaria del asistente agotada/).waitFor();
