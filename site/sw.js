@@ -1,5 +1,5 @@
-const CACHE='iren-cx360-shell-v4';
-const ASSETS=['./','./index.html','./app.js','./styles.css','./manifest.webmanifest','./assets/logo-anin.png','./assets/icon-192.png','./assets/icon-512.png'];
+const CACHE='iren-cx360-shell-v5';
+const ASSETS=['./','./index.html','./app.js','./styles.css','./manifest.webmanifest','./assets/logo-anin.png','./assets/icon-192.png','./assets/icon-512.png','./assets/fonts/barlow-latin-400-normal.woff2','./assets/fonts/barlow-latin-500-normal.woff2','./assets/fonts/barlow-latin-600-normal.woff2','./assets/fonts/barlow-latin-700-normal.woff2','./assets/fonts/barlow-semi-condensed-latin-600-normal.woff2','./assets/fonts/barlow-semi-condensed-latin-700-normal.woff2'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('iren-cx360-shell-')&&k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});
 self.addEventListener('fetch',e=>{

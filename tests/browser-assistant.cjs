@@ -12,6 +12,8 @@ const snapshot = {cut: now, members: [member], records: [], files: [], events: [
 const src = (n, extra = {}) => ({n, id: 'SYN-000' + n, doc: 'AN1', doc_title: 'SINTÉTICO Anexo eléctrico', nature: 'cliente', sec: '1.11.' + n, title: 'Sección sintética ' + n, page_from: 10 + n, page_to: 10 + n, systems: ['EL-03'], snippet: 'Texto con «banco» resistivo sintético ' + n, body: 'Cuerpo completo sintético ' + n + '\n• Pértiga\n• Multímetro', score: 1 - n / 10, ...extra});
 let mode = 'ia', used = 0;
 const calls = [];
+async function go(page,name){const b=page.getByRole('button',{name,exact:true});if(!(await b.count())){await page.getByRole('button',{name:'Menú'}).click();await page.locator('.menu-open .side').waitFor();}await page.getByRole('button',{name,exact:true}).first().click();}
+
 (async () => {
   const browser = await chromium.launch({executablePath: chrome, headless: true});
   try {
@@ -97,7 +99,7 @@ const calls = [];
     // Nueva conversación
     await page.getByRole('button', {name: 'Nueva conversación'}).click(); assert.equal(await page.locator('.msg').count(), 0);
     // Administración: configuración del asistente
-    await page.getByRole('button', {name: 'Administración', exact: true}).click(); await page.getByRole('heading', {name: 'Asistente Cx', exact: true}).waitFor();
+    await go(page, 'Administración'); await page.getByRole('heading', {name: 'Asistente Cx', exact: true}).waitFor();
     await page.locator('#assistant-config-form input[name=daily_limit]').fill('40'); await page.locator('#assistant-config-form').getByRole('button', {name: 'Guardar'}).click();
     await page.getByText('Configuración del asistente guardada en servidor.').waitFor();
     const cfg = calls.filter(c => c.path.endsWith('cx_assistant_configure')).map(c => JSON.parse(c.body)).at(-1); assert.deepEqual(cfg, {p_enabled: true, p_daily_limit: 40});

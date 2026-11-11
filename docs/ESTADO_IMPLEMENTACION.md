@@ -1,3 +1,14 @@
+# CX360 v2.4 — Diseño por especialidad con pestañas por sistema, 11/11/2026
+
+- **Nueva estructura de navegación**: barra lateral fija en escritorio (General, Especialidades, Control, Registros, Sistema) y menú desplegable con franja de accesos rápidos en tableta y celular.
+- **Una pestaña por especialidad**: Instalaciones Eléctricas (IIEE), Sanitarias (IISS), Mecánicas (IIMM), TIC y Equipamiento Médico (EM), cada una con su color, ícono y cabecera de indicadores (protocolos publicados, pruebas cerradas, avisos ACONEX vencidos, próxima prueba).
+- **Subpestañas por sistema** (EL-01, EL-02… TI-00… EM-…): ficha del sistema, avance de pruebas por nivel L1–L5 (sin prueba / programada / en curso / observada / cerrada), protocolos, pruebas, hitos, restricciones, capacitación y OyM del sistema, y preguntas directas al Asistente Cx con la especialidad ya fijada.
+- **Resumen de la especialidad**: índice de sistemas con su barra L1–L5, próximas pruebas y restricciones abiertas.
+- Tipografía Barlow autoalojada (licencia OFL, sin servicios externos), íconos en línea, texto alineado a la izquierda, foco visible y movimiento reducido respetado. El avance se muestra por estado de pruebas registradas; no se publica porcentaje (pesos L1–L5 pendientes de aceptación, D-09).
+- Pruebas: 42 unitarias (5 nuevas de `specialty-core`), `browser-plan.cjs` con lote sintético y con el lote privado (268 registros, 40 sistemas), `browser-assistant.cjs`; sin desbordamiento a 390 y 1440 px ni errores JS.
+
+---
+
 # CX360 v2.3 — Asistente Cx potenciado, 11/11/2026
 
 - **Glosario CX360** (8 fichas) y **Guía CX360** (11 fichas curadas por especialidad: precomisionamiento, pruebas, equipos y herramientas, formatos; con numerales de referencia) agregados a la base documental privada (889 fragmentos).

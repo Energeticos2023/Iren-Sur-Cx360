@@ -21,6 +21,8 @@ const seed=process.env.CX360_SEED?JSON.parse(fs.readFileSync(process.env.CX360_S
 const asRecord=r=>({id:r.id,kind:r.kind,specialty:r.specialty,assigned_to:null,state:r.state,payload:{...r.payload,catalog_batch:'PLANCX-V3'},version:1,created_by:uid,updated_by:uid,created_at:now,updated_at:now});
 let snapshot={cut:now,members:[member],records:[],files:[],events:[],settings:{custody_authorized:false,current_schedule:null}};
 const calls=[];
+async function go(page,name){const b=page.getByRole('button',{name,exact:true});if(!(await b.count())){await page.getByRole('button',{name:'Menú'}).click();await page.locator('.menu-open .side').waitFor();}await page.getByRole('button',{name,exact:true}).first().click();}
+
 (async()=>{
  const browser=await chromium.launch({executablePath:chrome,headless:true});
  try{
@@ -50,13 +52,22 @@ const calls=[];
   assert.equal(await page.locator('table.matrix tbody tr').count(),systems,'Matriz con todos los sistemas');
   assert.equal(await page.locator('body').evaluate(e=>e.scrollWidth<=window.innerWidth),true,'Plan Cx sin desbordamiento a 390 px');
   fs.mkdirSync('tmp/browser',{recursive:true});await page.screenshot({path:'tmp/browser/plan-390.png',fullPage:true});
+  // Especialidad con pestaña por sistema
+  await page.getByRole('button',{name:'Eléctricas',exact:true}).click();await page.getByRole('heading',{name:'Instalaciones Eléctricas',exact:true}).waitFor();
+  const sys=seed.find(r=>r.kind==='system'&&r.specialty==='IIEE');
+  await page.getByRole('tab',{name:new RegExp(sys.payload.code)}).click();
+  assert.equal(await page.getByRole('tab',{name:new RegExp(sys.payload.code)}).getAttribute('aria-selected'),'true','Pestaña del sistema activa');
+  await page.locator('.sysfile').waitFor();assert.ok((await page.locator('.esp-body').innerText()).includes(sys.payload.code));
+  assert.equal(await page.locator('ol.track li').count(),5,'Avance L1 a L5');
+  assert.equal(await page.locator('body').evaluate(e=>e.scrollWidth<=window.innerWidth),true,'Especialidad sin desbordamiento a 390 px');
+  await page.screenshot({path:'tmp/browser/especialidad-390.png',fullPage:true});
   // Seguimiento
   await page.getByRole('button',{name:'Seguimiento',exact:true}).click();await page.getByRole('heading',{name:'Seguimiento y alertas'}).waitFor();
   assert.ok(await page.locator('text=Avisos ACONEX de pruebas presenciadas').count()===1);
   await page.screenshot({path:'tmp/browser/seguimiento-390.png',fullPage:true});
   // Protocolo de campo: vista previa e impresión
   const hp=seed.find(r=>r.kind==='test'&&String(r.payload.witness).startsWith('HP')),prot=seed.find(r=>r.id===hp.payload.protocol_id);
-  await page.getByRole('button',{name:'Protocolos',exact:true}).click();await page.locator('#search').fill(prot.payload.code);await page.getByRole('button',{name:'Buscar',exact:true}).click();
+  await go(page,'Protocolos');await page.locator('#search').fill(prot.payload.code);await page.getByRole('button',{name:'Buscar',exact:true}).click();
   await page.getByRole('button',{name:'Protocolo en blanco'}).first().click();
   const printed=await page.evaluate(()=>({n:window.__printed||0,rows:document.querySelectorAll('#print-report .pbody tbody tr:not(.psec)').length}));
   assert.equal(printed.n,1,'Se invoca impresión');assert.equal(printed.rows,prot.payload.fields.length,'Todos los campos en el protocolo impreso');
@@ -64,7 +75,7 @@ const calls=[];
   assert.match(await page.locator('#f-fields_text').inputValue(),/\| (check|measure|text) \|/,'Tipo y sección se conservan al editar');
   await page.getByRole('button',{name:'Cerrar',exact:true}).click();
   // Prueba HP: campos agrupados, SÍ→CONFORME y aviso ACONEX
-  await page.getByRole('button',{name:'Pruebas',exact:true}).click();await page.locator('#search').fill(hp.payload.code);await page.getByRole('button',{name:'Buscar',exact:true}).click();
+  await go(page,'Pruebas');await page.locator('#search').fill(hp.payload.code);await page.getByRole('button',{name:'Buscar',exact:true}).click();
   await page.getByRole('button',{name:'Ver / revisar'}).first().click();await page.locator('fieldset.protosec').first().waitFor();
   assert.equal(await page.locator('#f-state').inputValue(),'NO INICIADO','El estado cargado no se altera al abrir');
   assert.notEqual(await page.locator('#f-protocol_id').inputValue(),'','El vínculo al protocolo en borrador se conserva');

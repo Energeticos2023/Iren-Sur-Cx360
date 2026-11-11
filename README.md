@@ -6,6 +6,8 @@ Titular declarado y administrador designado: Ing. José Rafael Zeña Peche, espe
 
 Leer [estado verificado](docs/ESTADO_IMPLEMENTACION.md), [activación móvil](docs/ACTIVACION_MOVIL.md) y [Asistente Cx](docs/ASISTENTE_CX.md).
 
+Navegación (v2.4): una pestaña por especialidad (IIEE, IISS, IIMM, TIC, EM) y, dentro de cada una, una subpestaña por sistema con su avance de pruebas L1–L5, protocolos, pruebas, hitos, restricciones, capacitación y OyM. Código en `site/specialty-core.cjs` (cálculo, probado) y `site/specialty-ui.js` (vistas).
+
 Publicación: **https://energeticos2023.github.io/Iren-Sur-Cx360/** (GitHub Pages, rama `gh-pages`, desplegada automáticamente en cada push a `main`). Los datos no están en el sitio: requieren cuenta autorizada, MFA y RLS en Supabase. Destino anterior (ChatGPT Sites, privado): https://iren-sur-cx360.energ-ticos-7536.chatgpt.site.
 
 ## Desarrollo
