@@ -1,6 +1,7 @@
 // CX360 – pantallas por especialidad (IIEE, IISS, IIMM, TIC, EM) con una pestaña por sistema.
 import sc from './specialty-core.cjs';
 import pc from './plan-core.cjs';
+import processCore from './system-process.cjs';
 import {icons} from './ui-icons.js';
 const {SPECS, STATUS_LABEL, systemsOf, related, levelTrack, specStats} = sc;
 const LEVEL_NAMES = {L1: 'Recepción y FAT', L2: 'Precomisionamiento', L3: 'Arranque', L4: 'Prueba funcional', L5: 'Prueba integrada'};
@@ -57,19 +58,25 @@ function overview(c, spec, systems) {
 }
 
 function systemPanel(c, spec, sys) {
-  const {records, h, button, tableRow} = c, all = records(), p = sys.payload, rel = related(all, p.code);
+  const {records, h, button, tableRow} = c, all = records(), p = sys.payload, rel = related(all.filter(r=>!r.specialty||r.specialty===spec), p.code);
+  const linked=all.filter(r=>processCore.inSystem(r,sys,sc.refIncludes));
+  const stage=c.S.systemStage?.[sys.id]||'PRECOMISIONAMIENTO';
+  const def=processCore.STAGES.find(x=>x[0]===stage);
+  const selected=linked.filter(r=>processCore.stageOf(r,all)===stage);
+  const unclassified=linked.filter(r=>processCore.stageOf(r,all)==='SIN CLASIFICAR');
+  const assets=p.assets||[];
   const meta = [['Líder y apoyo', p.leader_support], ['Sectores', p.sectors], ['Fuente en el Plan Cx', p.plan_source], ['Programa', p.program_ref], ['Equipo o TAG', p.equipment_tag]].filter(x => x[1]);
   const group = (title, list, empty) => `<section class="block"><h3>${title} <span class="count">${list.length}</span></h3>${list.length ? list.map(tableRow).join('') : `<p class="muted">${empty}</p>`}</section>`;
   const qs = [`¿Qué actividades de precomisionamiento corresponden a ${p.code} ${p.title}?`, `¿Qué pruebas y criterios de aceptación tiene ${p.code} ${p.title}?`, `¿Qué equipos de medición y herramientas se usan en ${p.code} ${p.title}?`];
   return `<section class="sysfile"><div class="sysfile-head"><span class="scode big">${h(p.code)}</span><div><h3>${h(p.title)}</h3>${p.notes ? `<p>${h(p.notes)}</p>` : ''}</div>${button('Ver ficha completa', 'edit:' + sys.id, 'btn ghost')}</div>
    <dl class="facts">${meta.map(([k, v]) => `<div><dt>${h(k)}</dt><dd>${h(v)}</dd></div>`).join('')}</dl>
    ${p.provisional ? '<p class="small muted">Datos del catálogo provisional del Plan Cx C01 V3 (borrador no emitido). No acreditan ejecución ni aceptación.</p>' : ''}</section>
-  <section class="block"><h3>Avance por nivel</h3>${trackHtml(c, rel.tests)}</section>
-  ${group('Protocolos', rel.protocols, 'Sin protocolos vinculados a este sistema.')}
-  ${group('Pruebas', rel.tests, 'Sin pruebas vinculadas a este sistema.')}
-  ${group('Hitos y actividades', rel.activities, 'Sin actividades vinculadas.')}
+  <section class="block"><h3>Qué se va a intervenir</h3><p><b>Condición del alcance:</b> ${h(p.scope_status||'PENDIENTE DE CONTRASTE CONTRACTUAL')}</p><p>${h(p.boundary||'Pendiente definir límites, subsistemas e interfaces con planos y alcance vigentes.')}</p><p class="preserve">${h(p.requirements||'Pendiente registrar por etapa: intervención, requisito, documento/revisión/página, criterio y aceptación. El catálogo por sí solo no acredita el alcance.')}</p>${button('Definir alcance e inventario','edit:'+sys.id,'btn ghost')}
+  <h4>Inventario identificado: ${assets.length} elementos registrados</h4><p class="small">Este conteo no acredita que el inventario esté completo. Diferenciar cada pozo/electrodo del sistema de puesta a tierra interconectado. Las conexiones deben identificar TAG y circuitos reales.</p>${assets.length?`<div class="tablewrap"><table><thead><tr>${['TAG','Tipo','Subsistema','Ubicación','Plano / revisión','Circuitos','Conexiones TAG','Fuente'].map(t=>`<th>${t}</th>`).join('')}</tr></thead><tbody>${assets.map(a=>`<tr>${['tag','type','subsystem','location','drawing_ref','circuits','connections','source_ref'].map(k=>`<td>${h(a[k]||'PENDIENTE')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<p class="muted">Sin elementos identificados. No se infieren cantidades ni ubicaciones.</p>'}</section>
+  <section class="block"><h3>Procesos de ${h(p.code)}</h3><div class="btnrow" role="tablist" aria-label="Etapas del sistema">${processCore.STAGES.map(([key,label])=>`<button type="button" role="tab" aria-selected="${key===stage}" class="btn ${key===stage?'':'ghost'}" data-action="sysstage:${h(sys.id)}:${encodeURIComponent(key)}">${label}</button>`).join('')}</div>
+  <div role="tabpanel"><h4>${h(def[1])}</h4><p class="small">${stage==='PRECOMISIONAMIENTO'?'Revisión documental y verificación física de instalaciones, equipos, materiales y accesorios contra planos y especificaciones vigentes, antes de las pruebas de funcionamiento.':'Registrar los entregables y resultados conforme al procedimiento y al alcance aceptados.'} Cada protocolo debe identificar el objeto intervenido y su fuente. Crear un borrador no habilita la ejecución.</p>${button(def[2]==='protocol'?'Preparar protocolo de esta etapa':'Registrar entregable de esta etapa','sysnew:'+sys.id+':'+encodeURIComponent(stage),'btn ghost')}${selected.length?selected.map(tableRow).join(''):'<p class="muted">Sin registros vinculados a esta etapa.</p>'}</div></section>
+  ${unclassified.length?group('Registros sin etapa clasificada',unclassified,''):''}
   ${rel.restrictions.length ? group('Restricciones, decisiones e inconsistencias', rel.restrictions, '') : ''}
-  ${rel.trainings.length || rel.om.length ? group('Capacitación y OyM', [...rel.trainings, ...rel.om], '') : ''}
   <section class="block"><h3>Consultar al asistente sobre ${h(p.code)}</h3><div class="suggest">${qs.map(q => `<button type="button" class="chipbtn" data-action="${h(askAction(q, spec))}">${h(q)}</button>`).join('')}</div></section>`;
 }
 
@@ -85,3 +92,4 @@ export function specialtyScreen(c) {
   ${systems.length ? `<div class="systabs tone-${meta.tone}" role="tablist" aria-label="Sistemas de ${h(meta.name)}">${tabs.map(([k, label, title]) => `<button type="button" role="tab" aria-selected="${k === (current ? tab : 'resumen')}" class="systab${k === (current ? tab : 'resumen') ? ' on' : ''}" data-action="systab:${spec}:${h(k)}" ${title ? `title="${h(title)}"` : ''}><b>${h(label)}</b>${title ? `<span>${h(title)}</span>` : ''}</button>`).join('')}</div>
   <div class="esp-body tone-${meta.tone}" role="tabpanel">${current ? systemPanel(c, spec, current) : overview(c, spec, systems)}</div>` : emptyCatalog(c, spec)}`;
 }
+

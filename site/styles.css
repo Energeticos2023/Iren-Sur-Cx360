@@ -171,3 +171,7 @@ ol.track li.done{border-top-color:#2f9a5f}ol.track li.active{border-top-color:#e
 /* v2.4 ajustes de pantallas heredadas */
 .filterbar{align-items:flex-end}.filterbar>label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#445b75}.filterbar>.btn{flex:0 0 auto;min-width:120px}
 .chatlog:has(.chatempty){height:auto;min-height:200px}.chatempty{text-align:left;padding:8px 0}
+
+
+/* Preferencia de lectura del titular */
+body,input,button,select,textarea,h1,h2,h3,h4{font-family:Arial,sans-serif}p{text-align:justify}.preserve{white-space:pre-wrap}
