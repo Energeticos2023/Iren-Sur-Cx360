@@ -1,0 +1,218 @@
+[
+  {
+    "disc": "IIEE",
+    "code": "2.1.1",
+    "name": "Sistema de Utilización",
+    "page": 8
+  },
+  {
+    "disc": "IIEE",
+    "code": "2.1.2",
+    "name": "Media Tensión (Trafo y Celda)",
+    "page": 8
+  },
+  {
+    "disc": "IIEE",
+    "code": "2.1.3",
+    "name": "Grupo Electrógeno",
+    "page": 8
+  },
+  {
+    "disc": "IIEE",
+    "code": "2.1.4",
+    "name": "Baja Tensión",
+    "page": 9
+  },
+  {
+    "disc": "IISS",
+    "code": "2.2.1",
+    "name": "Redes de Agua Fría",
+    "page": 9
+  },
+  {
+    "disc": "IISS",
+    "code": "2.2.2",
+    "name": "Redes de Agua Caliente",
+    "page": 9
+  },
+  {
+    "disc": "IISS",
+    "code": "2.2.3",
+    "name": "Redes de Agua Blanda",
+    "page": 10
+  },
+  {
+    "disc": "IISS",
+    "code": "2.2.4",
+    "name": "Redes de Contraincendios",
+    "page": 10
+  },
+  {
+    "disc": "IISS",
+    "code": "2.2.5",
+    "name": "Redes de Desagüe y Ventilacion",
+    "page": 10
+  },
+  {
+    "disc": "IISS",
+    "code": "2.2.6",
+    "name": "Redes de Aguas de Lluvia o Drenaje Pluvial",
+    "page": 11
+  },
+  {
+    "disc": "IIMM",
+    "code": "2.3.1",
+    "name": "Ventilacion Mecanica",
+    "page": 12
+  },
+  {
+    "disc": "IIMM",
+    "code": "2.3.2",
+    "name": "Aire Acondicionado",
+    "page": 12
+  },
+  {
+    "disc": "IIMM",
+    "code": "2.3.3",
+    "name": "Oxígeno, Vacío y Aire Comprimido",
+    "page": 12
+  },
+  {
+    "disc": "IIMM",
+    "code": "2.3.4",
+    "name": "Montacargas",
+    "page": 13
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.1",
+    "name": "Almacenamiento Centralizado",
+    "page": 14
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.2",
+    "name": "Comunicación por Radio HF",
+    "page": 14
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.3",
+    "name": "Conectividad y Seguridad Informática",
+    "page": 14
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.4",
+    "name": "Marcación de Asistencia",
+    "page": 14
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.5",
+    "name": "Detección y Alarma de Incendios",
+    "page": 14
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.6",
+    "name": "TeleSalud",
+    "page": 15
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.7",
+    "name": "Procesamiento Centralizado",
+    "page": 15
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.8",
+    "name": "Relojes Sincronizados",
+    "page": 15
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.9",
+    "name": "Sonido Ambiental y Perifoneo",
+    "page": 15
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.10",
+    "name": "Telefonía",
+    "page": 15
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.11",
+    "name": "Televisión",
+    "page": 15
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.12",
+    "name": "Telesalud",
+    "page": 15
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.13",
+    "name": "Videovigilancia",
+    "page": 15
+  },
+  {
+    "disc": "TIC",
+    "code": "2.4.14",
+    "name": "Cableado Estructurado",
+    "page": 16
+  },
+  {
+    "disc": "EM",
+    "code": "2.5.1",
+    "name": "Equipos Biomédicos (B)",
+    "page": 16
+  },
+  {
+    "disc": "EM",
+    "code": "2.5.2",
+    "name": "Equipos Complementarios (C)",
+    "page": 16
+  },
+  {
+    "disc": "EM",
+    "code": "2.5.3",
+    "name": "Instrumental (I)",
+    "page": 16
+  },
+  {
+    "disc": "EM",
+    "code": "2.5.4",
+    "name": "Mobiliario Clínico (MC)",
+    "page": 17
+  },
+  {
+    "disc": "EM",
+    "code": "2.5.5",
+    "name": "Mobiliario Administrativo (MA)",
+    "page": 17
+  },
+  {
+    "disc": "EM",
+    "code": "2.5.6",
+    "name": "Equipo Electromecánico (E)",
+    "page": 17
+  },
+  {
+    "disc": "EM",
+    "code": "2.5.7",
+    "name": "Equipo Informatico (INF)",
+    "page": 17
+  },
+  {
+    "disc": "EM",
+    "code": "2.5.8",
+    "name": "Equipos de Transporte (V)",
+    "page": 17
+  }
+]

@@ -16,12 +16,12 @@ Aplicación interna de seguimiento de **precomisionamiento, comisionamiento, pru
 
 ## Arquitectura prevista
 1. Código fuente: repositorio privado GitHub.
-2. Base de datos, usuarios y almacenamiento: proyecto Supabase **exclusivo y separado de IREN Sur**, con RLS y buckets privados.
+2. Base de datos, usuarios y almacenamiento: proyecto Supabase **exclusivo de IREN Sur, separado de los proyectos comerciales**, con RLS y buckets privados.
 3. Alojamiento: PWA HTTPS instalable en Android/iPhone, con login obligatorio para los datos.
 4. Respaldos, auditoría y control de acceso probado antes de la publicación.
 
 ## Siguientes pasos técnicos
-- Importar el paquete `IREN_SUR_CX_360_GitHub_Supabase_v1.zip` generado en el proyecto, colocando su contenido **descomprimido** en este repositorio.
+- Código del paquete original incorporado y revisado parcialmente. Consultar `docs/ESTADO_IMPLEMENTACION.md` antes de ejecutar SQL o desplegar.
 - Crear una organización/proyecto Supabase específico para IREN Sur con propietario institucional autorizado, y comprobar su costo antes de contratarlo.
 - Inspeccionar y probar el esquema SQL y las políticas de acceso; no ejecutar scripts de bootstrap sin verificar identidad, roles y permisos.
 - Conectar el frontend exclusivamente mediante `SUPABASE_URL` y clave pública; prohibido subir claves secretas o `service_role`.
@@ -29,3 +29,12 @@ Aplicación interna de seguimiento de **precomisionamiento, comisionamiento, pru
 - Publicar la PWA solo cuando las pruebas técnicas y autorizaciones institucionales se completen.
 
 **Separación de titularidad:** aunque el repositorio se encuentra actualmente en la cuenta GitHub `Energeticos2023`, su contenido debe permanecer separado de cualquier proyecto comercial; ANIN debe validar la cuenta administradora y la titularidad institucional antes de alojar documentación reservada.
+
+## Verificación local
+
+`node --check site/app.js`
+
+`node --test tests/frontend.test.cjs`
+
+La documentación original se conserva en `docs/INSTALACION_ORIGINAL.md` como antecedente; no acredita funcionamiento ni reemplaza los bloqueos descritos en el estado de implementación.
+
