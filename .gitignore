@@ -10,3 +10,8 @@ site/config.js
 *.pfx
 *.sql.bak
 .DS_Store
+
+# Expedientes y resultados locales, nunca publicar
+private/
+tmp/
+artifacts/

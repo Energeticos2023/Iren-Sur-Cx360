@@ -1,40 +1,30 @@
-# IREN SUR CX 360
+# IREN Sur CX360
 
-Aplicación interna de seguimiento de **precomisionamiento, comisionamiento, pruebas integradas, puesta en marcha y cierre** del **Hospital de Contingencia IREN Sur (ANIN)**.
+Control privado del comisionamiento del Hospital de Contingencia IREN Sur. Versión 2 para piloto y activación; no implica aceptación de operación de campo ni autoriza energización.
 
-> **ESTADO: EN CONSTRUCCIÓN. No publicado ni autorizado para datos contractuales reales.**
+Titular declarado y administrador designado: Ing. José Rafael Zeña Peche, especialista IIEE y líder de comisionamiento por ANIN, jose.zena.p@uni.pe. Designación no equivale a cuenta autenticada, custodia institucional o decisión contractual. Nómina adicional pendiente; no se enviaron invitaciones.
 
-## Principios obligatorios
-- Repositorio **privado**. Los expedientes reservados se almacenarán únicamente en un repositorio documental autorizado y almacenamiento privado, nunca dentro de GitHub ni de recursos web públicos.
-- Acceso por invitación individual del administrador de ANIN. Sin registro libre y **sin acceso para la contratista**.
-- Perfiles de Coordinación ANIN, Gerente de Proyecto, KP1, Supervisión, especialistas, Riesgos y SSOMA.
-- Cinco disciplinas: IIEE, IISS, IIMM, TIC y equipamiento médico; fases: precomisionamiento, pruebas funcionales e integradas, puesta en marcha, O&M/capacitación y cierre.
-- Cronograma versionado con actividades diarias, retrasos, evidencia, responsables y propuesta de reprogramación. No alterar la línea base ni el Programa Aceptado automáticamente.
-- Protocolos **no operativos** hasta contar con documentación aceptada y evidencia de la decisión competente.
-- Evidencias, observaciones y firmas de revisión en la aplicación **no sustituyen** Aconex, ACC ni decisiones contractuales del Gerente de Proyecto.
-- Nunca inventar fechas, pruebas, resultados, criterios de aceptación ni estados documentales.
+Leer [estado verificado](docs/ESTADO_IMPLEMENTACION.md) y [activación móvil](docs/ACTIVACION_MOVIL.md). Destino privado: https://iren-sur-cx360.energ-ticos-7536.chatgpt.site. Verificar resultado nativo de despliegue; la URL por sí sola no prueba funcionamiento.
 
-## Arquitectura prevista
-1. Código fuente: repositorio privado GitHub.
-2. Base de datos, usuarios y almacenamiento: proyecto Supabase **exclusivo de IREN Sur, separado de los proyectos comerciales**, con RLS y buckets privados.
-3. Alojamiento: PWA HTTPS instalable en Android/iPhone, con login obligatorio para los datos.
-4. Respaldos, auditoría y control de acceso probado antes de la publicación.
+## Desarrollo
 
-## Siguientes pasos técnicos
-- Código del paquete original incorporado y revisado parcialmente. Consultar `docs/ESTADO_IMPLEMENTACION.md` antes de ejecutar SQL o desplegar.
-- Crear una organización/proyecto Supabase específico para IREN Sur con propietario institucional autorizado, y comprobar su costo antes de contratarlo.
-- Inspeccionar y probar el esquema SQL y las políticas de acceso; no ejecutar scripts de bootstrap sin verificar identidad, roles y permisos.
-- Conectar el frontend exclusivamente mediante `SUPABASE_URL` y clave pública; prohibido subir claves secretas o `service_role`.
-- Probar acceso anónimo, usuario no autorizado, revocación, permisos por especialidad, archivos privados, protocolos, cronograma y auditoría.
-- Publicar la PWA solo cuando las pruebas técnicas y autorizaciones institucionales se completen.
+Node.js 22 o posterior:
 
-**Separación de titularidad:** aunque el repositorio se encuentra actualmente en la cuenta GitHub `Energeticos2023`, su contenido debe permanecer separado de cualquier proyecto comercial; ANIN debe validar la cuenta administradora y la titularidad institucional antes de alojar documentación reservada.
+```sh
+npm ci --ignore-scripts
+npm test
+npm run build
+npm run preview
+```
 
-## Verificación local
+Servir dist/, nunca la raíz del repositorio ni site/ directamente. site/mobile.js es la entrada actual; site/app.js y pruebas históricas se conservan como antecedente. Dependencias fijadas y lockfile; sin dependencias CDN en la aplicación publicada.
 
-`node --check site/app.js`
+Pruebas SQL sintéticas en tests/backend-security.sql y tests/backend-workflow.sql, en transacciones revertidas y exclusivamente en el proyecto dedicado. tests/browser.cjs usa Chrome y API simulada; su ruta de Playwright corresponde al runtime local y debe adaptarse en otro equipo.
 
-`node --test tests/frontend.test.cjs`
+## Backend
 
-La documentación original se conserva en `docs/INSTALACION_ORIGINAL.md` como antecedente; no acredita funcionamiento ni reemplaza los bloqueos descritos en el estado de implementación.
+Supabase exclusivo azajuquqksrjyfbtcujq, organización Energeticos, separado de bases comerciales. Migraciones v2 en supabase/migrations/. No ejecutar supabase/schema.sql, ADMIN_BOOTSTRAP.sql ni seed_catalogo.sql: son antecedentes de v1. Las migraciones v2 ya fueron aplicadas al proyecto exclusivo; no repetir contra otro proyecto sin revisión.
 
+site/public-config.json contiene clave pública específica, no contraseña ni service_role. Las funciones Edge usan secretos de servidor proporcionados por Supabase, nunca enviados al navegador o Git. RLS/funciones controlan disciplina, asignación, autoría, versión, independencia, revocación y auditoría.
+
+No subir expedientes, resultados reales, contraseñas ni tokens a GitHub. private/, tmp/, artifacts/, dist/ y node_modules/ están ignoradas. Las instrucciones originales de instalación son historia y no reemplazan el diagnóstico vigente.
