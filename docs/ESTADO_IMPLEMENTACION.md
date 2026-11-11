@@ -1,3 +1,30 @@
+# CX360 v2.2 — Asistente Cx, 11/11/2026
+
+Continúa desde v2.1 (61e2eda). Detalle y activación en [ASISTENTE_CX.md](ASISTENTE_CX.md).
+
+## Implementado en v2.2
+
+- **Asistente Cx** (pestaña y botón flotante): consultas sobre alcance, pruebas, equipos, herramientas, criterios, EPP, protocolos, testificación, capacitación y OyM, con respuesta citada [F#] al documento, numeral y página.
+- **Base documental privada** cargada en servidor: 870 fragmentos de Anexo 12, Anexo 16, Plan de Comisionamiento ANIN, Anexos 1 a 5 (con sus formatos) y Plan Cx C01 V3 (borrador). En `cx_private`, no expuesta por la API ni versionada en Git.
+- Búsqueda en español (`cx_kb_search`): sin tildes, raíces, sinónimos de siglas, ponderación por rareza del término y por título, bono por código de sistema (EL-03, TI-07…) y por documento citado. Solo miembros activos.
+- Función Edge `cx360-asistente` (v1, JWT y orígenes permitidos): cuota diaria por persona (80, configurable por el administrador), bitácora privada de uso, modo IA con instrucciones fijas (solo fuentes, jerarquía documental, no inventar, roles NEC4) y modo documental de respaldo. El modo IA se activa con el secreto `ANTHROPIC_API_KEY` (pendiente del titular).
+- Administración → Asistente Cx: habilitar/deshabilitar y cuota diaria.
+
+## Probado en v2.2
+
+- 37 pruebas automáticas (8 nuevas del asistente: render seguro, citas, historial, exportación, validación).
+- Chrome con API simulada (`tests/browser-assistant.cjs`): botón flotante, respuesta con citas, apertura de fuente y fragmento completo, copiar con fuentes, repregunta con historial, modo documental, cuota agotada, respaldo por búsqueda directa, configuración del administrador; sin HTML inyectado, sin desbordamiento a 360/430/1440 px, sin errores JS. `tests/browser-plan.cjs` sigue aprobando.
+- Búsqueda evaluada localmente (PGlite + unaccent) con 14 preguntas tipo; en servidor, función y permisos verificados (anónimos rechazados).
+- No probado: modo IA real (sin clave configurada) ni consulta con la cuenta real desde el sitio publicado.
+
+## Pendientes
+
+1. Configurar `ANTHROPIC_API_KEY` en los secretos de Edge Functions para el modo IA.
+2. Confirmar en Supabase la eliminación definitiva de la función temporal de carga `cx_tmp_kb_upload` (ya neutralizada: solo devuelve error y no tiene permisos).
+3. Pulsar **Cargar catálogo en CX360** (sigue pendiente desde v2.1).
+
+---
+
 # CX360 v2.1 — Estado verificado, 11/11/2026 (tarde)
 
 Continúa desde 07c863b. Lo de v2 (más abajo) sigue vigente salvo lo que aquí se indica.
