@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+site/config.js
+*.pem
+*.key
+*.p12
+*.pfx
+*.sql.bak
+.DS_Store
