@@ -21,7 +21,7 @@ const row=r=>'<article class="listitem"><div class="row spread"><strong>'+esc(r.
  '<small>Origen: '+esc(r.source_platform)+' · Referencia: '+esc(r.source_ref||'NO REGISTRADA')+'</small>'+
  (r.review_status==='ACREDITADO'?'<small>Decisión: '+esc(r.decision_ref)+' · '+esc(r.decision_authority)+' · '+esc(r.decision_on)+'</small>':'<small>La revisión no acredita aceptación contractual</small>')+
  (r.notes?'<p class="small">'+esc(r.notes)+'</p>':'')+
- '<div class="btnrow">'+(canOpen(r)?btn('Abrir fuente oficial','library-open:'+r.id):'<span class="small muted">Archivo original / enlace oficial no cargado</span>')+btn('Ficha y trazabilidad','library-detail:'+r.id)+'</div></article>';
+ '<div class="btnrow">'+(canOpen(r)?btn('Abrir PDF en Drive','library-open:'+r.id):'<span class="small muted">Archivo original / enlace oficial no cargado</span>')+btn('Ficha y trazabilidad','library-detail:'+r.id)+'</div></article>';
 
 export const CONTINGENCIA_DRIVE_FOLDER="https://drive.google.com/drive/folders/1yofNbD1dfxfpDPRr54BaR1LeuXByTQzg?usp=drive_link";
 // Enlace externo directo: la autorización y la vigencia de los archivos las controla Google Drive.
