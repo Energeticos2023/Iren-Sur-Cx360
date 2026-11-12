@@ -62,3 +62,12 @@ Costo orientativo: cada consulta envía unos 10 fragmentos (≈ 4 000 a 6 000 to
 - Documento «Matriz CX360» (código MAT, 239 fichas) generado desde `cx_private.scope_matrix` con `select cx_private.build_scope_kb();`. Volver a ejecutarlo cada vez que se actualice la matriz.
 - `cx_private.kb_system_terms`: palabras que identifican cada sistema eléctrico (EL-01 a EL-07). La búsqueda detecta la fase (precomisionamiento, pruebas, puesta en marcha, manual/OyM, capacitación, identificación) y prioriza la ficha de ese sistema y fase.
 - Respuesta documental: si la primera fuente es una ficha MAT, se muestra tal cual (breve, con referencias). Modo IA: respuesta corta en viñetas, solo la fase y el sistema preguntados.
+
+
+## Refuerzo contextual — 11/11/2026
+
+Dentro de Asistente Cx se puede seleccionar sistema y etapa; el acceso flotante desde especialidades transfiere ese contexto. Las consultas se envían con esa identificación y al cambiar de contexto se limpia el historial. El contexto también llega a la búsqueda de respaldo. Las preguntas directas desde una ficha conservan la identificación incluida en su texto.
+
+La instrucción vigente está en `supabase/functions/cx360-asistente/index.ts`, constante SYSTEM. Sustituye la jerarquía fija descrita históricamente arriba: solo corresponde aplicar una prevalencia acreditada por documentos. El bot diferencia puesta en marcha y servicio, pruebas integradas, documentos y propuestas. No tiene acceso automático a todos los archivos de ChatGPT ni puede declarar el expediente completamente aprendido por contar fragmentos.
+
+La función v4 comprueba que las citas del modelo existan en las fuentes recuperadas; en ausencia de citas o ante marcadores inválidos devuelve respaldo documental. Una cita existente todavía requiere revisión de su pertinencia. No se activó un servicio de IA de pago ni se cambió el secreto existente. Pendiente: auditoría de cobertura por archivo/revisión/página, recuperación visual de planos, prueba real con usuarios e IA y ampliación controlada del corpus.
