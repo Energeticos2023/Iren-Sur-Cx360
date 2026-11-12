@@ -230,3 +230,6 @@ table.crit td.tbd{color:#9b2532;font-weight:600}
 #print-report.phaseprint .phase-sys{page-break-inside:auto;border:0;border-top:1px solid #999;border-radius:0;padding:6px 0}
 #print-report.phaseprint ul.req li{font-size:10px;padding:2px 0}
 #print-report.phaseprint .comps{grid-template-columns:1fr 1fr}
+
+/* Piloto: instalación PWA y sugerencias */
+.install-steps{display:grid;gap:10px;margin:14px 0}.install-steps h3{margin:8px 0 0}.install-steps p{margin:0;line-height:1.6}.install-steps+ .notice{margin-top:15px}#pilot-feedback-form textarea{min-height:95px}#pilot-feedback-form button{margin-top:12px}#pilot-feedback-form .label{margin-top:12px}@media(max-width:700px){.install-steps{gap:8px}.install-steps p{font-size:14px}}
