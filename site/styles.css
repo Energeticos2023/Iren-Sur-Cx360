@@ -163,7 +163,7 @@ ol.track li.done{border-top-color:#2f9a5f}ol.track li.active{border-top-color:#e
 }
 @media (prefers-reduced-motion:reduce){.side{transition:none}*{scroll-behavior:auto!important}}
 @media print{.side,.top,.strip,.fab,.scrim{display:none!important}.content{padding:0}}
-.side-brand img{width:auto;max-width:92px;max-height:34px;padding:6px 8px;box-sizing:content-box}
+.side-brand img{width:108px;max-width:108px;height:auto;max-height:none;padding:0;background:none;border-radius:0;object-fit:contain}
 .esp-head p,.block p,.sysfile p,.esp-tile,.chatempty p,.msg p,.legend{text-align:left}
 .systabs{scroll-margin-top:72px}
 @media (max-width:1099px){.systabs{scroll-margin-top:118px}}
