@@ -53,7 +53,7 @@ async function load(){
  try{const sm=await db.rpc('cx_scope_matrix');S.scope=sm.error?null:sm.data;}catch{S.scope=null}
  await loadPilotFeedback();
  await loadLibrary();
- if(member.role==='admin'{const roster=await db.from('cx_pilot_roster').select('email,full_name,organization,role,specialty').order('organization').order('full_name');S.pilotRoster=roster.error?[]:roster.data||[];}else S.pilotRoster=[];
+ if(member.role==='admin'){const roster=await db.from('cx_pilot_roster').select('email,full_name,organization,role,specialty').order('organization').order('full_name');S.pilotRoster=roster.error?[]:roster.data||[];}else S.pilotRoster=[];
 }
 async function loadLibrary(){try{const r=await db.from('cx_library_documents').select('id,document_code,title,category,revision,specialty,system_code,stage,source_platform,source_ref,review_status,source_url,decision_ref,decision_authority,decision_on,notes').order('category').order('document_code').order('revision');if(r.error)throw r.error;S.libraryDocs=r.data||[];S.libraryError=null;}catch(e){S.libraryDocs=[];S.libraryError='Biblioteca no disponible: '+errorMessage(e);}}
 async function loadPilotFeedback(){try{const r=await db.from('cx_pilot_feedback').select('id,user_id,category,module,specialty,system_code,description,suggestion,status,created_at').order('created_at',{ascending:false}).limit(250);S.pilotFeedback=r.error?[]:r.data||[];}catch{S.pilotFeedback=[];}}
