@@ -62,22 +62,19 @@ export function verificationForm(r){
 }
 
 export function historicSection(c){
- const S=c.S, items=S.aconexHistorico||[],query=(S.aconexQuery||'').trim().toLowerCase();
- const sp=S.aconexSpec||'';
- const selected=items.filter(r=>(!sp||r.especialidad===sp||r.especialidad===null)&&(!query||[r.codigo,r.asunto,r.concepto,(r.codigos_relacionados||[]).join(' ')].join(' ').toLowerCase().includes(query)));
- const direct=selected.filter(r=>r.relacion_cx==='DIRECTA_CX');
- const indirect=selected.filter(r=>r.relacion_cx==='INTERFAZ_CX');
- const renderRows=(records)=>records.map(r=>
- '<article class="listitem"><div class="row spread"><strong>'+esc(r.codigo)+'</strong><span class="chip orange">Pendiente de cotejo</span></div>'+
+ const S=c.S, query=(S.aconexQuery||'').trim().toLowerCase(),sp=S.aconexSpec||'';
+ const active=(S.aconexHistorico||[]).filter(r=>r.estado_cotejo!=='DESCARTADO'&&r.relacion_cx==='DIRECTA_CX');
+ const selected=active.filter(r=>(!sp||r.especialidad===sp||!r.especialidad)&&(!query||[r.codigo,r.asunto,r.concepto,(r.codigos_relacionados||[]).join(' ')].join(' ').toLowerCase().includes(query)));
+ const renderRows=selected.map(r=>'<article class="listitem"><div class="row spread"><strong>'+esc(r.codigo)+'</strong><span class="chip orange">Por cotejar en Aconex</span></div>'+
  '<p><b>'+esc(r.asunto)+'</b></p><p class="small">'+esc(r.concepto)+'</p>'+
  '<small>Emisor: '+esc(r.emisor)+' · Especialidad: '+esc(r.especialidad||'Multidisciplinario')+
  ' · Fecha: '+esc(r.fecha_documento||'NO VERIFICADA')+' · Etapa: '+esc(r.etapa)+'</small>'+
- ((r.codigos_relacionados||[]).length?'<small>Relacionadas: '+esc(r.codigos_relacionados.join(', '))+'</small>':'')+
- '<small>Origen: revisión histórica de conversaciones. Pendiente de cotejo con documento Aconex original.</small></article>').join('');
- return '<section class="panel section" aria-label="Antecedentes históricos de Aconex"><h3>Antecedentes históricos recuperados</h3>'+
- '<p class="notice">Estos códigos y conceptos se reconstruyeron a partir de conversaciones y revisiones anteriores. NO son registros oficiales cotejados con Oracle Aconex, ni demuestran emisión, aceptación o cierre. Los especialistas pueden consultar antecedentes mientras se incorporan las evidencias formales.</p>'+
+ ((r.codigos_relacionados||[]).length?'<small>Códigos relacionados (no verificados): '+esc(r.codigos_relacionados.join(', '))+'</small>':'')+
+ '<small>Fuente: conversaciones anteriores; documento original pendiente de cotejo. No acredita emisión ni aceptación.</small></article>').join('');
+ return '<section class="panel section" aria-label="Histórico de comisionamiento">'+
+ '<h3>Antecedentes específicos de comisionamiento</h3>'+
+ '<p class="notice">Solo comunicaciones cuyo asunto identificado trata sobre planificación, responsabilidades, pruebas o ejecución del Cx. Se excluyeron asuntos de diseño, SPDA, sustitución de transformador, luminarias temporales y códigos sin concepto corroborado. Esta lista aún requiere cotejo en Oracle Aconex.</p>'+
  (S.aconexHistoricoError?'<p class="notice error">'+esc(S.aconexHistoricoError)+'</p>':'')+
- '<p class="small muted">Registros históricos visibles: '+selected.length+' · Comisionamiento directo: '+direct.length+' · Interfaces técnicas: '+indirect.length+'</p>'+
- '<h3>1. Comunicaciones directamente relacionadas con Cx</h3>'+(renderRows(direct)||'<p class="muted">Sin antecedentes con esos filtros.</p>')+
- '<h3>2. Interfaces y condiciones previas de comisionamiento</h3>'+(renderRows(indirect)||'<p class="muted">Sin antecedentes con esos filtros.</p>')+'</section>';
+ '<p class="small muted">Referencias pertinentes visibles: '+selected.length+'. No equivalen a comunicaciones oficialmente verificadas.</p>'+
+ (renderRows||'<p class="muted">No se identificaron antecedentes de Cx con los filtros seleccionados.</p>')+'</section>';
 }
