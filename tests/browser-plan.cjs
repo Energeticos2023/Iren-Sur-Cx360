@@ -58,7 +58,7 @@ async function go(page,name){const b=page.getByRole('button',{name,exact:true});
   await page.getByRole('tab',{name:new RegExp(sys.payload.code)}).click();
   assert.equal(await page.getByRole('tab',{name:new RegExp(sys.payload.code)}).getAttribute('aria-selected'),'true','Pestaña del sistema activa');
   await page.locator('.sysfile').waitFor();assert.ok((await page.locator('.esp-body').innerText()).includes(sys.payload.code));
-  assert.equal(await page.locator('ol.track li').count(),5,'Avance L1 a L5');
+  assert.equal(await page.locator('[aria-label="Etapas del sistema"] [role=tab]').count(),7,'Siete etapas del sistema');
   assert.equal(await page.locator('body').evaluate(e=>e.scrollWidth<=window.innerWidth),true,'Especialidad sin desbordamiento a 390 px');
   await page.screenshot({path:'tmp/browser/especialidad-390.png',fullPage:true});
   // Seguimiento

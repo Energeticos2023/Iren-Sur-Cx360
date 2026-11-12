@@ -2,6 +2,9 @@
 'use strict';
 
 const SUGGESTIONS = [
+  '¿Qué se hace en el precomisionamiento de los pozos a tierra?',
+  '¿Qué pozos a tierra hay y a qué se conectan?',
+  '¿Qué pruebas se hacen al alumbrado exterior?',
   '¿Qué actividades se desarrollan en el precomisionamiento de las instalaciones eléctricas (IIEE)?',
   '¿Qué pruebas se hacen al grupo electrógeno y con qué equipos?',
   '¿Qué EPP y equipos de bloqueo se requieren para maniobras en media tensión?',
@@ -17,7 +20,7 @@ const SUGGESTIONS = [
   '¿Cómo se hace el precomisionamiento de TIC?',
 ];
 
-const DOC_SHORT = {A12: 'Anexo 12', A16: 'Anexo 16', PCX: 'Plan Cx ANIN', AN1: 'Anexo 1 IIEE', AN2: 'Anexo 2 IISS', AN3: 'Anexo 3 IIMM', AN4: 'Anexo 4 TIC', AN5: 'Anexo 5 EM', PV3: 'Plan Cx V3 (borrador)', GLO: 'Glosario CX360', GUIA: 'Guía CX360'};
+const DOC_SHORT = {A12: 'Anexo 12', A16: 'Anexo 16', PCX: 'Plan Cx ANIN', AN1: 'Anexo 1 IIEE', AN2: 'Anexo 2 IISS', AN3: 'Anexo 3 IIMM', AN4: 'Anexo 4 TIC', AN5: 'Anexo 5 EM', PV3: 'Plan Cx V3 (borrador)', GLO: 'Glosario CX360', GUIA: 'Guía CX360', MAT: 'Matriz CX360'};
 
 function escapeHtml(v) {
   return String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
@@ -27,7 +30,7 @@ function escapeHtml(v) {
 function sourceRef(s) {
   if (!s) return '';
   const pages = s.page_from ? ` · pág. ${s.page_from}${s.page_to && s.page_to !== s.page_from ? '–' + s.page_to : ''}` : '';
-  return `${DOC_SHORT[s.doc] || s.doc}${s.sec ? ' · num. ' + s.sec : ''}${pages}`;
+  return `${DOC_SHORT[s.doc] || s.doc}${s.sec && s.doc !== 'MAT' ? ' · num. ' + s.sec : ''}${pages}`;
 }
 
 // Marcadores del resaltado de la base («…») convertidos en <mark> sobre texto ya escapado.

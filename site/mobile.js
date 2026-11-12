@@ -17,7 +17,7 @@ const db=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,d
 const $=s=>document.querySelector(s),root=$('#app');
 const kinds={activity:'Actividades',schedule:'Cronogramas',system:'Sistemas',document:'Documentos',protocol:'Protocolos',test:'Pruebas',restriction:'Restricciones',instrument:'Instrumentos',om:'O&M',training:'Capacitación',handover:'Entrega y cierre',proposal:'Reprogramaciones',coverage:'Cobertura de avance'};
 const roles={admin:'Administrador designado',gp:'Gerente de Proyecto',kp1:'KP1 Supervisión',especialista_anin:'Especialista ANIN',especialista_supervision:'Especialista Supervisión',riesgos:'Riesgos',ssoma:'SSOMA',auditor:'Auditor de lectura'};
-const S={member:null,snapshot:null,screen:'home',specialty:'',search:'',busy:false,imported:null,mfa:null,recovery:location.hash.includes('type=recovery'),chat:{messages:[],specialty:'',asking:false,draft:''},kb:null,kbLoading:false,esp:'IIEE',espTab:{},menuOpen:false};
+const S={member:null,snapshot:null,screen:'home',specialty:'',search:'',busy:false,imported:null,mfa:null,recovery:location.hash.includes('type=recovery'),chat:{messages:[],specialty:'',asking:false,draft:''},kb:null,kbLoading:false,esp:'IIEE',espTab:{},espPhase:{},espSys:{},scope:null,menuOpen:false};
 const records=kind=>(S.snapshot?.records||[]).filter(r=>!kind||r.kind===kind);
 const get=id=>records().find(r=>r.id===id);
 const title=id=>{const r=get(id);return r?`${r.payload.code} · ${r.payload.title}`:'PENDIENTE'};
@@ -47,6 +47,7 @@ async function load(){
  if(!member?.active){S.member=null;S.snapshot=null;throw Error('Cuenta sin membresía activa. La nómina debe ser autorizada por el administrador.')}
  const result=await db.rpc('cx_snapshot');if(result.error){S.snapshot=null;throw result.error}const changed=S.member?.user_id!==member.user_id;S.member=member;S.snapshot=result.data;if(changed){S.chat={messages:[],specialty:'',asking:false,draft:''};S.kb=null;loadChat();}
  S.catalog=null;if(['admin','gp','kp1'].includes(member.role)){const cs=await db.rpc('cx_catalog_status');if(!cs.error)S.catalog=cs.data;}
+ try{const sm=await db.rpc('cx_scope_matrix');S.scope=sm.error?null:sm.data;}catch{S.scope=null}
 }
 function filtered(kind){return records(kind).filter(r=>(!S.specialty||r.specialty===S.specialty)&&(!S.search||`${r.payload.code} ${r.payload.title} ${r.payload.equipment_tag||''}`.toLowerCase().includes(S.search.toLowerCase())))}
 function canEdit(r){return S.member&&S.member.role!=='auditor'&&(['admin','gp','kp1'].includes(S.member.role)||(r.specialty===S.member.specialty&&r.assigned_to===S.member.user_id))}
@@ -143,7 +144,7 @@ function report(){modal('Reporte del corte',`<p>Corte: ${h(S.snapshot.cut)} · D
 function printSection(html,cls=''){closeModal();document.querySelector('#print-report')?.remove();const section=document.createElement('section');section.id='print-report';if(cls)section.className=cls;section.innerHTML=html;document.body.append(section);window.print();setTimeout(()=>section.remove(),2000)}
 async function action(a){
  if(a==='close')return closeModal();if(a==='refresh'){await load();render();return}if(a==='search'){S.search=$('#search')?.value||'';render();return}
- if(a==='logout'){await db.auth.signOut();clearChat();S.member=null;S.snapshot=null;closeModal();login();return}
+ if(a==='logout'){await db.auth.signOut();clearChat();S.member=null;S.snapshot=null;S.scope=null;closeModal();login();return}
  if(a==='recover')return modal('Recuperar acceso',`<form id="recover-form">${field('email','Correo autorizado','','email','required')}<div class="btnrow"><button class="btn">Enviar enlace de recuperación</button></div></form>`);
  if(a==='password')return modal('Establecer contraseña',`<form id="password-form">${field('password','Contraseña nueva','','password','required minlength="12" autocomplete="new-password"')}<div class="btnrow"><button class="btn">Guardar contraseña</button></div></form>`);
  if(a.startsWith('new:'))return openRecord(a.slice(4));if(a.startsWith('edit:')){const r=get(a.slice(5));return openRecord(r.kind,r.id)}if(a.startsWith('test:')){const pr=get(a.slice(5));return openRecord('test',null,pr.id,{system_id:pr.payload.system_id,system_code:pr.payload.system_code,stage:pr.payload.stage,specialty:pr.specialty});}
@@ -151,6 +152,10 @@ async function action(a){
  if(a==='menu'){S.menuOpen=!S.menuOpen;document.querySelector('.app')?.classList.toggle('menu-open',S.menuOpen);return}
  if(a.startsWith('sysstage:')){const [,id,stage]=a.split(':');S.systemStage={...S.systemStage,[id]:decodeURIComponent(stage)};render();return}
  if(a.startsWith('sysnew:')){const [,id,encoded]=a.split(':');const sys=get(id),stage=decodeURIComponent(encoded),def=processCore.STAGES.find(x=>x[0]===stage);if(!sys||!def)throw Error('Sistema o etapa inválida');return openRecord(def[2],null,null,{system_id:sys.id,system_code:sys.payload.code,specialty:sys.specialty,stage});}
+ if(a.startsWith('espphase:')){const [,sp,k]=a.split(':');S.espPhase={...S.espPhase,[sp]:k};render();document.querySelector('.phasebar')?.scrollIntoView({block:'start'});return}
+ if(a.startsWith('espsys:')){const [,sp,code]=a.split(':');S.espSys={...S.espSys,[sp]:code||''};render();return}
+ if(a.startsWith('esp-open:')){const [,sp,code]=a.split(':');S.espPhase={...S.espPhase,[sp]:'resumen'};S.espTab={...S.espTab,[sp]:code};render();document.querySelector('.systabs')?.scrollIntoView({block:'start'});return}
+ if(a.startsWith('print-phase:')){const [,sp,k]=a.split(':');return printSection(sui.phasePrintHtml(ctx(),sp,k),'phaseprint')}
  if(a.startsWith('systab:')){const [,sp,code]=a.split(':');S.espTab={...S.espTab,[sp]:code};render();const t=document.querySelector('.systabs .on');if(t){const bar=t.parentElement;bar.scrollLeft=t.offsetLeft-bar.clientWidth/2+t.clientWidth/2;bar.scrollIntoView({block:'start'})}return}
  if(a.startsWith('ask-esp:')){S.chat.specialty=a.slice(8);S.screen='asistente';render();$('#f-question')?.focus();return}
  if(a.startsWith('ask-q:')){const raw=decodeURIComponent(a.slice(6)),i=raw.indexOf('|');S.chat.specialty=raw.slice(0,i);S.screen='asistente';render();ask(raw.slice(i+1));return}

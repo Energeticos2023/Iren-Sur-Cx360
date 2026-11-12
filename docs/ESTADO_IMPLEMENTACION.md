@@ -1,3 +1,15 @@
+# CX360 v2.5 — Pestañas por fase dentro de cada especialidad, 11/11/2026 (noche)
+
+- **Fases dentro de cada especialidad**: Resumen · 1 Precomisionamiento · 2 Pruebas · 3 Puesta en marcha · 4 Manual O&M · 5 Capacitaciones. Filtro por sistema (Todos, EL-01…), impresión de la fase y botón para abrir el sistema (vista v2.4 con sus etapas y registros).
+- Cada fase muestra, por sistema y en líneas cortas, lo que corresponde según la matriz de alcance privada (`cx_scope_matrix`): qué se interviene (subsistemas y elementos, p. ej. los cinco sistemas de puesta a tierra con sus pozos), revisión documental, verificación física según plano y liberación (Precomisionamiento); mediciones sin tensión, pruebas con energía, instrumentos y criterio por subsistema (Pruebas); operación e interfaces (Puesta en marcha); contenido del Manual y entrega (O&M); capacitación. Cada ítem lleva su origen (A Alcance ANIN · C propuesta del Contratista · D diseño C01) y referencia. Se listan los protocolos de la fase y los registros programados (hitos, pruebas HP, capacitaciones) con fecha y estado.
+- Criterio de fases acordado con el especialista: las mediciones sin tensión (continuidad, aislamiento, resistencia de puesta a tierra) se muestran en **Pruebas**; el Plan Cx del Contratista las registra como L2.
+- Matriz IIEE ampliada en el servidor: instrumentos por sistema (EL-01 a EL-07, con fuente) y en EL-06 aislamiento de circuitos derivados, tensión/corriente por circuito, encendido por interruptor y el pendiente de identificar los circuitos de alumbrado exterior.
+- **Asistente Cx preciso y conciso**: 239 fichas «Matriz CX360» (sistema × fase + qué se interviene) generadas en el servidor con `cx_private.build_scope_kb()`; la búsqueda reconoce el sistema por sus palabras (pozos a tierra, alumbrado, grupo electrógeno…) y la fase preguntada. Sin IA, responde con la ficha exacta; con IA, instrucciones de respuesta corta (≈150 palabras, viñetas de una línea) y `max_tokens` 900. Preguntas de EPP, seguridad o herramientas siguen priorizando los documentos originales.
+- Migración `202611120001_matriz_fases_asistente.sql` (estructura y lógica; el contenido sigue fuera de Git). Función `cx360-asistente` v3 desplegada.
+- Pruebas: 53 unitarias (7 nuevas de `scope-core`), `browser-phases.cjs` (390 y 1440 px, sin desbordamiento ni errores JS), `browser-plan.cjs` (aserción L1–L5 obsoleta reemplazada por las 7 etapas) y `browser-assistant.cjs` aprobadas. `tests/browser.cjs` no se ejecuta en este entorno (dependencia ausente, igual que antes del cambio).
+
+---
+
 # CX360 v2.4 — Diseño por especialidad con pestañas por sistema, 11/11/2026
 
 - **Nueva estructura de navegación**: barra lateral fija en escritorio (General, Especialidades, Control, Registros, Sistema) y menú desplegable con franja de accesos rápidos en tableta y celular.

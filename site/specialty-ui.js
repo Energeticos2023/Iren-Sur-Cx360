@@ -2,6 +2,7 @@
 import sc from './specialty-core.cjs';
 import pc from './plan-core.cjs';
 import processCore from './system-process.cjs';
+import sp from './scope-core.cjs';
 import {icons} from './ui-icons.js';
 const {SPECS, STATUS_LABEL, systemsOf, related, levelTrack, specStats} = sc;
 const LEVEL_NAMES = {L1: 'Recepción y FAT', L2: 'Precomisionamiento', L3: 'Arranque', L4: 'Prueba funcional', L5: 'Prueba integrada'};
@@ -80,16 +81,77 @@ function systemPanel(c, spec, sys) {
   <section class="block"><h3>Consultar al asistente sobre ${h(p.code)}</h3><div class="suggest">${qs.map(q => `<button type="button" class="chipbtn" data-action="${h(askAction(q, spec))}">${h(q)}</button>`).join('')}</div></section>`;
 }
 
+// ---------- Pestañas por fase: Precomisionamiento, Pruebas, Puesta en marcha, Manual O&M, Capacitaciones ----------
+const OG_TITLE = sp.ORIGINS;
+const og = (c, o) => o ? `<span class="og og-${c.h(o)}" title="${c.h(OG_TITLE[o] || o)}">${c.h(o)}</span>` : '';
+function reqList(c, items) {
+  const {h} = c;
+  return `<ul class="req">${items.map(i => `<li>${og(c, i.o)}<span>${h(i.t)}${i.unit ? ` <b class="unit">[${h(i.unit)}]</b>` : ''}${i.s ? `<small class="rsrc">${h(i.s)}</small>` : ''}</span></li>`).join('')}</ul>`;
+}
+function groupsHtml(c, groups) { return groups.map(g => `<h4>${c.h(g.name)} <span class="count">${g.items.length}</span></h4>${reqList(c, g.items)}`).join(''); }
+function componentsHtml(c, comps) {
+  const {h} = c;
+  if (!comps.length) return '';
+  return `<h4>Qué se interviene <span class="count">${comps.length}</span></h4><div class="comps">${comps.map(x => `<div class="comp"><b>${h(x.g)}</b><span class="ctags">${x.tags?.length ? x.tags.map(t => `<i>${h(t)}</i>`).join('') : h(x.n && x.n !== '—' ? x.n : '')}</span>${x.k && x.k !== '—' ? `<small>Se conecta a: ${h(x.k)}</small>` : ''}${x.u && x.u !== '—' ? `<small>Ubicación: ${h(x.u)}</small>` : ''}${x.s ? `<small class="rsrc">${h(x.s)}${x.e && x.e !== '—' ? ' · ' + h(x.e) : ''}</small>` : ''}</div>`).join('')}</div>`;
+}
+function criteriaHtml(c, crit) {
+  const {h} = c;
+  if (!crit.length) return '';
+  return `<h4>Criterio por subsistema</h4><div class="tablewrap"><table class="crit"><thead><tr><th>Subsistema</th><th>Elementos</th><th>Criterio de aceptación</th></tr></thead><tbody>${crit.map(x => `<tr><td>${h(x.g)}</td><td>${h(x.tags?.length ? x.tags.join(', ') : x.n || '')}</td><td class="${/POR FIJAR|POR CONFIRMAR/i.test(x.crit) ? 'tbd' : ''}">${h(x.crit)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function recLine(c, r, print) {
+  const {h, chip} = c, p = r.payload;
+  const when = p.planned_start || p.performed_on;
+  const label = `<strong>${h(p.code)}</strong>`;
+  return `<div class="lineitem">${print ? label : `<button type="button" class="linkbtn" data-action="edit:${h(r.id)}">${label}</button>`} ${h(p.title || '')} <small class="muted">${when ? fmt(when) : 'sin fecha'}${String(p.witness || '').startsWith('HP') ? ', presenciada (HP)' : ''}</small> ${chip(r.state)}</div>`;
+}
+function phaseSystem(c, spec, s, phase, print) {
+  const {h, button} = c;
+  const protos = s.protocols.length ? `<p class="protos"><b>Protocolos:</b> ${s.protocols.map(p => p.record && !print ? `<button type="button" class="pchip" data-action="edit:${h(p.record.id)}">${h(p.code)} <span>${h(p.record.state)}</span></button>` : `<span class="pchip${p.record ? '' : ' off'}">${h(p.code)} <span>${p.record ? h(p.record.state) : 'por cargar'}</span></span>`).join('')}</p>` : '';
+  const recs = s.records.length ? `<h4>Programado y registrado <span class="count">${s.records.length}</span></h4>${s.records.map(r => recLine(c, r, print)).join('')}` : '';
+  const empty = !s.hasScope ? '<p class="muted">Sin ficha de alcance cargada para este sistema.</p>' : (!s.groups.length && !s.components.length ? '<p class="muted">Sin requisitos específicos en esta fase; aplican los comunes.</p>' : '');
+  const q = `¿Qué corresponde en ${phase.label.toLowerCase()} de ${s.code} ${s.title}?`;
+  return `<section class="block phase-sys"><div class="phase-sys-head"><span class="scode">${h(s.code)}</span><div><h3>${h(s.title)}</h3>${s.leader ? `<small class="muted">Líder: ${h(s.leader)}</small>` : ''}</div></div>
+   ${componentsHtml(c, s.components)}${groupsHtml(c, s.groups)}${criteriaHtml(c, s.criteria)}${empty}
+   ${s.interfaces.length ? `<p class="pend"><b>Interfaces:</b> ${h(s.interfaces.join('; '))}</p>` : ''}
+   ${s.pending.length ? `<p class="pend"><b>Por confirmar:</b> ${h(s.pending.join('; '))}</p>` : ''}
+   ${protos}${recs}
+   ${print ? '' : `<div class="btnrow phase-actions">${button('Abrir el sistema', 'esp-open:' + spec + ':' + s.code, 'btn ghost small')}<button type="button" class="chipbtn" data-action="${h(askAction(q, spec))}">Preguntar al asistente</button></div>`}</section>`;
+}
+export function phaseBody(c, spec, key, print = false) {
+  const {h, S} = c, all = c.records();
+  const only = (S.espSys || {})[spec] || '';
+  const v = sp.phaseView(S.scope, all, spec, key, only);
+  const legend = `<p class="legend oglegend">${Object.entries({A: 'Alcance ANIN', C: 'Propuesta del Contratista (no aceptada)', D: 'Diseño C01 en aprobación'}).map(([k, t]) => `<span class="ogi">${og(c, k)}${h(t)}</span>`).join('')}</p>`;
+  const head = `<div class="phase-what"><span class="pnum">${v.phase.n}</span><div><h3>${h(v.phase.label)}${print ? ' – ' + h(sc.SPECS[spec].name) : ''}</h3><p>${h(v.phase.what)}</p>${legend}</div></div>`;
+  const noScope = !S.scope ? `<p class="notice">La matriz de alcance por sistema no está disponible en esta sesión. Se muestran solo los registros vinculados.</p>` : '';
+  const common = v.common.length ? `<details class="block common"${print ? ' open' : ''}><summary>Aplica a todos los sistemas <span class="count">${v.common.reduce((a, g) => a + g.items.length, 0)}</span></summary>${groupsHtml(c, v.common)}</details>` : '';
+  return head + noScope + v.systems.map(s => phaseSystem(c, spec, s, v.phase, print)).join('') + common
+    + (S.scope?.updated_at ? `<p class="small muted">Matriz de alcance actualizada el ${h(new Date(S.scope.updated_at).toLocaleDateString('es-PE', {timeZone: 'America/Lima', day: '2-digit', month: '2-digit', year: 'numeric'}))}. Los ítems C y D son propuestas o diseños aún no aceptados; no acreditan conformidad.</p>` : '');
+}
+function phaseScreen(c, spec, key, systems) {
+  const {h, button, S} = c;
+  const only = (S.espSys || {})[spec] || '';
+  const filter = `<div class="sysfilter" role="group" aria-label="Filtrar por sistema">${[['', 'Todos'], ...systems.map(s => [s.payload.code, s.payload.code])].map(([k, label]) => `<button type="button" class="fchip${k === only ? ' on' : ''}" aria-pressed="${k === only}" data-action="espsys:${spec}:${h(k)}" ${k ? `title="${h(systems.find(s => s.payload.code === k)?.payload.title || '')}"` : ''}>${h(label)}</button>`).join('')}<span class="grow"></span>${button('Imprimir', 'print-phase:' + spec + ':' + key, 'btn ghost small')}</div>`;
+  return filter + phaseBody(c, spec, key);
+}
+export function phasePrintHtml(c, spec, key) {
+  return `<h1>IREN Sur CX360 – ${c.h(sc.SPECS[spec].name)}</h1>` + phaseBody(c, spec, key, true);
+}
+
 export function specialtyScreen(c) {
   const {records, h, button, today, S} = c, spec = S.esp, meta = SPECS[spec], all = records();
   const systems = systemsOf(all, spec), st = specStats(all, spec, today);
   const tab = (S.espTab || {})[spec] || 'resumen', current = systems.find(s => s.payload.code === tab);
   const stat = (label, value, hint, alert = false) => `<div class="stat${alert ? ' alert' : ''}"><dt>${label}</dt><dd>${value}</dd><small>${hint}</small></div>`;
   const tabs = [['resumen', 'Resumen', ''], ...systems.map(s => [s.payload.code, s.payload.code, s.payload.title])];
+  const phase = (S.espPhase || {})[spec] || 'resumen';
+  const phasebar = `<nav class="phasebar tone-${meta.tone}" role="tablist" aria-label="Fases del comisionamiento">${[['resumen', 'Resumen', ''], ...sp.PHASES.map(p => [p.key, p.label, p.n])].map(([k, label, num]) => `<button type="button" role="tab" aria-selected="${k === phase}" class="ptab${k === phase ? ' on' : ''}" data-action="espphase:${spec}:${k}">${num ? `<i>${num}</i>` : ''}<b>${h(label)}</b></button>`).join('')}</nav>`;
   return `<section class="esp-head tone-${meta.tone}"><div class="esp-id">${specBadge(spec)}<div><h2>${h(meta.name)}</h2><p>${meta.annex} del Plan de Comisionamiento, ${n(systems.length, "sistema", "sistemas")}</p></div></div>
    <div class="esp-actions">${button('Preguntar al asistente', 'ask-esp:' + spec)}${button('Protocolos', 'list-esp:protocol:' + spec, 'btn ghost')}${button('Pruebas', 'list-esp:test:' + spec, 'btn ghost')}</div>
    <dl class="stats">${stat('Protocolos publicados', `${st.published} de ${st.protocols}`, st.pendingCriteria ? `${st.pendingCriteria} con criterios por fijar` : 'Criterios con valor')}${stat('Pruebas cerradas', `${st.closed} de ${st.tests}`, `${st.hp} presenciadas (HP)`)}${stat('Avisos ACONEX vencidos', st.overdueNotices, 'Pruebas presenciadas sin aviso registrado', st.overdueNotices > 0)}${stat('Próxima prueba', st.nextTest ? h(st.nextTest.payload.code) : '—', st.nextTest ? fmt(st.nextTest.payload.planned_start) : 'Sin pruebas futuras')}</dl></section>
-  ${systems.length ? `<div class="systabs tone-${meta.tone}" role="tablist" aria-label="Sistemas de ${h(meta.name)}">${tabs.map(([k, label, title]) => `<button type="button" role="tab" aria-selected="${k === (current ? tab : 'resumen')}" class="systab${k === (current ? tab : 'resumen') ? ' on' : ''}" data-action="systab:${spec}:${h(k)}" ${title ? `title="${h(title)}"` : ''}><b>${h(label)}</b>${title ? `<span>${h(title)}</span>` : ''}</button>`).join('')}</div>
+  ${systems.length ? phasebar : ''}
+  ${systems.length && phase !== 'resumen' ? `<div class="esp-body tone-${meta.tone} phase-body" role="tabpanel">${phaseScreen(c, spec, phase, systems)}</div>` : systems.length ? `<div class="systabs tone-${meta.tone}" role="tablist" aria-label="Sistemas de ${h(meta.name)}">${tabs.map(([k, label, title]) => `<button type="button" role="tab" aria-selected="${k === (current ? tab : 'resumen')}" class="systab${k === (current ? tab : 'resumen') ? ' on' : ''}" data-action="systab:${spec}:${h(k)}" ${title ? `title="${h(title)}"` : ''}><b>${h(label)}</b>${title ? `<span>${h(title)}</span>` : ''}</button>`).join('')}</div>
   <div class="esp-body tone-${meta.tone}" role="tabpanel">${current ? systemPanel(c, spec, current) : overview(c, spec, systems)}</div>` : emptyCatalog(c, spec)}`;
 }
 

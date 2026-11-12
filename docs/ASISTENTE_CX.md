@@ -55,3 +55,10 @@ Costo orientativo: cada consulta envía unos 10 fragmentos (≈ 4 000 a 6 000 to
 - La búsqueda es léxica (palabras y sinónimos); conviene usar los términos del documento (sistema, equipo, prueba, numeral). Si no aparece lo buscado, reformular o filtrar por disciplina.
 - El Plan Cx V3 es un borrador del Contratista: lo que cite de él es configuración de trabajo, no requisito aceptado.
 - Las respuestas orientan; no sustituyen el documento fuente, la revisión del especialista ni la decisión del Gerente de Proyecto.
+
+
+## v2.5 – Respuestas por sistema y fase
+
+- Documento «Matriz CX360» (código MAT, 239 fichas) generado desde `cx_private.scope_matrix` con `select cx_private.build_scope_kb();`. Volver a ejecutarlo cada vez que se actualice la matriz.
+- `cx_private.kb_system_terms`: palabras que identifican cada sistema eléctrico (EL-01 a EL-07). La búsqueda detecta la fase (precomisionamiento, pruebas, puesta en marcha, manual/OyM, capacitación, identificación) y prioriza la ficha de ese sistema y fase.
+- Respuesta documental: si la primera fuente es una ficha MAT, se muestra tal cual (breve, con referencias). Modo IA: respuesta corta en viñetas, solo la fase y el sistema preguntados.
