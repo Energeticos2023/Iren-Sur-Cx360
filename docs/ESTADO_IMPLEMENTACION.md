@@ -1,3 +1,17 @@
+# CX360 v2.6 — Avance por sistema (rama de revisión, 12/11/2026)
+
+- **Función preparada en GitHub, todavía no fusionada ni desplegada:** panel gerencial por especialidad y sistema en «Control de hoy», indicador junto a cada sistema y detalle por etapas en la ficha del sistema.
+- Fórmula **no ponderada**: 100 × número de actividades de ese sistema cubiertas por cierre de revisión independiente / número de actividades del sistema en el cronograma aceptado y formalmente vigente. Una actividad cuenta una sola vez aunque tenga varias coberturas. «ACEPTADO» se informa por separado.
+- El cálculo requiere settings.current_schedule vinculado a un registro schedule con estado ACEPTADO_CON_EVIDENCIA y universo de actividades, y registros activity + coverage coherentes con ese cronograma. Sin esos datos: **NO CALCULABLE** (nunca 0% inventado).
+- Las pruebas cerradas aisladas, planes en borrador, aprobaciones no acreditadas, y fechas del cronograma provisional NO crean avance. Sin actividades aplicables para una etapa se usa «—», no 0%.
+- Se indican por sistema numerador, denominador, revisión y corte, y el desglose: precomisionamiento, pruebas funcionales, integradas/puesta en marcha, OyM/entrega y capacitaciones.
+- **Límite:** porcentaje de cobertura de actividades, no de progreso físico o ponderación por costo, horas, criticidad o duración. Las actividades que cubren más de un sistema pueden contarse en más de un indicador de sistema, por lo que no corresponde sumar porcentajes o numeradores entre sistemas.
+- Se han pasado siete pruebas unitarias locales del núcleo con datos sintéticos. Pendientes: CI sobre toda la aplicación, revisión visual y prueba integral con el usuario autorizado y RLS.
+- Base de planificación: la contratista JYS mantiene la responsabilidad de proponer y ejecutar su plan compatibilizado, recursos, protocolos y programa; ANIN revisa. Esta interfaz no altera el programa contractual ni reconoce aceptación.
+- Los indicadores dependen de lo que el servidor entregue bajo los permisos de cada usuario; el cuadro gerencial integral requiere acceso autorizado a todo el universo pertinente. En perfiles con visibilidad parcial no debe interpretarse como reporte integral de obra.
+
+---
+
 # CX360 v2.5 — Pestañas por fase dentro de cada especialidad, 11/11/2026 (noche)
 
 - **Fases dentro de cada especialidad**: Resumen · 1 Precomisionamiento · 2 Pruebas · 3 Puesta en marcha · 4 Manual O&M · 5 Capacitaciones. Filtro por sistema (Todos, EL-01…), impresión de la fase y botón para abrir el sistema (vista v2.4 con sus etapas y registros).
