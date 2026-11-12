@@ -1,3 +1,15 @@
+# Asistente Cx contextual — 11/11/2026
+
+- Integrado en el asistente existente: selectores de sistema y etapa. El botón flotante desde una especialidad recoge su contexto; cambios de contexto inician conversación nueva. El contexto acompaña también la búsqueda documental de respaldo.
+- Instrucciones reforzadas: respuesta breve, distinción requisito/propuesta/síntesis, configuración real solo con fuente, no asumir jerarquía contractual ni cobertura completa. Pruebas integradas diferenciadas del servicio y sistemas pasivos sin arranque ficticio.
+- Respuestas IA sin citas o con marcadores inexistentes pasan al respaldo documental. Esto valida referencias, no garantiza correspondencia semántica de cada afirmación.
+- Función cx360-asistente v4 desplegada, JWT conservado. No se incorporaron expedientes ni usuarios nuevos ni se cambiaron permisos o secretos del proveedor IA.
+- Verificación local: 57 pruebas aprobadas y compilación de frontend y función correcta. Navegador real bloqueado por el entorno (socket de Chromium no permitido); prueba E2E con usuario real y modo IA real pendientes. No declarar cobertura íntegra del expediente.
+- Comprobación del servicio desplegado: solicitud sin sesión rechazada con HTTP 401. Publicación directa en main rechazada por revisión automática; interfaz preparada en rama para revisión.
+- El destino Sites histórico devuelve «project not found» en esta conexión. La publicación de la interfaz en GitHub Pages está pendiente de integrar la rama revisable; no se crea otro sitio ni se modifica audiencia.
+
+---
+
 # CX360 v2.5 — Pestañas por fase dentro de cada especialidad, 11/11/2026 (noche)
 
 - **Fases dentro de cada especialidad**: Resumen · 1 Precomisionamiento · 2 Pruebas · 3 Puesta en marcha · 4 Manual O&M · 5 Capacitaciones. Filtro por sistema (Todos, EL-01…), impresión de la fase y botón para abrir el sistema (vista v2.4 con sus etapas y registros).
