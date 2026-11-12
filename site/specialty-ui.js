@@ -1,5 +1,6 @@
 // CX360 – pantallas por especialidad (IIEE, IISS, IIMM, TIC, EM) con una pestaña por sistema.
 import sc from './specialty-core.cjs';
+import systemProgress from './system-progress.cjs';
 import pc from './plan-core.cjs';
 import processCore from './system-process.cjs';
 import sp from './scope-core.cjs';
@@ -10,6 +11,47 @@ const fmt = iso => { if (!iso) return '—'; const [y, m, d] = String(iso).split
 const askAction = (q, spec) => 'ask-q:' + encodeURIComponent(spec + '|' + q);
 const n = (k, one, many) => `${k} ${k === 1 ? one : many}`;
 
+
+function advanceOf(c,system) {
+  return systemProgress.bySystem(c.records(),system,c.S?.snapshot?.settings?.current_schedule||null,c.S?.snapshot?.cut||'');
+}
+function advanceHtml(c,p) {
+  const h=c.h;
+  if(!p.calculable)return '<div class="cxprogress na" title="'+h(p.reason)+'"><strong>NO CALCULABLE</strong><small>'+h(p.reason)+'</small></div>';
+  const pct=Number(p.percent).toFixed(1);
+  return '<div class="cxprogress"><strong>'+h(p.label)+'</strong><div class="cxprogress-track" role="progressbar" aria-label="Cobertura verificada del sistema" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><i style="width:'+pct+'%"></i></div><small>'+p.numerator+' de '+p.denominator+' actividades verificadas · '+p.accepted+' con aceptación</small></div>';
+}
+function advanceMini(c,system) {
+  return '<span class="cxprogress-mini">'+advanceHtml(c,advanceOf(c,system))+'</span>';
+}
+function advanceDetail(c,system) {
+  const h=c.h,p=advanceOf(c,system);
+  const stages=p.calculable?'<div class="cxprogress-phases">'+p.phases.map(ph=>
+    '<div class="cxprogress-phase"><span>'+h(ph.label)+'</span><b>'+(ph.percent===null?'—':ph.percent.toFixed(1)+'%')+'</b><small>'+(ph.denominator?ph.numerator+' / '+ph.denominator:'Sin actividad')+'</small></div>'
+  ).join('')+'</div>':'';
+  return '<section class="cxprogress-full"><h4>Avance porcentual comprobado del sistema</h4>'+advanceHtml(c,p)+
+    (p.calculable?'<p class="small muted">Base: '+h(p.schedule_code)+' / revisión '+h(p.revision)+' · corte '+h(p.cut||'sin corte')+'. Solo cobertura de actividades cerrada por revisión independiente; NO es avance físico ponderado ni aceptación de todo el sistema.</p>':
+    '<p class="small muted">La contratista debe presentar el universo y cronograma compatibilizados. ANIN controla la revisión y vigencia. No se presume 0% ni se suman pruebas preliminares.</p>')+
+    stages+'</section>';
+}
+function progressBoard(c) {
+  const {h}=c,all=c.records(),systems=all.filter(r=>r.kind==='system'&&!['REVOCADO','ARCHIVADO'].includes(r.state));
+  const groups=Object.keys(SPECS).map(spec=>{
+    const rows=systemsOf(all,spec);
+    if(!rows.length)return '';
+    const ready=rows.filter(s=>advanceOf(c,s).calculable).length;
+    return '<details class="cxprogress-group" open><summary>'+h(SPECS[spec].name)+' <span>'+ready+' de '+rows.length+' sistemas con avance calculable</span></summary>'+
+      rows.map(s=>{
+        const p=advanceOf(c,s);
+        return '<div class="cxprogress-row"><span class="scode">'+h(s.payload.code)+'</span><div class="cxprogress-title">'+h(s.payload.title)+
+          '<small>'+h(p.calculable?'Revisión '+p.revision+' · cobertura verificable':'Universo pendiente de aceptación o no visible')+'</small></div>'+advanceHtml(c,p)+'</div>';
+      }).join('')+'</details>';
+  }).join('');
+  return '<section class="panel cxprogress-board" aria-label="Avance por sistema"><h3>Avance de comisionamiento por sistema</h3>'+
+    '<p class="cxprogress-notice">Cobertura verificada: actividades con revisión independiente / actividades del sistema en el cronograma formalmente vigente. No promediar porcentajes entre sistemas: las actividades compartidas pueden tener interfaces. Sin universo aceptado se indica NO CALCULABLE, nunca 0% ficticio.</p>'+
+    (groups||'<p class="muted">Sin sistemas cargados para esta cuenta; avance no disponible.</p>')+'</section>';
+}
+
 export function specBadge(spec, withName = '') {
   return `<span class="sbadge tone-${SPECS[spec].tone}">${icons[spec]}<b>${spec}</b></span>${withName ? `<span class="slabel">${withName}</span>` : ''}`;
 }
@@ -17,11 +59,12 @@ export function specBadge(spec, withName = '') {
 // Tarjetas de acceso para la pantalla Hoy.
 export function specialtyTiles(c) {
   const {records, h, today} = c, all = records();
-  return `<div class="esp-tiles">${Object.keys(SPECS).map(k => {
+  const tiles = `<div class="esp-tiles">${Object.keys(SPECS).map(k => {
     const st = specStats(all, k, today);
     const line = st.systems ? `${n(st.systems, 'sistema', 'sistemas')}, ${st.closed} de ${n(st.tests, 'prueba cerrada', 'pruebas cerradas')}` : 'Sin sistemas cargados';
     return `<button type="button" class="esp-tile tone-${SPECS[k].tone}" data-nav="esp:${k}"><span class="sbadge tone-${SPECS[k].tone}">${icons[k]}<b>${k}</b></span><strong>${h(SPECS[k].name)}</strong><small>${h(line)}</small>${st.overdueNotices ? `<em class="flag">${st.overdueNotices} avisos ACONEX vencidos</em>` : ''}</button>`;
   }).join('')}</div>`;
+  return tiles + progressBoard(c);
 }
 
 function trackHtml(c, tests, compact = false) {
@@ -43,7 +86,7 @@ function overview(c, spec, systems) {
   const codes = systems.map(s => s.payload.code);
   const rows = systems.map(s => {
     const rel = related(all, s.payload.code), p = s.payload;
-    return `<button type="button" class="sysrow" data-action="systab:${spec}:${h(p.code)}"><span class="scode">${h(p.code)}</span><span class="stitle"><strong>${h(p.title)}</strong><small>${h(p.leader_support || 'Responsable por confirmar')}${p.sectors ? ', sectores ' + h(p.sectors) : ''}</small></span>${trackHtml(c, rel.tests, true)}<span class="scount">${n(rel.protocols.length, 'protocolo', 'protocolos')}<br>${n(rel.tests.length, 'prueba', 'pruebas')}</span>${icons.arrow}</button>`;
+    return `<button type="button" class="sysrow" data-action="systab:${spec}:${h(p.code)}"><span class="scode">${h(p.code)}</span><span class="stitle"><strong>${h(p.title)}</strong><small>${h(p.leader_support || 'Responsable por confirmar')}${p.sectors ? ', sectores ' + h(p.sectors) : ''}</small>${advanceMini(c,s)}</span>${trackHtml(c, rel.tests, true)}<span class="scount">${n(rel.protocols.length, 'protocolo', 'protocolos')}<br>${n(rel.tests.length, 'prueba', 'pruebas')}</span>${icons.arrow}</button>`;
   }).join('');
   const f = pc.followup(all, today);
   const mine = r => r.specialty === spec || codes.some(code => sc.refIncludes(r.payload?.system_code, code));
@@ -71,6 +114,7 @@ function systemPanel(c, spec, sys) {
   const qs = [`¿Qué actividades de precomisionamiento corresponden a ${p.code} ${p.title}?`, `¿Qué pruebas y criterios de aceptación tiene ${p.code} ${p.title}?`, `¿Qué equipos de medición y herramientas se usan en ${p.code} ${p.title}?`];
   return `<section class="sysfile"><div class="sysfile-head"><span class="scode big">${h(p.code)}</span><div><h3>${h(p.title)}</h3>${p.notes ? `<p>${h(p.notes)}</p>` : ''}</div>${button('Ver ficha completa', 'edit:' + sys.id, 'btn ghost')}</div>
    <dl class="facts">${meta.map(([k, v]) => `<div><dt>${h(k)}</dt><dd>${h(v)}</dd></div>`).join('')}</dl>
+   ${advanceDetail(c,sys)}
    ${p.provisional ? '<p class="small muted">Datos del catálogo provisional del Plan Cx C01 V3 (borrador no emitido). No acreditan ejecución ni aceptación.</p>' : ''}</section>
   <section class="block"><h3>Qué se va a intervenir</h3><p><b>Condición del alcance:</b> ${h(p.scope_status||'PENDIENTE DE CONTRASTE CONTRACTUAL')}</p><p>${h(p.boundary||'Pendiente definir límites, subsistemas e interfaces con planos y alcance vigentes.')}</p><p class="preserve">${h(p.requirements||'Pendiente registrar por etapa: intervención, requisito, documento/revisión/página, criterio y aceptación. El catálogo por sí solo no acredita el alcance.')}</p>${button('Definir alcance e inventario','edit:'+sys.id,'btn ghost')}
   <h4>Inventario identificado: ${assets.length} elementos registrados</h4><p class="small">Este conteo no acredita que el inventario esté completo. Diferenciar cada pozo/electrodo del sistema de puesta a tierra interconectado. Las conexiones deben identificar TAG y circuitos reales.</p>${assets.length?`<div class="tablewrap"><table><thead><tr>${['TAG','Tipo','Subsistema','Ubicación','Plano / revisión','Circuitos','Conexiones TAG','Fuente'].map(t=>`<th>${t}</th>`).join('')}</tr></thead><tbody>${assets.map(a=>`<tr>${['tag','type','subsystem','location','drawing_ref','circuits','connections','source_ref'].map(k=>`<td>${h(a[k]||'PENDIENTE')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<p class="muted">Sin elementos identificados. No se infieren cantidades ni ubicaciones.</p>'}</section>
