@@ -22,12 +22,28 @@ const row=r=>'<article class="listitem"><div class="row spread"><strong>'+esc(r.
  (r.review_status==='ACREDITADO'?'<small>Decisión: '+esc(r.decision_ref)+' · '+esc(r.decision_authority)+' · '+esc(r.decision_on)+'</small>':'<small>La revisión no acredita aceptación contractual</small>')+
  (r.notes?'<p class="small">'+esc(r.notes)+'</p>':'')+
  '<div class="btnrow">'+(canOpen(r)?btn('Abrir fuente oficial','library-open:'+r.id):'<span class="small muted">Archivo original / enlace oficial no cargado</span>')+btn('Ficha y trazabilidad','library-detail:'+r.id)+'</div></article>';
+
+export const CONTINGENCIA_DRIVE_FOLDER="https://drive.google.com/drive/folders/1yofNbD1dfxfpDPRr54BaR1LeuXByTQzg?usp=drive_link";
+// Enlace externo directo: la autorización y la vigencia de los archivos las controla Google Drive.
+export const driveLink=(label='Abrir expedientes en Google Drive')=>
+ '<a class="btn" href="'+esc(CONTINGENCIA_DRIVE_FOLDER)+'" target="_blank" rel="noopener noreferrer" aria-label="'+esc(label)+' (se abre en Google Drive)">'+esc(label)+' ↗</a>';
+export function driveScreen(){
+ return '<h2>Drive de expedientes — Hospital de Contingencia</h2>'+
+ '<div class="panel section"><h3>Repositorio compartido de expedientes</h3>'+
+ '<p>Acceso directo a la carpeta de Google Drive indicada por la coordinación de comisionamiento. Los expedientes permanecen en Drive y no se publican en CX360.</p>'+
+ '<div class="btnrow">'+driveLink('Abrir carpeta de expedientes')+'</div>'+
+ '<p class="small muted">Se abrirá Google Drive en otra pestaña o en la aplicación de su celular. Ingrese con la cuenta Google que tenga autorización sobre esta carpeta.</p></div>'+
+ '<div class="panel section"><h3>Si no puede acceder</h3>'+
+ '<p>Si Google muestra «Solicitar acceso», solicite permiso al propietario o responsable de la carpeta utilizando su correo institucional autorizado. Si aparece 404, confirme que usa la cuenta Google correcta y que el enlace sigue vigente.</p>'+
+ '<p class="notice">Un enlace en CX360 no concede permisos en Google Drive. No active «Cualquier persona con el enlace» para documentos técnicos reservados. La consulta de un archivo no acredita revisión ni aceptación contractual de planos.</p></div>';
+}
+
 export function libraryScreen(c) {
  const {S}=c;
  const docs=S.libraryDocs||[],query=(S.libraryQuery||'').toLowerCase(),sp=S.librarySpec||'',cat=S.libraryCategory||'',st=S.libraryStatus||'';
  const filtered=docs.filter(r=>(!sp||r.specialty===sp)&&(!cat||r.category===cat)&&(!st||r.review_status===st)&&(!query||[r.title,r.document_code,r.system_code,r.source_ref,r.revision].join(' ').toLowerCase().includes(query)));
  return '<h2>Biblioteca documental del Comisionamiento</h2>'+
- '<p class="notice">Contingencia IREN Sur exclusivamente. Las referencias del Asistente no equivalen al expediente original. Una aprobación solo es acreditada con revisión exacta, autoridad, fecha y referencia oficial. Los vínculos externos pueden solicitar credenciales de ACC o Aconex.</p>'+
+ '<p class="notice">Contingencia IREN Sur exclusivamente. Las referencias del Asistente no equivalen al expediente original. Una aprobación solo es acreditada con revisión exacta, autoridad, fecha y referencia oficial. Los vínculos externos pueden solicitar credenciales de ACC o Aconex.</p>'+ '<div class="panel"><h3>Expedientes en Google Drive</h3><p>Carpeta de referencia del equipo de ANIN y Supervisión; acceso sujeto a los permisos concedidos en Google.</p><div class="btnrow">'+driveLink('Abrir Drive de expedientes')+'</div></div>'+
  '<div class="panel"><div class="row spread"><h3>Expedientes y planos</h3>'+(S.member?.role==='admin'?btn('Registrar / vincular documento','library-new'):'')+'</div>'+
  '<p class="small muted">Los archivos originales permanecen en sus repositorios institucionales autorizados. Este índice no copia ni publica planos reservados.</p>'+
  '<div class="filterbar"><label>Buscar código, nombre, revisión o sistema<input class="input" id="library-search" value="'+esc(S.libraryQuery||'')+'" placeholder="Ej.: EL-01, E4, Anexo 12"></label>'+
@@ -46,7 +62,7 @@ export function librarySystemPanel(c,specialty,systemCode) {
  '<p class="small muted">Referencias generales y de especialidad visibles: '+docs.length+
  ' · Aceptaciones documentadas en este índice: '+count+'. No se consideran planos aceptados si no constan revisión y decisión oficial.</p>'+
  (docs.length?docs.slice(0,30).map(row).join(''):'<p class="muted">No hay documentos vinculados al sistema. Solicitar plano aceptado y alcance vigente antes de liberar una prueba.</p>')+
- '<div class="btnrow">'+btn('Abrir biblioteca completa','library-go:'+encodeURIComponent(specialty)+':'+encodeURIComponent(systemCode))+'</div></section>';
+ '<div class="btnrow">'+btn('Abrir biblioteca completa','library-go:'+encodeURIComponent(specialty)+':'+encodeURIComponent(systemCode))+driveLink('Abrir Drive de expedientes')+'</div></section>';
 }
 export function libraryForm(r) {
  const selected=r||{};
