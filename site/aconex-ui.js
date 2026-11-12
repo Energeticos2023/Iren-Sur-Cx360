@@ -1,6 +1,7 @@
 // IREN Sur CX360 – Registro documental Aconex del Hospital de Contingencia
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STATES={REGISTRADA:'Registrada',RESPUESTA_EN_PREPARACION:'En preparación',RESPUESTA_REPORTADA:'Respuesta reportada',EMISION_VERIFICADA:'Emisión verificada',ANULADA:'Anulada'};
+const ISSUERS={CONTRATISTA:'Contratista',ANIN:'ANIN',SUPERVISION:'Supervisión',OTRO:'Otro emisor'};
 const TYPES={APORTE_AL_GP:'Aporte técnico al GP',RESPUESTA_FORMAL:'Respuesta formal',OBSERVACION:'Observación',CONSULTA:'Consulta',SEGUIMIENTO:'Seguimiento',OTRO:'Otro'};
 const STAGES={TRANSVERSAL:'Transversal',PRECOMISIONAMIENTO:'Precomisionamiento',COMISIONAMIENTO:'Comisionamiento',PRUEBAS_INTEGRADAS:'Pruebas integradas',PUESTA_EN_MARCHA:'Puesta en marcha',OYM:'O&M',CAPACITACION:'Capacitación',CIERRE:'Entrega y cierre'};
 const SPECS={IIEE:'Eléctricas',IISS:'Sanitarias',IIMM:'Mecánicas',TIC:'TIC',EM:'Equipamiento Médico'};
@@ -17,12 +18,12 @@ export function aconexScreen(c){
  '<div class="panel"><div class="row spread"><h3>Control compartido ANIN y Supervisión</h3>'+btn('Registrar comunicación','aconex-new')+'</div>'+
  '<p class="small muted">Registros: '+rows.length+' · Verificados: '+rows.filter(x=>x.status==='EMISION_VERIFICADA').length+'</p>'+
  '<div class="filterbar">'+field('query','Buscar código o asunto',S.aconexQuery||'','search','placeholder="ANIN-FB-013634"')+select('specialty','Especialidad',{ALL:'Todas',...SPECS},sp||'ALL')+select('status','Estado',{ALL:'Todos',...STATES},state||'ALL')+
- select('owner','Registrado por',{ALL:'Todos',...Object.fromEntries(members.map(m=>[m.user_id,m.full_name]))},owner||'ALL')+'</div><div class="btnrow">'+btn('Buscar','aconex-filter')+btn('Limpiar','aconex-reset')+'</div></div>'+
+ select('owner','Registrado por',{ALL:'Todos',...Object.fromEntries(members.map(m=>[m.user_id,m.full_name]))},owner||'ALL')+'</div><div class="btnrow">'+btn('Buscar','aconex-filter')+btn('Limpiar','aconex-reset')+btn('Exportar matriz CSV','aconex-csv')+'</div></div>'+
  (S.aconexError?'<p class="notice error">'+esc(S.aconexError)+'</p>':'')+'<div class="panel section"><h3>Resultados: '+shown.length+'</h3>'+
  (shown.map(r=>{const author=members.find(m=>m.user_id===r.created_by)?.full_name||'Usuario identificado',isAuthor=r.created_by===S.member?.user_id;
  const canVerify=['admin','gp'].includes(S.member?.role)&&!isAuthor&&r.status==='RESPUESTA_REPORTADA';
  return '<article class="listitem"><div class="row spread"><strong>'+esc(r.received_code)+'</strong><span class="chip '+(r.status==='EMISION_VERIFICADA'?'green':r.status==='ANULADA'?'red':'orange')+'">'+esc(STATES[r.status]||r.status)+'</span></div><p>'+esc(r.subject)+'</p>'+
- '<small>'+esc(r.organization)+' · '+esc(r.specialty||'Multidisciplinario')+' · '+esc(r.system_code||'Sin sistema')+' · '+esc(STAGES[r.stage]||r.stage)+'</small>'+
+ '<small>Emisor: '+esc(ISSUERS[r.issuer]||r.issuer||'Contratista')+' · Registrado por '+esc(r.organization)+' · '+esc(r.specialty||'Multidisciplinario')+' · '+esc(r.system_code||'Sin sistema')+' · '+esc(STAGES[r.stage]||r.stage)+'</small>'+
  '<small>Registrado por: '+esc(author)+' · '+esc(TYPES[r.action_type]||r.action_type)+'</small>'+
  '<small>Respuesta: '+esc(r.response_code||'Pendiente')+' · Fecha: '+esc(r.responded_on||'No acreditada')+'</small>'+
  (r.summary?'<p class="small">'+esc(r.summary)+'</p>':'')+
@@ -36,6 +37,7 @@ export function aconexForm(row,member){
  field('received_code','Código de comunicación recibida',r.received_code||'','text','required minlength="6" maxlength="120"')+
  field('response_code','Código de respuesta, si se conoce',r.response_code||'','text','maxlength="120"')+
  field('subject','Asunto',r.subject||'','text','required minlength="8" maxlength="300"')+
+ select('issuer','Emisor de la comunicación',ISSUERS,r.issuer||'CONTRATISTA')+
  select('action_type','Actuación',TYPES,r.action_type||'APORTE_AL_GP')+
  select('specialty','Especialidad',{NONE:'Multidisciplinario',...SPECS},r.specialty||member.specialty||'NONE')+
  field('system_code','Sistema / TAG',r.system_code||'','text','maxlength="80"')+
