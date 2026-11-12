@@ -60,3 +60,24 @@ export function verificationForm(r){
  '<label class="check"><input type="checkbox" name="confirmed" required> Verifiqué estos datos en la fuente oficial y soy distinto al autor.</label>'+
  '<button class="btn" type="submit">Verificar emisión</button></form>';
 }
+
+export function historicSection(c){
+ const S=c.S, items=S.aconexHistorico||[],query=(S.aconexQuery||'').trim().toLowerCase();
+ const sp=S.aconexSpec||'';
+ const selected=items.filter(r=>(!sp||r.especialidad===sp||r.especialidad===null)&&(!query||[r.codigo,r.asunto,r.concepto,(r.codigos_relacionados||[]).join(' ')].join(' ').toLowerCase().includes(query)));
+ const direct=selected.filter(r=>r.relacion_cx==='DIRECTA_CX');
+ const indirect=selected.filter(r=>r.relacion_cx==='INTERFAZ_CX');
+ const renderRows=(records)=>records.map(r=>
+ '<article class="listitem"><div class="row spread"><strong>'+esc(r.codigo)+'</strong><span class="chip orange">Pendiente de cotejo</span></div>'+
+ '<p><b>'+esc(r.asunto)+'</b></p><p class="small">'+esc(r.concepto)+'</p>'+
+ '<small>Emisor: '+esc(r.emisor)+' · Especialidad: '+esc(r.especialidad||'Multidisciplinario')+
+ ' · Fecha: '+esc(r.fecha_documento||'NO VERIFICADA')+' · Etapa: '+esc(r.etapa)+'</small>'+
+ ((r.codigos_relacionados||[]).length?'<small>Relacionadas: '+esc(r.codigos_relacionados.join(', '))+'</small>':'')+
+ '<small>Origen: revisión histórica de conversaciones. Pendiente de cotejo con documento Aconex original.</small></article>').join('');
+ return '<section class="panel section" aria-label="Antecedentes históricos de Aconex"><h3>Antecedentes históricos recuperados</h3>'+
+ '<p class="notice">Estos códigos y conceptos se reconstruyeron a partir de conversaciones y revisiones anteriores. NO son registros oficiales cotejados con Oracle Aconex, ni demuestran emisión, aceptación o cierre. Los especialistas pueden consultar antecedentes mientras se incorporan las evidencias formales.</p>'+
+ (S.aconexHistoricoError?'<p class="notice error">'+esc(S.aconexHistoricoError)+'</p>':'')+
+ '<p class="small muted">Registros históricos visibles: '+selected.length+' · Comisionamiento directo: '+direct.length+' · Interfaces técnicas: '+indirect.length+'</p>'+
+ '<h3>1. Comunicaciones directamente relacionadas con Cx</h3>'+(renderRows(direct)||'<p class="muted">Sin antecedentes con esos filtros.</p>')+
+ '<h3>2. Interfaces y condiciones previas de comisionamiento</h3>'+(renderRows(indirect)||'<p class="muted">Sin antecedentes con esos filtros.</p>')+'</section>';
+}
