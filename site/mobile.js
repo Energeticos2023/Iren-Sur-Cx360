@@ -271,7 +271,7 @@ document.addEventListener('submit',async e=>{
     const code=str('received_code').toUpperCase(),answer=str('response_code').toUpperCase();
     const subject=str('subject'),specialty=str('specialty')==='NONE'?null:str('specialty');
     const status=str('status'),issued=str('issuer');
-    if(!/^[A-Z0-9][A-Z0-9._\\/-]{5,119}$/.test(code)||answer&&!/^[A-Z0-9][A-Z0-9._\\/-]{5,119}$/.test(answer))throw Error('Revise el formato de los códigos Aconex');
+    if(!/^[A-Z0-9][A-Z0-9._\/-]{5,119}$/.test(code)||answer&&!/^[A-Z0-9][A-Z0-9._\/-]{5,119}$/.test(answer))throw Error('Revise el formato de los códigos Aconex');
     if(subject.length<8)throw Error('Escriba un concepto de al menos 8 caracteres');
     if(status==='EMISION_VERIFICADA')throw Error('La emisión solo puede verificarse de forma independiente');
     if(status==='RESPUESTA_REPORTADA'&&!str('responded_on'))throw Error('Indique fecha cuando reporte una respuesta');
