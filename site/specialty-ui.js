@@ -4,6 +4,7 @@ import pc from './plan-core.cjs';
 import processCore from './system-process.cjs';
 import sp from './scope-core.cjs';
 import {icons} from './ui-icons.js';
+import {librarySystemPanel} from './library-ui.js';
 const {SPECS, STATUS_LABEL, systemsOf, related, levelTrack, specStats} = sc;
 const LEVEL_NAMES = {L1: 'Recepción y FAT', L2: 'Precomisionamiento', L3: 'Arranque', L4: 'Prueba funcional', L5: 'Prueba integrada'};
 const fmt = iso => { if (!iso) return '—'; const [y, m, d] = String(iso).split('-'); return `${d}/${m}/${y}`; };
@@ -76,6 +77,7 @@ function systemPanel(c, spec, sys) {
   <h4>Inventario identificado: ${assets.length} elementos registrados</h4><p class="small">Este conteo no acredita que el inventario esté completo. Diferenciar cada pozo/electrodo del sistema de puesta a tierra interconectado. Las conexiones deben identificar TAG y circuitos reales.</p>${assets.length?`<div class="tablewrap"><table><thead><tr>${['TAG','Tipo','Subsistema','Ubicación','Plano / revisión','Circuitos','Conexiones TAG','Fuente'].map(t=>`<th>${t}</th>`).join('')}</tr></thead><tbody>${assets.map(a=>`<tr>${['tag','type','subsystem','location','drawing_ref','circuits','connections','source_ref'].map(k=>`<td>${h(a[k]||'PENDIENTE')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<p class="muted">Sin elementos identificados. No se infieren cantidades ni ubicaciones.</p>'}</section>
   <section class="block"><h3>Procesos de ${h(p.code)}</h3><div class="btnrow" role="tablist" aria-label="Etapas del sistema">${processCore.STAGES.map(([key,label])=>`<button type="button" role="tab" aria-selected="${key===stage}" class="btn ${key===stage?'':'ghost'}" data-action="sysstage:${h(sys.id)}:${encodeURIComponent(key)}">${label}</button>`).join('')}</div>
   <div role="tabpanel"><h4>${h(def[1])}</h4><p class="small">${stage==='PRECOMISIONAMIENTO'?'Revisión documental y verificación física de instalaciones, equipos, materiales y accesorios contra planos y especificaciones vigentes, antes de las pruebas de funcionamiento.':'Registrar los entregables y resultados conforme al procedimiento y al alcance aceptados.'} Cada protocolo debe identificar el objeto intervenido y su fuente. Crear un borrador no habilita la ejecución.</p>${button(def[2]==='protocol'?'Preparar protocolo de esta etapa':'Registrar entregable de esta etapa','sysnew:'+sys.id+':'+encodeURIComponent(stage),'btn ghost')}${selected.length?selected.map(tableRow).join(''):'<p class="muted">Sin registros vinculados a esta etapa.</p>'}</div></section>
+  ${librarySystemPanel(c,spec,p.code)}
   ${unclassified.length?group('Registros sin etapa clasificada',unclassified,''):''}
   ${rel.restrictions.length ? group('Restricciones, decisiones e inconsistencias', rel.restrictions, '') : ''}
   <section class="block"><h3>Consultar al asistente sobre ${h(p.code)}</h3><div class="suggest">${qs.map(q => `<button type="button" class="chipbtn" data-action="${h(askAction(q, spec))}">${h(q)}</button>`).join('')}</div></section>`;
