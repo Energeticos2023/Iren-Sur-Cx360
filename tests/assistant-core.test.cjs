@@ -56,3 +56,15 @@ test('Sugerencias en español y sin datos de personas', () => {
   assert.ok(ac.SUGGESTIONS.length >= 6);
   for (const q of ac.SUGGESTIONS) assert.match(q, /^¿.+\?$/);
 });
+
+test('Consulta contextual: conserva sistema y etapa sin alterar la pregunta',()=>{
+ assert.equal(ac.contextualQuestion('¿Qué verifico?',{system:'EL-01',phase:'pre'}),'Sistema seleccionado: EL-01 · Etapa: Precomisionamiento\nConsulta: ¿Qué verifico?');
+ assert.equal(ac.contextualQuestion('¿Qué verifico?',{}),'¿Qué verifico?');
+ assert.equal(ac.contextualQuestion('Consulta',{phase:'<script>'}),'Consulta');
+});
+test('Contexto: usa filtro de fase y no un sistema anterior del resumen',()=>{
+ const s={screen:'esp:IIEE',espPhase:{IIEE:'pru'},espSys:{IIEE:'EL-06'},espTab:{IIEE:'EL-01'}};
+ assert.deepEqual(ac.screenContext(s),{specialty:'IIEE',system:'EL-06',phase:'pru'});
+ s.espPhase.IIEE='resumen';assert.equal(ac.screenContext(s).system,'EL-01');
+ s.screen='home';assert.equal(ac.screenContext(s),null);
+});

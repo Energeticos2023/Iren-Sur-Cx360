@@ -112,4 +112,14 @@ function validQuestion(q) {
   return {ok: true, text: t};
 }
 
-module.exports = {SUGGESTIONS, DOC_SHORT, escapeHtml, sourceRef, snippetHtml, renderAnswer, citedNumbers, buildHistory, plainExport, validQuestion};
+const PHASE_LABELS = {pre:'Precomisionamiento',pru:'Pruebas',pem:'Puesta en marcha / servicio',om:'Manual O&M',cap:'Capacitaciones'};
+function contextualQuestion(question, context = {}) {
+  const parts = [context.system ? 'Sistema seleccionado: '+String(context.system).slice(0,100) : '', PHASE_LABELS[context.phase] ? 'Etapa: '+PHASE_LABELS[context.phase] : ''].filter(Boolean);
+  return parts.length ? parts.join(' · ')+'\nConsulta: '+question : question;
+}
+function screenContext(S) {
+  if (!S.screen?.startsWith('esp:')) return null;
+  const specialty=S.screen.slice(4), phase=S.espPhase?.[specialty];
+  return {specialty, phase:PHASE_LABELS[phase]?phase:'', system:(phase && phase!=='resumen'?S.espSys?.[specialty]:S.espTab?.[specialty])||''};
+}
+module.exports = {PHASE_LABELS, contextualQuestion, screenContext,SUGGESTIONS, DOC_SHORT, escapeHtml, sourceRef, snippetHtml, renderAnswer, citedNumbers, buildHistory, plainExport, validQuestion};
