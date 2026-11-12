@@ -1,3 +1,15 @@
+# CX360 v2.6 — Piloto nominal y PWA Android/iPhone, 12/11/2026
+
+- Nómina de 11 profesionales adicionales (5 ANIN, 6 Supervisión) registrada en `public.cx_pilot_roster`, con RLS, lectura solo del administrador y sin correos en el repositorio. Administrador previo: 1. Las invitaciones NO han sido enviadas: requieren sesión real de administrador, MFA AAL2, confirmación individual y correo saliente funcional.
+- Administración: listado privado de la nómina, detección de miembros ya registrados y botón «Invitar» por persona. Roles iniciales de especialidad; Calidad/SSOMA en lectura multidisciplinaria (auditor) durante piloto.
+- Nuevo módulo «Sugerencias» con registro autenticado en `public.cx_pilot_feedback` y RLS: cada usuario ve sus reportes, administrador ve todos. No son incidencias ACC ni conformidades contractuales.
+- «Instalar en celular» accesible desde navegación, además de la pantalla de ingreso. Android: instalador nativo cuando el navegador lo ofrezca o menú Chrome. iPhone: Safari → Compartir → Añadir a pantalla de inicio. Manifest, metadatos Apple y caché estática actualizados; no hay captura offline.
+- Compilación, pruebas automáticas y publicación de GitHub Actions satisfactorias en commit `94888cb2a74513a6ce6843d2e2381adb7782da32`, ejecución `43261872523`. No equivale a pruebas reales en teléfonos ni a invitaciones entregadas.
+- Seguridad pendiente de auditoría integral de funciones SECURITY DEFINER y protección de tablas del esquema privado. El esquema `cx_private` no concede SELECT directo a anon/authenticated en las tablas documentales comprobadas, pero carece de RLS de defensa en profundidad. No se han cambiado políticas privadas automáticamente.
+- No se acreditó autorización institucional de custodia ni cronograma aceptado; la plataforma sigue en piloto y no debe usarse para liberar pruebas.
+
+---
+
 # CX360 v2.5 — Pestañas por fase dentro de cada especialidad, 11/11/2026 (noche)
 
 - **Fases dentro de cada especialidad**: Resumen · 1 Precomisionamiento · 2 Pruebas · 3 Puesta en marcha · 4 Manual O&M · 5 Capacitaciones. Filtro por sistema (Todos, EL-01…), impresión de la fase y botón para abrir el sistema (vista v2.4 con sus etapas y registros).
