@@ -175,7 +175,7 @@ async function action(a){
  if(a.startsWith('acc-edit:')){const r=S.accRows.find(x=>x.id===a.slice(9));if(!r||r.created_by!==S.member.user_id||r.verification_status!=='POR_COTEJAR')throw Error('Esta ficha no admite edición');return modal('Actualizar ficha ACC',acc.reviewForm(r,S.member));}
  if(a.startsWith('acc-entry:')){const r=S.accRows.find(x=>x.id===a.slice(10));if(!r||S.member.role==='auditor')throw Error('No está autorizado a registrar actuaciones');return modal('Actuación del flujo ACC',acc.entryForm(r));}
  if(a.startsWith('acc-verify:')){const r=S.accRows.find(x=>x.id===a.slice(11));if(!r||r.created_by===S.member.user_id||r.verification_status!=='POR_COTEJAR'||!['admin','gp'].includes(S.member.role))throw Error('Cotejo independiente no permitido');return modal('Cotejar con ACC oficial',acc.verifyForm(r));}
- if(a.startsWith('acc-open:')){const r=S.accRows.find(x=>x.id===a.slice(9));if(!r?.official_url)throw Error('Falta enlace ACC');const u=new URL(r.official_url);if(u.protocol!=='https:'||u.username||u.password)throw Error('Solo se permite un enlace HTTPS sin credenciales');window.open(u.href,'_blank','noopener,noreferrer');return;}
+ if(a.startsWith('acc-open:')){const r=S.accRows.find(x=>x.id===a.slice(9));if(!r?.official_url)throw Error('Falta enlace ACC');const u=new globalThis.URL(r.official_url);if(u.protocol!=='https:'||u.username||u.password)throw Error('Solo se permite un enlace HTTPS sin credenciales');window.open(u.href,'_blank','noopener,noreferrer');return;}
  if(a==='acc-csv'){
  const columns=['acc_review_number','document_code','document_revision','title','specialty','system_code','stage','workflow_state','document_status_code','verification_status','final_decision','final_decision_ref','aconex_code','review_due_on','next_action'];
  return download('CX360_Revisiones_ACC_'+limaDate()+'.csv',exportCsv([columns,...S.accRows.map(r=>columns.map(k=>r[k]??''))]),'text/csv;charset=utf-8');
@@ -186,7 +186,7 @@ async function action(a){
  if(a.startsWith('aconex-detail:')){const x=S.aconexRows.find(r=>r.id===a.slice(14));if(!x)throw Error('Comunicación no disponible');return modal('Trazabilidad Aconex',`<p><b>${h(x.received_code)}</b> · ${h(x.subject)}</p><p>Emisor: ${h(x.issuer||'CONTRATISTA')} · Organización que registra: ${h(x.organization)} · Especialidad: ${h(x.specialty||'Multidisciplinario')}</p><p>Estado: ${h(x.status)} · Código de respuesta: ${h(x.response_code||'No informado')}</p><p>Fecha recibida: ${h(x.received_on||'No informada')} · Respuesta: ${h(x.responded_on||'No informada')}</p><p>Resumen: ${h(x.summary||'No registrado')}</p><p>Siguiente acción: ${h(x.next_action||'No registrada')}</p><p>Referencia oficial: ${h(x.official_ref||'No registrada')}</p><p>Registrada por: ${h(S.snapshot.members.find(m=>m.user_id===x.created_by)?.full_name||'Usuario autenticado')}</p><p>Verificación independiente: ${h(x.verified_at||'Pendiente')}</p>`);}
  if(a.startsWith('aconex-edit:')){const x=S.aconexRows.find(r=>r.id===a.slice(12));if(!x||x.created_by!==S.member.user_id||x.status==='EMISION_VERIFICADA')throw Error('No puede editar este registro');return modal('Actualizar comunicación Aconex',ax.aconexForm(x,S.member));}
  if(a.startsWith('aconex-verify:')){const x=S.aconexRows.find(r=>r.id===a.slice(14));if(!x||x.created_by===S.member.user_id||x.status!=='RESPUESTA_REPORTADA'||!['admin','gp'].includes(S.member.role))throw Error('Verificación independiente no permitida');return modal('Verificar emisión en Aconex',ax.verificationForm(x));}
- if(a.startsWith('aconex-open:')){const x=S.aconexRows.find(r=>r.id===a.slice(12));if(!x?.official_url)throw Error('Enlace no disponible');const url=new URL(x.official_url);if(url.protocol!=='https:'||url.username||url.password)throw Error('Enlace no autorizado');window.open(url.href,'_blank','noopener,noreferrer');return;}
+ if(a.startsWith('aconex-open:')){const x=S.aconexRows.find(r=>r.id===a.slice(12));if(!x?.official_url)throw Error('Enlace no disponible');const url=new globalThis.URL(x.official_url);if(url.protocol!=='https:'||url.username||url.password)throw Error('Enlace no autorizado');window.open(url.href,'_blank','noopener,noreferrer');return;}
  if(a==='aconex-csv'){const columns=['received_code','response_code','subject','issuer','organization','specialty','system_code','stage','status','received_on','responded_on','official_ref','summary','next_action'];const filtered=S.aconexRows.filter(r=>(!S.aconexSpec||r.specialty===S.aconexSpec)&&(!S.aconexState||r.status===S.aconexState)&&(!S.aconexOwner||r.created_by===S.aconexOwner)&&(!S.aconexQuery||[r.received_code,r.response_code,r.subject,r.system_code,r.summary].join(' ').toLowerCase().includes(S.aconexQuery.toLowerCase())));return download('CX360_Comunicaciones_Aconex_'+limaDate()+'.csv',exportCsv([columns,...filtered.map(r=>columns.map(k=>r[k]||''))]),'text/csv;charset=utf-8');}
  if(a==='go-library'){S.screen='library';S.menuOpen=false;render();window.scrollTo({top:0});return;}
  if(a.startsWith('library-go:')){const parts=a.slice(11).split(':');S.librarySpec=decodeURIComponent(parts[0]||'');S.libraryQuery=decodeURIComponent(parts[1]||'');S.libraryCategory='';S.libraryStatus='';S.screen='library';render();window.scrollTo({top:0});return;}
@@ -195,7 +195,7 @@ async function action(a){
  if(a==='library-new'){if(S.member?.role!=='admin')throw Error('Registro reservado al administrador');return modal('Registrar referencia documental',lib.libraryForm(null));}
  if(a.startsWith('library-detail:')){const record=S.libraryDocs.find(x=>x.id===a.slice(15));if(!record)throw Error('Referencia no visible para esta cuenta');const body='<p><strong>'+h(record.title)+'</strong> · '+h(record.document_code)+' / '+h(record.revision)+'</p><p>Estado: '+h(record.review_status)+' · Repositorio: '+h(record.source_platform)+'</p><p>Referencia: '+h(record.source_ref||'PENDIENTE')+'</p><p>Decisión: '+h(record.decision_ref||'NO ACREDITADA')+'</p><p>Notas: '+h(record.notes||'Sin notas')+'</p>'+(S.member.role==='admin'?button('Editar ficha','library-edit:'+record.id,'btn ghost'):'');return modal('Ficha documental y trazabilidad',body);}
  if(a.startsWith('library-edit:')){if(S.member?.role!=='admin')throw Error('Edición reservada al administrador');const record=S.libraryDocs.find(x=>x.id===a.slice(13));if(!record)throw Error('Referencia no visible');return modal('Actualizar ficha documental',lib.libraryForm(record));}
- if(a.startsWith('library-open:')){const record=S.libraryDocs.find(x=>x.id===a.slice(13));if(!record||!record.source_url)throw Error('Enlace oficial no disponible para esta cuenta');const url=new URL(record.source_url);if(url.protocol!=='https:'||url.username||url.password)throw Error('Enlace no admitido');window.open(url.href,'_blank','noopener,noreferrer');return;}
+ if(a.startsWith('library-open:')){const record=S.libraryDocs.find(x=>x.id===a.slice(13));if(!record||!record.source_url)throw Error('Enlace oficial no disponible para esta cuenta');const url=new globalThis.URL(record.source_url);if(url.protocol!=='https:'||url.username||url.password)throw Error('Enlace no admitido');window.open(url.href,'_blank','noopener,noreferrer');return;}
  if(a==='install-help')return modal('Instalar CX360 en celular',installGuide(button));
  if(a==='install-now'){if(S.installPrompt){const p=S.installPrompt;S.installPrompt=null;await p.prompt();const result=await p.userChoice;notice(result?.outcome==='accepted'?'Instalación solicitada.':'Puede instalar desde el menú del navegador.');}else notice('Abra el menú de Chrome y elija Instalar aplicación o Añadir a pantalla de inicio.');return;}
  if(a==='close')return closeModal();if(a==='refresh'){await load();render();return}if(a==='search'){S.search=$('#search')?.value||'';render();return}
@@ -298,7 +298,7 @@ document.addEventListener('submit',async e=>{
     if(S.accRows.some(r=>r.id!==id&&r.acc_review_number===no&&r.document_code===code&&r.document_revision===rev))throw Error('Revisión ya registrada; evite duplicidades');
     const special=str('specialty')==='NONE'?null:str('specialty');
     if(!['admin','gp','kp1','ssoma','riesgos'].includes(S.member.role)&&special!==S.member.specialty)throw Error('Solo puede gestionar su especialidad');
-    const url=str('official_url');if(url){const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('Enlace HTTPS sin credenciales requerido');}
+    const url=str('official_url');if(url){const u=new globalThis.URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('Enlace HTTPS sin credenciales requerido');}
     for(const d of ['received_on','source_captured_on','final_decision_on'])if(str(d)&&str(d)>limaDate())throw Error('Fecha futura no permitida: '+d);
     const final=str('final_decision');
     if(final!=='NO_VERIFICADA'&&(!str('final_decision_ref')||!str('final_decision_on')))throw Error('La decisión final requiere referencia y fecha oficiales');
@@ -320,7 +320,7 @@ document.addEventListener('submit',async e=>{
     const review=S.accRows.find(x=>x.id===f.dataset.id);
     if(!review)throw Error('Revisión no identificada');
     const str=k=>String(data.get(k)||'').trim();
-    const url=str('official_url');if(url){const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('Enlace HTTPS requerido');}
+    const url=str('official_url');if(url){const u=new globalThis.URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('Enlace HTTPS requerido');}
     if(str('entry_date')&&str('entry_date')>limaDate())throw Error('Fecha oficial futura inválida');
     if(str('summary').length<8)throw Error('Incorpore comentario o síntesis verificable');
     const sp=str('specialty')==='NONE'?null:str('specialty');
@@ -338,7 +338,7 @@ document.addEventListener('submit',async e=>{
     if(!old||old.created_by===S.member.user_id||old.verification_status!=='POR_COTEJAR'||!['admin','gp'].includes(S.member.role))throw Error('No puede cotejar esta revisión');
     if(!data.has('confirmed'))throw Error('Confirme lectura del documento original');
     const ref=String(data.get('official_ref')||'').trim(),url=String(data.get('official_url')||'').trim();
-    const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password||ref.length<6)throw Error('Referencias oficiales inválidas');
+    const u=new globalThis.URL(url);if(u.protocol!=='https:'||u.username||u.password||ref.length<6)throw Error('Referencias oficiales inválidas');
     const result=await db.from('cx_acc_reviews').update({official_ref:ref,official_url:url,verification_status:'COTEJADA'})
       .eq('id',old.id).eq('verification_status','POR_COTEJAR').select('id,verified_by');
     if(result.error)throw result.error;if(!result.data?.length)throw Error('Cotejo no confirmado: verifique MFA y permisos');
@@ -357,7 +357,7 @@ document.addEventListener('submit',async e=>{
     if(status==='EMISION_VERIFICADA')throw Error('La emisión solo puede verificarse de forma independiente');
     if(status==='RESPUESTA_REPORTADA'&&!str('responded_on'))throw Error('Indique fecha cuando reporte una respuesta');
     if((str('received_on')&&str('received_on')>limaDate())||(str('responded_on')&&str('responded_on')>limaDate()))throw Error('La fecha no puede ser futura');
-    const url=str('official_url');if(url){const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('Se requiere un enlace HTTPS sin credenciales');}
+    const url=str('official_url');if(url){const u=new globalThis.URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('Se requiere un enlace HTTPS sin credenciales');}
     if(!['admin','gp','kp1','auditor','ssoma','riesgos'].includes(S.member.role)&&specialty!==S.member.specialty)throw Error('Solo puede registrar comunicaciones de su especialidad');
     if(S.aconexRows.some(r=>r.created_by===S.member.user_id&&r.received_code===code&&r.id!==id))throw Error('Este código ya fue registrado por usted. Edite su registro anterior para mantener la trazabilidad.');
     const payload={received_code:code,response_code:answer||null,subject,issuer:issued,action_type:str('action_type'),specialty,system_code:str('system_code')||null,stage:str('stage'),status,received_on:str('received_on')||null,responded_on:str('responded_on')||null,official_ref:str('official_ref')||null,official_url:url||null,summary:str('summary')||null,next_action:str('next_action')||null};
@@ -384,7 +384,7 @@ document.addEventListener('submit',async e=>{
     if(id&&!old)throw Error('Revisión no disponible');
     const clean=k=>String(d[k]||'').trim();const rev=clean('revision'),code=clean('document_code');
     if(old&&(code!==old.document_code||rev!==old.revision))throw Error('No cambie código o revisión de un registro anterior. Cree una nueva ficha para conservar el historial.');
-    if(clean('source_url')){const url=new URL(clean('source_url'));if(url.protocol!=='https:'||url.username||url.password)throw Error('Solo enlaces HTTPS sin credenciales');}
+    if(clean('source_url')){const url=new globalThis.URL(clean('source_url'));if(url.protocol!=='https:'||url.username||url.password)throw Error('Solo enlaces HTTPS sin credenciales');}
     if(clean('review_status')==='ACREDITADO'&&(!clean('decision_ref')||!clean('decision_authority')||!clean('decision_on')||['POR_VERIFICAR','SIN_REVISION','PENDIENTE'].includes(rev)))throw Error('La aceptación requiere revisión exacta y decisión oficial sustentada');
     const payload={document_code:code,title:clean('title'),category:clean('category'),revision:rev,specialty:clean('specialty')||null,system_code:clean('system_code')||null,stage:clean('stage')||null,source_platform:clean('source_platform'),source_ref:clean('source_ref')||null,review_status:clean('review_status'),source_url:clean('source_url')||null,decision_ref:clean('decision_ref')||null,decision_authority:clean('decision_authority')||null,decision_on:clean('decision_on')||null,notes:clean('notes')||null};
     const q=old?db.from('cx_library_documents').update(payload).eq('id',old.id).select('id'):db.from('cx_library_documents').insert(payload).select('id');
