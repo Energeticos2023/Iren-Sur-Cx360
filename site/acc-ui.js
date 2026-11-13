@@ -68,7 +68,7 @@ export function entryForm(r){
  sel('specialty','Especialidad',SPEC,r.specialty||'NONE')+
  field('official_author','Autor oficial visible en ACC', '', 'text','maxlength="200"')+
  field('acc_issue_number','N.º incidencia ACC (si corresponde)', '', 'text','maxlength="100"')+
- sel('opinion','Opinión individual (no decisión final)',{NONE:'No corresponde',...OP,PENDIENTE:'Pendiente',NO_APLICA:'No aplica'},'NONE')+
+ sel('opinion','Opinión individual (no decisión final)',{NONE:'No corresponde',ACEPTADO:'Aceptado',ACEPTADO_CON_COMENTARIOS:'Aceptado con comentarios',RECHAZADO:'Rechazado',PENDIENTE:'Pendiente',NO_APLICA:'No aplica',OTRO:'Otra'},'NONE')+
  field('entry_date','Fecha oficial de la actuación','', 'date')+
  area('summary','Comentario / hallazgo / decisión original o síntesis fiel','',6000)+
  area('required_action','Corrección, evidencia y condición de cierre','',3000)+
