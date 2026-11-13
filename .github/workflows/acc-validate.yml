@@ -1,0 +1,21 @@
+name: Validar propuesta ACC CX360
+on:
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'package-lock.json'
+permissions:
+  contents: read
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run build
