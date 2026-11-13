@@ -117,6 +117,10 @@ begin
  if not coalesce(v_member.active,false) then raise exception 'Membresia inactiva'; end if;
  if tg_op='INSERT' then
    if v_member.role='auditor' then raise exception 'Sin permisos de registro'; end if;
+   if v_member.role not in ('admin','gp','kp1','ssoma','riesgos') and
+      new.specialty is distinct from v_member.specialty then
+      raise exception 'No puede registrar revisiones de otra especialidad';
+   end if;
    if new.created_by is distinct from auth.uid() then raise exception 'Autor no coincide con la sesion'; end if;
    if new.verification_status<>'POR_COTEJAR' or new.verified_by is not null or new.verified_at is not null then
      raise exception 'No se permite crear revisiones ya verificadas';
@@ -130,6 +134,10 @@ begin
      raise exception 'Identidad e historia del expediente inmutables';
    end if;
    if new.verification_status='COTEJADA' then
+     if (to_jsonb(new) - ARRAY['official_ref','official_url','verification_status','verified_by','verified_at','updated_by','updated_at']::text[]) is distinct from
+        (to_jsonb(old) - ARRAY['official_ref','official_url','verification_status','verified_by','verified_at','updated_by','updated_at']::text[]) then
+       raise exception 'El verificador solo puede completar la referencia y cotejo documental';
+     end if;
      if v_member.role not in ('admin','gp') or coalesce(auth.jwt()->>'aal','')<>'aal2'
         or old.created_by=auth.uid() then
        raise exception 'Cotejo independiente requiere autorizacion, MFA y revisor distinto';
@@ -144,6 +152,10 @@ begin
      new.verified_by:=auth.uid(); new.verified_at:=now();
    else
      if old.created_by<>auth.uid() or v_member.role='auditor' then raise exception 'Solo autor edita ficha sin verificar'; end if;
+     if v_member.role not in ('admin','gp','kp1','ssoma','riesgos') and
+        new.specialty is distinct from v_member.specialty then
+       raise exception 'No puede editar una revision de otra especialidad';
+     end if;
      new.verified_by:=null;new.verified_at:=null;
    end if;
    new.updated_by:=auth.uid();
@@ -153,11 +165,14 @@ begin
 end $$;
 create or replace function public.cx_acc_entry_guard() returns trigger
 language plpgsql security definer set search_path='' as $$
-declare v_role text;
+declare v_role text; v_specialty text;
 begin
  if auth.uid() is null then raise exception 'Autenticacion requerida'; end if;
- select m.role into v_role from public.cx_members m where m.user_id=auth.uid() and m.active;
+ select m.role,m.specialty into v_role,v_specialty from public.cx_members m where m.user_id=auth.uid() and m.active;
  if v_role is null or v_role='auditor' then raise exception 'Sin autorizacion para registrar una actuacion'; end if;
+ if v_role not in ('admin','gp','kp1','ssoma','riesgos') and new.specialty is distinct from v_specialty then
+   raise exception 'Solo se admiten actuaciones de su especialidad';
+ end if;
  if new.entered_by is distinct from auth.uid() then raise exception 'El autor de registro debe ser la sesion autenticada'; end if;
  if not exists(select 1 from public.cx_acc_reviews r where r.id=new.review_id) then
    raise exception 'Revision ACC inexistente';
