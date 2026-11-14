@@ -239,7 +239,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.upload:focus-vi
    <div id="aiPanel" class="hidden">
   <h2 class="sectiontitle">Dictamen de SUSTENTA IA</h2>
   <p class="sub">Solo un análisis emitido por la IA conectada puede considerarse revisión inteligente. El autor debe contrastar los hechos y fuentes.</p>
-  <div id="aiAnswer" class="ai-answer" role="status"></div>
+  <div id="aiAnswer" class="ai-answer" role="status"></div><div id="aiStructured" class="hidden">
+  <div id="aiReviewStatus" class="message"></div>
+  <div id="aiReviewFindings" class="findings"></div>
+  <h3 class="sectiontitle" style="margin-top:20px">Correcciones sugeridas</h3>
+  <p class="sub">Cada propuesta requiere la validación del especialista. Se puede copiar, pero no se insertará automáticamente ni alterará la estructura del Word.</p>
+  <div id="aiReviewEdits" class="findings"></div>
+  <div id="aiReviewQuestions" class="message hidden"></div>
+ </div>
   <div class="actions">
    <button id="analyzeAI" class="primary" type="button">Analizar con IA</button>
    <button id="recheckAI" class="secondary" type="button">Comprobar conexión IA</button>
@@ -286,7 +293,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.upload:focus-vi
 "use strict";
 const $=id=>document.getElementById(id);
 const S={text:"",filename:"",draft:"",findings:[],questions:[],index:0,replies:[],added:0,score:0,purpose:null,kindOverride:null,originalDocx:null,originalLines:null,sourceFile:null,exportMode:"blocked"};
-const AI={token:null,available:false,history:[],busy:false};
+const AI={token:null,available:false,history:[],busy:false,review:null};
 const API_URL="https://azajuquqksrjyfbtcujq.supabase.co";
 const PUBLIC_KEY="sb_publishable_U0SSbONBfry7O3YPB2DAzw_d_C5kmEF";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -526,14 +533,45 @@ async function checkAI(){
  $("analyzeAI").disabled=!AI.available;
  return AI.available;
 }
+
+function showStructuredReview(data) {
+ AI.review=data;const container=$("aiStructured");container.classList.remove("hidden");
+ $("aiReviewStatus").textContent="Dictamen: "+(data.estado_editorial||"NO DETERMINABLE")+" · Propósito: "+(data.dictamen_proposito||"no determinado")+
+ (typeof data.puntuacion_1_a_10==="number"?" · Calificación IA: "+data.puntuacion_1_a_10+"/10":" · Calificación no determinable");
+ const findings=$("aiReviewFindings");findings.replaceChildren();
+ const title=document.createElement("h3");title.className="sectiontitle";title.textContent="Hallazgos del análisis IA";findings.append(title);
+ const observations=Array.isArray(data.observaciones)?data.observaciones:[];
+ if(!observations.length){const p=document.createElement("p");p.className="muted";p.textContent="No se emitieron observaciones específicas.";findings.append(p)}
+ observations.forEach(obs=>{
+  const article=document.createElement("article");article.className="finding "+(obs.severidad==="critica"?"critica":obs.severidad==="menor"?"leve":"");
+  const h=document.createElement("h3");h.textContent=(obs.id||"Observación")+" · "+(obs.problema||"Hallazgo");article.append(h);
+  for(const line of ["Ubicación: "+(obs.ubicacion||"no localizable"),"Impacto: "+(obs.efecto_en_proposito||""),"Corrección: "+(obs.propuesta||""),"Evidencia: "+(obs.fuente||"NO VERIFICADA")]){const p=document.createElement("p");p.textContent=line;article.append(p)}
+  findings.append(article);
+ });
+ const edits=$("aiReviewEdits");edits.replaceChildren();
+ const proposals=Array.isArray(data.ediciones_propuestas)?data.ediciones_propuestas:[];
+ if(!proposals.length){const p=document.createElement("p");p.className="muted";p.textContent="No se han propuesto sustituciones aplicables.";edits.append(p)}
+ proposals.forEach((edit,index)=>{
+  const article=document.createElement("article");article.className="finding";
+  const h=document.createElement("h3");h.textContent="Propuesta "+(index+1)+" · "+(edit.id_bloque||"Ubicación pendiente");article.append(h);
+  const old=document.createElement("p");old.textContent="Original: "+(edit.texto_anterior||"");article.append(old);
+  const next=document.createElement("p");next.textContent="Sugerido: "+(edit.texto_sugerido||"");article.append(next);
+  const btn=document.createElement("button");btn.type="button";btn.className="secondary";btn.textContent="Copiar texto propuesto";
+  btn.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(edit.texto_sugerido||"");btn.textContent="Copiado"}catch{btn.textContent="No se pudo copiar"}});article.append(btn);edits.append(article);
+ });
+ const questions=Array.isArray(data.preguntas_indispensables)?data.preguntas_indispensables:[];
+ $("aiReviewQuestions").classList.toggle("hidden",!questions.length);
+ $("aiReviewQuestions").textContent=questions.length?"Aclaraciones imprescindibles: "+questions.map(q=>q.pregunta).join(" · "):"";
+}
 async function analyzeWithAI(){
- $("aiPanel").classList.remove("hidden");$("aiAnswer").textContent="Analizando el propósito y el sustento del documento...";
+ $("aiPanel").classList.remove("hidden");$("aiStructured").classList.add("hidden");$("aiAnswer").textContent="Analizando el propósito y el sustento del documento...";$("aiStructured").classList.add("hidden");AI.review=null;
  $("analyzeAI").disabled=true;$("aiState").textContent="Análisis en curso";
  try{
   const j=await aiRequest("analyze");
-  $("aiAnswer").textContent=j.answer;
+  $("aiAnswer").textContent=j.structured?[(j.structured.proposito||""),(j.structured.analisis_narrativo||""),(j.structured.recomendacion_final||"")].filter(Boolean).join("\n\n"):j.answer;
+  if(j.structured)showStructuredReview(j.structured);
   $("aiState").textContent="Dictamen IA. Contrasta las afirmaciones con los originales.";
-  AI.history=[{role:"assistant",content:j.answer.slice(0,1500)}];
+  AI.history=[{role:"assistant",content:(j.answer||"").slice(0,2000)}];
   $("chat").replaceChildren();
   bubble("Ya he revisado el propósito del documento. Pregúntame por las observaciones, o indícame qué deseas mejorar. No modificaré tu Word sin tu autorización.","assistant");
   $("questionState").textContent="Chat IA activo";
@@ -600,8 +638,9 @@ async function fileSelected(file){
  try{
    const content=await extract(file);
    if(tidy(content).length<45)throw Error("No pude extraer suficiente texto. Si el PDF está escaneado, requiere OCR; todavía no disponible.");
+   if(content.length>180000)throw Error("El texto tiene "+content.length+" caracteres. El límite IA es 180000; divide el expediente en partes.");
    start(file,content);msg("");
-   AI.history=[];
+   AI.history=[];AI.review=null;$("aiStructured").classList.add("hidden");
    $("aiPanel").classList.remove("hidden");
    if(AI.available)await analyzeWithAI();
    else{
@@ -642,12 +681,7 @@ $("chatForm").addEventListener("submit",async e=>{
  e.preventDefault();const answer=tidy($("reply").value);if(!answer||!S.text)return;
  bubble(answer,"user");$("reply").value="";
  if(AI.available){await chatWithAI(answer);return;}
- bubble("El bot IA está pendiente de configurar su clave en el servidor. No se inventarán respuestas de ChatGPT.","assistant");return;
- if(handleInstruction(answer))return;
- if(S.index<S.questions.length){
-  const question=S.questions[S.index];question.replied=true;S.replies.push({q:question.question,a:answer});S.index++;renderFindings();ask();
- }else{S.replies.push({q:"Precisión complementaria",a:answer});bubble("Precisión registrada. Verifica su pertinencia y sustento antes de incorporarla.","assistant");}
- $("addAnswers").disabled=S.replies.length===S.added;
+ bubble("El bot IA está pendiente de configuración y no puede responder.","assistant");
 });
 $("addAnswers").addEventListener("click",()=>{
  const next=S.replies.slice(S.added);
