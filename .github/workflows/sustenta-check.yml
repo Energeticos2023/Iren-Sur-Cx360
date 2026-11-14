@@ -1,10 +1,12 @@
-name: Validar SUSTENTA R3
+name: Validar SUSTENTA R4
 on:
   push:
     branches: [main]
     paths:
       - 'site/assets/sustenta.html'
       - 'site/assets/sustenta-revision-20261114.html'
+      - 'site/assets/sustenta-ui.css'
+      - 'tests/sustenta.test.cjs'
       - 'supabase/functions/sustenta-ia/index.ts'
       - 'docs/SUSTENTA_PROMPT_MAESTRO_V1.md'
       - '.github/workflows/sustenta-check.yml'
@@ -43,3 +45,5 @@ jobs:
           PY
           node --check sustenta.html.js
           node --check sustenta-revision-20261114.html.js
+      - name: Verify SUSTENTA flows
+        run: node --test tests/sustenta.test.cjs

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0C2340"><title>SUSTENTA | Revisión de informes</title>
-<meta name="description" content="Sube tu informe, revisa observaciones y obtén un Word editable. Piloto local sin IA conectada.">
+<meta name="theme-color" content="#0C2340"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><title>SUSTENTA | Revisión de informes</title>
+<meta name="description" content="Sube tu informe, revisa observaciones y obtén un Word editable. Acceso privado, análisis con IA y edición compatible con el Word original.">
 <style>
 :root{--navy:#102a43;--navy-dark:#0b2035;--blue:#24506c;--teal:#187d81;--gold:#e5a449;--gold-soft:#fff1d8;--ink:#20364b;--muted:#667b8f;--line:#dce5ed;--bg:#f4f7fa;--white:#fff;--red:#b84c53;--green:#227b5b;--shadow:0 14px 38px rgba(16,42,67,.06)}
 *{box-sizing:border-box}
@@ -183,18 +183,24 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.upload:focus-vi
 @media(max-width:1150px){.header .wrap{flex-wrap:wrap;row-gap:7px;padding-top:11px;padding-bottom:11px}.platform-tabs{order:3;flex:1 0 100%;margin:0;justify-content:center}.header-right{margin-left:auto}}
 @media(max-width:600px){.platform-tabs{justify-content:stretch;gap:0}.platform-tabs__item{flex:1;padding:9px 5px;font-size:11px}.platform-tabs__item span[aria-hidden]{display:none}.header-right{margin-left:auto}}
 </style>
+<link rel="stylesheet" href="sustenta-ui.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script defer src="sustenta-jszip.min.js"></script>
 </head>
 <body>
+<a class="skip-link" href="#authGate">Ir al contenido principal</a>
 <header class="header"><div class="wrap"><div class="brand"><div class="logo" aria-hidden="true">S</div><div class="brand-copy"><strong>SUSTENTA</strong><span>Informes claros. Decisiones sustentadas.</span></div></div><nav class="platform-tabs" aria-label="Accesos a aplicaciones">
   <span class="platform-tabs__item platform-tabs__item--active" aria-current="page">SUSTENTA</span>
   <a class="platform-tabs__item" href="https://energeticos2023.github.io/YACUSOL/" target="_blank" rel="noopener noreferrer" title="Abrir página web YACUSOL en otra pestaña">Web YACUSOL <span aria-hidden="true">↗</span></a>
   <a class="platform-tabs__item" href="https://energeticos2023.github.io/Yacusol-app/" target="_blank" rel="noopener noreferrer" title="Abrir aplicación YACUSOL en otra pestaña">App YACUSOL <span aria-hidden="true">↗</span></a>
  </nav>
  <div class="header-right"><span class="header-kicker">Revisión documental profesional</span><span class="pill" id="serviceState">Acceso privado · IA</span></div></div></header>
-<section class="wrap loginbox" id="authGate"><h2>Acceso privado a SUSTENTA</h2><p>Solo usuarios autorizados por el administrador.</p><form id="loginForm"><label for="authEmail">Correo</label><input type="email" id="authEmail" required autocomplete="username"><label for="authPassword">Contraseña</label><input type="password" id="authPassword" required autocomplete="current-password"><button class="primary" id="loginButton" type="submit">Ingresar</button></form><p id="authMessage" role="status">Acceso mediante Supabase Auth. No hay registro público.</p></section><main id="mainApp" class="wrap main hidden">
+<section class="wrap loginbox" id="authGate" aria-labelledby="accessHeading">
+ <div class="access-story"><div class="eyebrow">Tu criterio. Mejor sustentado.</div><h1>Del primer borrador<br>a un documento<br><span>que se entiende.</span></h1><p>Un espacio para revisar el propósito, precisar el sustento y mejorar cada comunicación antes de emitirla.</p><ol class="access-points"><li><b>01</b> Carga tu documento original</li><li><b>02</b> Revisa hallazgos y propuestas con IA</li><li><b>03</b> Valida los cambios con tu criterio profesional</li></ol></div>
+ <div class="access-form"><div class="access-label">Espacio de revisión documental</div><h2 id="accessHeading">Bienvenido a SUSTENTA</h2><p>Ingresa con tu cuenta autorizada para comenzar.</p><form id="loginForm"><label for="authEmail">Correo electrónico</label><input type="email" id="authEmail" required autocomplete="username" placeholder="nombre@organizacion.pe" maxlength="254"><label for="authPassword">Contraseña</label><div class="password-field"><input type="password" id="authPassword" required autocomplete="current-password"><button type="button" id="togglePassword" aria-label="Mostrar contraseña" aria-pressed="false">Mostrar</button></div><button class="primary" id="loginButton" type="submit">Ingresar a mi espacio →</button></form><p id="authMessage" role="status" aria-live="polite">Acceso exclusivo para usuarios autorizados. No hay registro público.</p><div class="demo-access"><button id="openDemo" class="ghost" type="button">Explorar con un documento de ejemplo ↗</button><p>Vista guiada · Datos ficticios · Sin consultas a IA</p></div></div>
+</section><p class="access-footer" id="accessFooter">SUSTENTA · Informes claros. Decisiones sustentadas.</p><main id="mainApp" class="wrap main hidden">
+ <div class="demo-banner hidden" id="demoBanner" role="status"><span><strong>Vista guiada.</strong> Documento ficticio; no se ha realizado un análisis con IA. Ingresa para revisar tus archivos.</span><button id="exitDemo" class="ghost" type="button">Salir del ejemplo</button></div>
  <div class="session-toolbar"><span class="session-caption">Espacio de trabajo privado</span><button id="logoutButton" class="ghost" type="button">Cerrar sesión</button></div>
  <section class="intro" aria-label="Presentación de SUSTENTA">
   <div class="intro-copy">
@@ -217,6 +223,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.upload:focus-vi
    </ol>
   </aside>
  </section>
+ <ol class="workflow-nav" aria-label="Etapas de revisión"><li><a id="stepUpload" href="#uploader" aria-current="step"><b>1</b> Cargar documento</a></li><li><a id="stepReview" href="#workspace" aria-disabled="true"><b>2</b> Revisar hallazgos</a></li><li><a id="stepEdit" href="#editorHeading" aria-disabled="true"><b>3</b> Preparar descarga</a></li></ol>
  <section class="box upload-panel" id="uploader" aria-labelledby="uploadHeading">
   <div class="upload-panel-head"><div><span class="upload-kicker">Comenzar una revisión</span><h2 id="uploadHeading">Sube tu documento</h2><p>Una sola acción para comenzar. No necesitas completar formularios.</p></div><span class="filetypes">DOCX · PDF · TXT</span></div>
   <label class="upload" id="drop" tabindex="0" role="button" aria-label="Seleccionar un documento Word, PDF o TXT">
@@ -235,13 +242,13 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.upload:focus-vi
  </section>
  <section id="workspace" class="hidden">
  <div class="box">
-   <div class="topline"><div><div class="small muted">DOCUMENTO CARGADO</div><div class="filename" id="fileName"></div></div><button id="newFile" class="ghost">Subir otro informe</button></div>
+   <div class="topline"><div><div class="small muted">DOCUMENTO CARGADO</div><div class="filename" id="fileName"></div><div class="doc-meta"><span id="docWords"></span><span id="docType"></span><span id="editStatus">Sin cambios</span></div></div><button id="newFile" class="ghost">Subir otro informe</button></div>
    <div id="aiPanel" class="hidden">
-  <h2 class="sectiontitle">Dictamen de SUSTENTA IA</h2>
+  <h2 class="sectiontitle">Revisión de SUSTENTA IA</h2><div id="staleReview" class="message hidden" role="status">El texto cambió después del análisis. Vuelve a analizarlo para obtener observaciones sobre esta versión.</div>
   <p class="sub">Solo un análisis emitido por la IA conectada puede considerarse revisión inteligente. El autor debe contrastar los hechos y fuentes.</p>
   <div id="aiAnswer" class="ai-answer" role="status"></div><div id="aiStructured" class="hidden">
   <div id="aiReviewStatus" class="message"></div>
-  <div id="aiReviewFindings" class="findings"></div>
+  <div class="review-tools"><div class="filter-group" role="group" aria-label="Filtrar hallazgos por severidad"><button type="button" data-severity="all" aria-pressed="true">Todos</button><button type="button" data-severity="critica" aria-pressed="false">Críticos</button><button type="button" data-severity="mayor" aria-pressed="false">Mayores</button><button type="button" data-severity="menor" aria-pressed="false">Menores</button></div><button id="exportReview" class="ghost" type="button">Descargar revisión TXT ↓</button></div><p id="filterCount" class="small muted" role="status"></p><div id="aiReviewFindings" class="findings"></div>
   <h3 class="sectiontitle" style="margin-top:20px">Correcciones sugeridas</h3>
   <p class="sub">Cada propuesta requiere la validación del especialista. Se puede copiar, pero no se insertará automáticamente ni alterará la estructura del Word.</p>
   <div id="aiReviewEdits" class="findings"></div>
@@ -274,19 +281,20 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.upload:focus-vi
  <div class="layout">
   <div class="box"><h2 class="sectiontitle">Aclaraciones y respuestas</h2><p class="sub">Conversa con SUSTENTA IA. Solo se pedirán aclaraciones necesarias.</p>
    <div class="chat" id="chat" aria-live="polite"></div>
-   <form id="chatForm" class="chatbar"><textarea id="reply" placeholder="Escribe aquí tu respuesta..."></textarea><button type="submit" class="primary">Responder</button></form>
+   <form id="chatForm" class="chatbar"><textarea id="reply" aria-label="Consulta sobre el documento" placeholder="Pregunta por un hallazgo o aclara un dato…" maxlength="3000"></textarea><button type="submit" class="primary">Responder</button></form>
    <div class="actions"><button id="addAnswers" class="secondary" disabled>Incorporar respuestas al borrador</button></div>
    <div class="counter" id="questionState"></div>
   </div>
   <div class="box"><h2 class="sectiontitle" id="editorHeading">Documento y revisión</h2><p class="sub" id="formatMessage">El cuadro siguiente muestra texto extraído, NO el aspecto del Word original.</p><div class="message" id="modeStatus" role="status">Solo se permite exportación con diseño preservado cuando se cargó el DOCX original.</div>
+   <div class="editor-tools"><span id="draftCount">Texto de trabajo</span><button id="restoreDraft" class="ghost" type="button" disabled>Restaurar texto original</button></div>
    <textarea id="draft" class="editor" spellcheck="true" aria-label="Borrador editable"></textarea>
    <label class="review"><input id="checked" type="checkbox">Confirmo que revisaré personalmente las afirmaciones y evidencias del documento antes de su emisión.</label>
    <div class="actions"><button id="download" class="primary" disabled>Guardar cambios en Word original</button><button id="draftDownload" class="secondary" disabled>Descargar copia original intacta</button></div>
-   <div id="downloadStatus" class="small muted" role="status"></div><div class="message" id="formatWarning">Nunca se convertirá texto plano o PDF en un supuesto Word revisado con formato intacto.</div>
+   <div class="actions"><button id="textDownload" class="ghost" type="button">Descargar texto de trabajo TXT ↓</button></div><div id="downloadStatus" class="small muted" role="status"></div><div class="message" id="formatWarning">Nunca se convertirá texto plano o PDF en un supuesto Word revisado con formato intacto.</div>
   </div>
  </div>
  </section>
- <footer class="footer">SUSTENTA · Versión piloto local. No acredita conformidad técnica, contractual o institucional. La descarga no equivale a autorización de emisión.</footer>
+ <footer class="footer">SUSTENTA · Versión 2026.11.14-R4 · Piloto de revisión. No acredita conformidad técnica, contractual o institucional. La descarga no equivale a autorización de emisión.</footer>
 </main>
 <script>
 (function(){
@@ -294,6 +302,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.upload:focus-vi
 const $=id=>document.getElementById(id);
 const S={text:"",filename:"",draft:"",findings:[],questions:[],index:0,replies:[],added:0,score:0,purpose:null,kindOverride:null,originalDocx:null,originalLines:null,sourceFile:null,exportMode:"blocked"};
 const AI={token:null,available:false,history:[],busy:false,review:null};
+const UX={epoch:0,controllers:new Set(),demo:false,loading:false,analyzing:false,checking:false,reviewText:null,filter:"all",dirty:false};
 const API_URL="https://azajuquqksrjyfbtcujq.supabase.co";
 const PUBLIC_KEY="sb_publishable_U0SSbONBfry7O3YPB2DAzw_d_C5kmEF";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -310,16 +319,17 @@ async function readDocx(file){
  if(!part)throw Error("El archivo no contiene word/document.xml");
  const lines=paragraphLines(parseXml(await part.async("string")));return {zip,lines};
 }
-async function preservedWord(){
+async function preservedWord(textSnapshot=$("draft").value){
  if(!S.originalDocx||!S.sourceFile)throw Error("Carga el Word original.");
+ const originalLines=S.originalLines.slice();
  const original=await S.sourceFile.arrayBuffer();
  const z=await JSZip.loadAsync(original),part=z.file("word/document.xml");
  if(!part)throw Error("El documento Word no incluye word/document.xml.");
  const xml=parseXml(await part.async("string"));
- const paras=byTag(xml.documentElement,"p"),edited=$("draft").value.replace(/\r/g,"").split("\n");
+ const paras=byTag(xml.documentElement,"p"),edited=textSnapshot.replace(/\r/g,"").split("\n");
  if(edited.length!==paras.length)throw Error("El número de párrafos cambió ("+paras.length+" originales / "+edited.length+" editados). No puedo garantizar el formato. Solo se admite editar dentro de los párrafos originales.");
  const different=[];
- for(let i=0;i<paras.length;i++)if(edited[i]!==S.originalLines[i])different.push(i);
+ for(let i=0;i<paras.length;i++)if(edited[i]!==originalLines[i])different.push(i);
  if(!different.length)throw Error("No hay cambios de texto. Utiliza «Descargar copia original intacta» para conservar el archivo exactamente.");
  for(const i of different){
    const p=paras[i],runs=byTag(p,"t");
@@ -332,7 +342,7 @@ async function preservedWord(){
       byTag(p,"ins").length){
      throw Error("El párrafo "+(i+1)+" usa formato enriquecido, saltos, campos o varios fragmentos. Para evitar deformarlo, SUSTENTA no sustituirá ese contenido.");
    }
-   const before=S.originalLines[i],after=edited[i];
+   const before=originalLines[i],after=edited[i];
    if(after.includes("\n"))throw Error("No se admite partir el párrafo "+(i+1)+".");
    if(after.length>before.length+200&&after.length>before.length*1.35){
      throw Error("La edición del párrafo "+(i+1)+" es demasiado extensa: podría desplazar la paginación. Realiza el cambio en Word.");
@@ -347,11 +357,11 @@ async function preservedWord(){
  return {blob:await z.generateAsync({type:"blob",compression:"DEFLATE"}),changed:different.length};
 }
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
-async function extract(file){
+async function extract(file,epoch=UX.epoch){
   if(file.size>12*1024*1024)throw Error("El archivo supera los 12 MB permitidos.");
   const n=file.name.toLowerCase();
   if(n.endsWith(".txt"))return await file.text();
-  if(n.endsWith(".docx")){S.originalDocx=await readDocx(file);S.originalLines=S.originalDocx.lines;return S.originalLines.join("\n");}
+  if(n.endsWith(".docx")){const doc=await readDocx(file);if(epoch!==UX.epoch)throw Error("Carga cancelada.");S.originalDocx=doc;S.originalLines=doc.lines;return S.originalLines.join("\n");}
   if(n.endsWith(".pdf")){
     if(!window.pdfjsLib)throw Error("No se pudo cargar el lector PDF.");
     window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -490,47 +500,53 @@ function start(file,text){
  let score=10;
  S.findings.forEach(f=>{score-=f.level==="critica"?2:f.level==="mayor"?1:.4});
  S.score=Math.max(1,Math.min(10,score));
- S.draft=S.originalDocx?S.originalLines.join("\n"):tidy(S.text);
+ UX.savedText=null;S.draft=S.originalDocx?S.originalLines.join("\n"):tidy(S.text);
  $("fileName").textContent=file.name;$("editorHeading").textContent=S.purpose.kind==="carta"?"Carta para revisar y descargar":S.purpose.kind==="informe"?"Informe para revisar y descargar":"Documento para revisar y descargar";
  $("score").textContent="—";
  $("outcome").textContent="SIN EVALUACIÓN INTELIGENTE";
  $("summary").textContent="Se detectaron "+S.findings.length+" señales automáticas. Sin calificación de calidad ni aprobación de emisión.";
  $("chat").replaceChildren();renderPurpose();renderFindings();
  bubble("Archivo recibido. Las observaciones locales son orientativas. El dictamen contextual corresponde al bot IA.","assistant");
- $("draft").value=S.draft;$("checked").checked=false;$("download").disabled=!S.originalDocx;
+ $("draft").value=S.draft;$("checked").checked=false;$("download").disabled=true;
  S.exportMode=S.originalDocx?"original-only":"blocked";$("draftDownload").disabled=!S.originalDocx;
- $("modeStatus").textContent=S.originalDocx?"Modo Word original: copia exacta disponible. Los cambios solo se exportarán cuando sean compatibles con la estructura del archivo.":"Modo lectura: este archivo no es DOCX. Puedes leer el análisis, pero NO generaremos un Word falso que pierda el formato original.";
-$("formatMessage").textContent=S.originalDocx?"Este campo es una transcripción de párrafos; no muestra márgenes, tablas, encabezados ni diseño original. Solo las ediciones simples dentro de un párrafo podrán guardarse en el DOCX original.":"Texto extraído solo para análisis. Para producir un Word con idéntico formato, carga el DOCX original.";
+ $("modeStatus").textContent=S.originalDocx?"Modo Word original: copia exacta disponible. Los cambios solo se exportarán cuando sean compatibles con la estructura del archivo.":"Modo lectura: este archivo no es DOCX. Puedes leer el análisis, pero para guardar con el diseño original, carga el archivo DOCX.";
+$("formatMessage").textContent=S.originalDocx?"Este campo es una transcripción de párrafos; no muestra márgenes, tablas, encabezados ni diseño original. Solo las ediciones simples dentro de un párrafo podrán guardarse en el DOCX original.":"Texto extraído para revisión y edición. Para producir un Word con idéntico formato, carga el DOCX original.";
 $("formatWarning").textContent=S.originalDocx?"La copia original se descarga byte por byte sin cambios. Las correcciones de texto se aplican solamente cuando no afectan objetos o formatos complejos; aun así debes cotejar visualmente el resultado en Word.":"Exportación de Word bloqueada desde PDF/TXT para evitar documentos de texto corrido y formato incorrecto.";
  $("addAnswers").disabled=true;$("reply").value="";$("downloadStatus").textContent="";
  $("workspace").classList.remove("hidden");
+ $("uploader").classList.add("hidden");
+ document.querySelectorAll(".workflow-nav a").forEach(a=>{a.removeAttribute("aria-current");a.removeAttribute("aria-disabled")});$("stepReview").setAttribute("aria-current","step");
+ updateDraftState();
  $("workspace").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 async function aiRequest(action,question=""){
  if(!AI.token)throw Error("Primero ingresa a SUSTENTA");
- const response=await fetch(API_URL+"/functions/v1/sustenta-ia",{
+ if(UX.demo)throw Error("La vista guiada no realiza consultas a IA.");
+ const documentText=tidy($("draft").value);
+ if(documentText.length<40||documentText.length>180000)throw Error("El texto de trabajo debe tener entre 40 y 180000 caracteres.");
+ const response=await request(API_URL+"/functions/v1/sustenta-ia",{
   method:"POST",
   headers:{"Content-Type":"application/json","apikey":PUBLIC_KEY,"Authorization":"Bearer "+AI.token},
-  body:JSON.stringify({action,document:S.text,filename:S.filename,question,history:AI.history.slice(-8)})
+  body:JSON.stringify({action,document:documentText,filename:S.filename,question,history:AI.history.slice(-8)})
  });
  const data=await response.json().catch(()=>({}));
  if(!response.ok)throw Error(data.error||"No se pudo completar la consulta");
  return data;
 }
 async function checkAI(){
- const r=await fetch(API_URL+"/functions/v1/sustenta-ia",{
+ if(UX.demo||!AI.token)throw Error("Ingresa con tu cuenta para comprobar la conexión.");
+ const r=await request(API_URL+"/functions/v1/sustenta-ia",{
   method:"POST",
   headers:{"Content-Type":"application/json","apikey":PUBLIC_KEY,"Authorization":"Bearer "+AI.token},
   body:JSON.stringify({action:"status"})
  });
  const j=await r.json().catch(()=>({}));
- if(!r.ok)throw Error(j.error||"Esta cuenta no tiene acceso a SUSTENTA IA");
+ if(!r.ok)throw Error(r.status===401?"La sesión venció. Vuelve a ingresar.":r.status===403?"Esta cuenta no tiene autorización para SUSTENTA.":j.error||"No se pudo comprobar el servicio. Intenta de nuevo.");
  AI.available=Boolean(j.available);
+ $("serviceState").dataset.state=AI.available?"ready":"error";
  $("serviceState").textContent=AI.available?"Bot SUSTENTA IA · Disponible":"Bot IA · Pendiente de clave";
- $("reply").disabled=!AI.available;
- $("chatForm").querySelector('button[type="submit"]').disabled=!AI.available;
- $("analyzeAI").disabled=!AI.available;
+ syncBusy();
  return AI.available;
 }
 
@@ -541,9 +557,12 @@ function showStructuredReview(data) {
  const findings=$("aiReviewFindings");findings.replaceChildren();
  const title=document.createElement("h3");title.className="sectiontitle";title.textContent="Hallazgos del análisis IA";findings.append(title);
  const observations=Array.isArray(data.observaciones)?data.observaciones:[];
+ UX.filter="all";document.querySelectorAll("[data-severity]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.severity==="all")));
  if(!observations.length){const p=document.createElement("p");p.className="muted";p.textContent="No se emitieron observaciones específicas.";findings.append(p)}
  observations.forEach(obs=>{
   const article=document.createElement("article");article.className="finding "+(obs.severidad==="critica"?"critica":obs.severidad==="menor"?"leve":"");
+  article.dataset.severity=obs.severidad||"sin_clasificar";
+  const badge=document.createElement("span");badge.className="severity";badge.textContent=({critica:"Crítica",mayor:"Mayor",menor:"Menor"}[obs.severidad]||"Por clasificar")+" · "+(obs.estado||"ABIERTO");article.append(badge);
   const h=document.createElement("h3");h.textContent=(obs.id||"Observación")+" · "+(obs.problema||"Hallazgo");article.append(h);
   for(const line of ["Ubicación: "+(obs.ubicacion||"no localizable"),"Impacto: "+(obs.efecto_en_proposito||""),"Corrección: "+(obs.propuesta||""),"Evidencia: "+(obs.fuente||"NO VERIFICADA")]){const p=document.createElement("p");p.textContent=line;article.append(p)}
   findings.append(article);
@@ -562,12 +581,18 @@ function showStructuredReview(data) {
  const questions=Array.isArray(data.preguntas_indispensables)?data.preguntas_indispensables:[];
  $("aiReviewQuestions").classList.toggle("hidden",!questions.length);
  $("aiReviewQuestions").textContent=questions.length?"Aclaraciones imprescindibles: "+questions.map(q=>q.pregunta).join(" · "):"";
+ filterFindings();
 }
 async function analyzeWithAI(){
+ if(UX.analyzing||AI.busy||UX.demo||!AI.available)return;
+ const epoch=UX.epoch,reviewText=$("draft").value;UX.analyzing=true;AI.history=[];UX.reviewText=null;$("staleReview").classList.add("hidden");syncBusy();
  $("aiPanel").classList.remove("hidden");$("aiStructured").classList.add("hidden");$("aiAnswer").textContent="Analizando el propósito y el sustento del documento...";$("aiStructured").classList.add("hidden");AI.review=null;
  $("analyzeAI").disabled=true;$("aiState").textContent="Análisis en curso";
  try{
   const j=await aiRequest("analyze");
+  if(epoch!==UX.epoch)return;
+  if(!j.structured&&!j.answer)throw Error("El servicio devolvió una respuesta vacía.");
+  UX.reviewText=reviewText;updateDraftState();
   $("aiAnswer").textContent=j.structured?[(j.structured.proposito||""),(j.structured.analisis_narrativo||""),(j.structured.recomendacion_final||"")].filter(Boolean).join("\n\n"):j.answer;
   if(j.structured)showStructuredReview(j.structured);
   $("aiState").textContent="Dictamen IA. Contrasta las afirmaciones con los originales.";
@@ -576,67 +601,72 @@ async function analyzeWithAI(){
   bubble("Ya he revisado el propósito del documento. Pregúntame por las observaciones, o indícame qué deseas mejorar. No modificaré tu Word sin tu autorización.","assistant");
   $("questionState").textContent="Chat IA activo";
  }catch(e){
+  if(epoch!==UX.epoch)return;
   $("aiAnswer").textContent="No se pudo completar el análisis con IA: "+(e.message||String(e));
   $("aiState").textContent="Motor IA no disponible";
- }finally{$("analyzeAI").disabled=!AI.available}
+ }finally{if(epoch===UX.epoch){UX.analyzing=false;syncBusy();}}
 }
 async function chatWithAI(question){
- if(AI.busy)return;
- AI.busy=true;
+ if(AI.busy||UX.analyzing||UX.demo||!AI.available)return;
+ const epoch=UX.epoch;AI.busy=true;syncBusy();
  const send=$("chatForm").querySelector('button[type="submit"]');
  send.disabled=true;
  bubble("Estoy revisando tu consulta...","assistant");
  const target=$("chat").lastElementChild;
  try{
   const j=await aiRequest("chat",question);
+  if(epoch!==UX.epoch)return;
+  if(!j.answer)throw Error("El servicio devolvió una respuesta vacía.");
   target.textContent=j.answer;
   AI.history.push({role:"user",content:question},{role:"assistant",content:j.answer});
   AI.history=AI.history.slice(-8);
   $("questionState").textContent="Chat IA activo. Revisa las fuentes antes de emitir.";
- }catch(e){target.textContent="No se pudo obtener respuesta: "+(e.message||String(e))}
- finally{AI.busy=false;send.disabled=false}
+ }catch(e){if(epoch===UX.epoch)target.textContent="No se pudo obtener respuesta: "+(e.message||String(e))}
+ finally{if(epoch===UX.epoch){AI.busy=false;syncBusy();}}
 }
 $("loginForm").addEventListener("submit",async e=>{
- e.preventDefault();$("loginButton").disabled=true;$("authMessage").textContent="Comprobando acceso...";
+ e.preventDefault();const epoch=UX.epoch;$("authMessage").dataset.error="false";$("loginButton").disabled=true;$("openDemo").disabled=true;$("authMessage").textContent="Comprobando acceso...";
  try{
-  const res=await fetch(API_URL+"/auth/v1/token?grant_type=password",{
+  const res=await request(API_URL+"/auth/v1/token?grant_type=password",{
    method:"POST",headers:{"Content-Type":"application/json","apikey":PUBLIC_KEY},
    body:JSON.stringify({email:$("authEmail").value.trim(),password:$("authPassword").value})
   });
   const data=await res.json().catch(()=>({}));
-  if(!res.ok||!data.access_token)throw Error("No se pudo iniciar sesión. Comprueba las credenciales autorizadas.");
+  if(epoch!==UX.epoch)return;
+  if(!res.ok||!data.access_token)throw Error(res.status===429?"Demasiados intentos. Espera un momento y vuelve a intentar.":res.status>=500?"El servicio de acceso no responde. Intenta de nuevo en unos minutos.":"No se pudo iniciar sesión. Comprueba tu correo y contraseña.");
   AI.token=data.access_token;
   $("authPassword").value="";
   await checkAI();
+  if(epoch!==UX.epoch)return;
+  document.querySelector(".skip-link").setAttribute("href","#mainApp");
+  $("accessFooter").classList.add("hidden");
   $("authGate").classList.add("hidden");
   $("mainApp").classList.remove("hidden");
   $("authMessage").textContent="Acceso validado.";
- }catch(e){AI.token=null;$("authMessage").textContent=e.message||String(e)}
- finally{$("loginButton").disabled=false}
+ }catch(e){if(epoch===UX.epoch){AI.token=null;AI.available=false;$("authMessage").dataset.error="true";$("authMessage").textContent=e.message||String(e)}}
+ finally{if(epoch===UX.epoch){$("loginButton").disabled=false;$("openDemo").disabled=false;}}
 });
-$("logoutButton").addEventListener("click",()=>{
- AI.token=null;AI.available=false;AI.history=[];S.text="";S.originalDocx=null;S.originalLines=null;S.sourceFile=null;
- $("workspace").classList.add("hidden");$("mainApp").classList.add("hidden");$("authGate").classList.remove("hidden");
- $("serviceState").textContent="Acceso privado · IA";
- $("file").value="";
-});
+$("logoutButton").addEventListener("click",leaveWorkspace);
 $("analyzeAI").addEventListener("click",()=>{if(AI.available&&S.text)analyzeWithAI()});
 $("recheckAI").addEventListener("click",async()=>{
- $("aiState").textContent="Verificando conexión...";
- try {
-  await checkAI();
-  $("aiState").textContent=AI.available?"Servicio IA disponible":"Motor de IA pendiente de configuración";
-  if(AI.available&&S.text)await analyzeWithAI();
-  else $("aiAnswer").textContent="No se ha realizado revisión IA. Es necesario configurar una clave OpenAI válida en el servidor; no se configura desde esta página.";
- }catch(e){$("aiState").textContent="No se pudo validar la conexión: "+(e.message||String(e))}
+ if(UX.checking||UX.analyzing||AI.busy||UX.demo)return;
+ const epoch=UX.epoch;UX.checking=true;syncBusy();$("aiState").textContent="Verificando conexión…";
+ try{await checkAI();if(epoch!==UX.epoch)return;$("aiState").textContent=AI.available?"Servicio disponible. Pulsa Analizar con IA cuando lo necesites.":"Servicio de IA pendiente de configuración.";}
+ catch(e){if(epoch===UX.epoch){AI.available=false;$("serviceState").dataset.state="error";$("serviceState").textContent="IA · Sin conexión";$("aiState").textContent=e.message||String(e);}}
+ finally{if(epoch===UX.epoch){UX.checking=false;syncBusy();}}
 });
 async function fileSelected(file){
- if(!file)return;
+ if(!file||UX.loading||UX.demo||!AI.token)return;
+ if(UX.dirty&&!confirm("Hay cambios sin descargar. ¿Deseas cargar otro documento?"))return;
+ invalidateRequests();const epoch=UX.epoch;UX.loading=true;syncBusy();
+ const previous={...S};
  S.originalDocx=null;S.originalLines=null;S.sourceFile=file;S.exportMode="blocked";
  msg("Leyendo el informe y generando observaciones preliminares...");
- $("workspace").classList.add("hidden");
+ $("uploader").classList.remove("hidden");
+ $("drop").setAttribute("aria-busy","true");
  try{
-   const content=await extract(file);
+   const content=await extract(file,epoch);
+   if(epoch!==UX.epoch)return;
    if(tidy(content).length<45)throw Error("No pude extraer suficiente texto. Si el PDF está escaneado, requiere OCR; todavía no disponible.");
    if(content.length>180000)throw Error("El texto tiene "+content.length+" caracteres. El límite IA es 180000; divide el expediente en partes.");
    start(file,content);msg("");
@@ -652,10 +682,11 @@ async function fileSelected(file){
     $("chatForm").querySelector('button[type="submit"]').disabled=true;
     bubble("El chat estará disponible cuando el motor de IA se encuentre configurado. No es posible revisar este documento inteligentemente todavía.","assistant");
    }
- }catch(e){msg(e.message||"No fue posible leer este documento.",true);}
+ }catch(e){if(epoch===UX.epoch){Object.assign(S,previous);msg(e.message||"No fue posible leer este documento.",true);}}
+ finally{if(epoch===UX.epoch){UX.loading=false;$("drop").setAttribute("aria-busy","false");syncBusy();}}
 }
 $("file").addEventListener("change",e=>fileSelected(e.target.files?.[0]));
-$("newFile").addEventListener("click",()=>{$("file").value="";$("workspace").classList.add("hidden");$("drop").scrollIntoView({behavior:"smooth"});$("file").click();});
+$("newFile").addEventListener("click",()=>{if(UX.demo||UX.loading)return;$("file").value="";$("file").click();});
 $("drop").addEventListener("keydown",e=>{if(e.target===$("drop")&&(e.key==="Enter"||e.key===" ")){e.preventDefault();$("file").click();}});
 $("drop").addEventListener("dragover",e=>{e.preventDefault();$("drop").classList.add("dragging");});
 $("drop").addEventListener("dragleave",()=>$("drop").classList.remove("dragging"));
@@ -678,7 +709,7 @@ function handleInstruction(text){
  return false;
 }
 $("chatForm").addEventListener("submit",async e=>{
- e.preventDefault();const answer=tidy($("reply").value);if(!answer||!S.text)return;
+ e.preventDefault();const answer=tidy($("reply").value);if(!answer||!S.text||AI.busy||UX.analyzing||!AI.available||UX.demo)return;
  bubble(answer,"user");$("reply").value="";
  if(AI.available){await chatWithAI(answer);return;}
  bubble("El bot IA está pendiente de configuración y no puede responder.","assistant");
@@ -691,9 +722,10 @@ $("addAnswers").addEventListener("click",()=>{
  $("draft").value=tidy($("draft").value)+addition;S.draft=$("draft").value;S.added=S.replies.length;S.purpose=purposeAudit(S.draft,S.filename,S.kindOverride);renderPurpose();
  $("addAnswers").disabled=true;$("checked").checked=false;$("download").disabled=true;$("draft").scrollIntoView({behavior:"smooth",block:"center"});
 });
-$("draft").addEventListener("input",()=>{$("checked").checked=false;$("download").disabled=true;if(S.filename){S.purpose=purposeAudit($("draft").value,S.filename,S.kindOverride);renderPurpose();}});
+$("draft").addEventListener("input",()=>{updateDraftState();$("checked").checked=false;$("download").disabled=true;if(S.filename){S.purpose=purposeAudit($("draft").value,S.filename,S.kindOverride);renderPurpose();}});
 $("checked").addEventListener("change",()=>{$("download").disabled=!S.originalDocx||!$("checked").checked||!$("draft").value.trim();});
 async function download(asDraft){
+ const epoch=UX.epoch,exportText=$("draft").value;
  if(!S.sourceFile)return;
  if(!S.originalDocx){
    $("downloadStatus").textContent="Exportación bloqueada. La conversión de PDF o TXT a Word no conserva la estructura original. Sube el archivo .docx editable.";
@@ -709,7 +741,9 @@ async function download(asDraft){
  if(!$("checked").checked){$("downloadStatus").textContent="Confirma tu revisión antes de guardar los cambios.";return}
  try{
    $("downloadStatus").textContent="Comprobando la estructura de los párrafos...";
-   const result=await preservedWord();
+   const result=await preservedWord(exportText);
+   if(epoch!==UX.epoch)return;
+   UX.savedText=exportText;updateDraftState();
    saveBlob(result.blob,base+"_CAMBIOS_COMPATIBLES.docx");
    $("downloadStatus").textContent="Se editaron "+result.changed+" párrafos simples dentro del Word original. Este archivo requiere una comparación visual de páginas antes de su emisión.";
  }catch(e){
@@ -718,5 +752,122 @@ async function download(asDraft){
 }
 $("download").addEventListener("click",()=>download(false));
 $("draftDownload").addEventListener("click",()=>download(true));
+
+
+async function request(url,options){
+ const epoch=UX.epoch,controller=new AbortController();UX.controllers.add(controller);
+ const timer=setTimeout(()=>controller.abort(),options.body?.includes('"action":"analyze"')?240000:45000);
+ try{
+  const response=await fetch(url,{...options,signal:controller.signal});
+  // Consume the response before clearing the timeout: the body can stall too.
+  const body=await response.text();
+  if(epoch!==UX.epoch)throw Error("Solicitud cancelada al cambiar de documento o sesión.");
+  return {ok:response.ok,status:response.status,json:async()=>JSON.parse(body)};
+ }catch(e){
+  if(e.name==="AbortError")throw Error("La consulta se canceló o superó el tiempo de espera. Puedes volver a intentar.");
+  if(e instanceof TypeError)throw Error("No se pudo conectar con el servicio. Comprueba tu conexión e intenta de nuevo.");
+  throw e;
+ }finally{clearTimeout(timer);UX.controllers.delete(controller);}
+}
+function invalidateRequests(){
+ UX.epoch++;UX.controllers.forEach(c=>c.abort());UX.controllers.clear();
+ UX.analyzing=false;UX.checking=false;AI.busy=false;UX.reviewText=null;
+}
+function syncBusy(){
+ const blocked=UX.analyzing||AI.busy||UX.checking;
+ $("analyzeAI").disabled=!AI.available||blocked||UX.demo;
+ $("recheckAI").disabled=blocked||UX.demo;
+ $("reply").disabled=!AI.available||blocked||UX.demo;
+ $("chatForm").querySelector('button[type="submit"]').disabled=!AI.available||blocked||UX.demo;
+ $("aiPanel").setAttribute("aria-busy",String(UX.analyzing));
+ $("analyzeAI").textContent=UX.analyzing?"Analizando…":"Analizar con IA";
+ $("newFile").disabled=UX.loading||UX.demo;
+ $("file").disabled=UX.loading||UX.demo;
+ $("drop").setAttribute("aria-disabled",String(UX.loading||UX.demo));
+}
+function updateDraftState(){
+ const text=$("draft").value,words=text.trim()?text.trim().split(/\s+/u).length:0;
+ UX.dirty=text!==(UX.savedText??S.draft);
+ $("docWords").textContent=words.toLocaleString("es-PE")+" palabras";
+ $("docType").textContent=S.filename.split(".").pop().toUpperCase()+" · "+(S.sourceFile?(S.sourceFile.size/1024).toFixed(1)+" KB":"Ejemplo ficticio");
+ $("draftCount").textContent=text.length.toLocaleString("es-PE")+" caracteres · "+text.split("\n").length+" párrafos de texto";
+ $("editStatus").textContent=UX.dirty?"Cambios sin descargar":text!==S.draft?"Cambios descargados":"Sin cambios";
+ $("restoreDraft").disabled=text===S.draft;
+ $("staleReview").classList.toggle("hidden",!UX.reviewText||UX.reviewText===text);
+}
+function filterFindings(){
+ const articles=Array.from($("aiReviewFindings").querySelectorAll("article"));let count=0;
+ articles.forEach(a=>{const visible=UX.filter==="all"||a.dataset.severity===UX.filter;a.classList.toggle("hidden",!visible);if(visible)count++;});
+ $("filterCount").textContent=count+" de "+articles.length+" hallazgos"+(count===0&&articles.length?" · No hay hallazgos en esta categoría.":"");
+}
+function leaveWorkspace(){
+ if(UX.dirty&&!confirm("Hay cambios sin descargar. ¿Deseas salir de este espacio?"))return;
+ invalidateRequests();UX.demo=false;UX.dirty=false;UX.loading=false;UX.savedText=null;
+ AI.token=null;AI.available=false;AI.history=[];AI.review=null;
+ Object.assign(S,{text:"",filename:"",draft:"",findings:[],questions:[],replies:[],originalDocx:null,originalLines:null,sourceFile:null,purpose:null,exportMode:"blocked"});
+ ["draft","reply","file","authPassword"].forEach(id=>$(id).value="");
+ ["chat","aiReviewFindings","aiReviewEdits"].forEach(id=>$(id).replaceChildren());
+ ["fileName","aiAnswer","aiReviewStatus","aiReviewQuestions","questionState","downloadStatus","aiState"].forEach(id=>$(id).textContent="");
+ ["workspace","mainApp","demoBanner","aiStructured","staleReview"].forEach(id=>$(id).classList.add("hidden"));
+ ["authGate","accessFooter","uploader"].forEach(id=>$(id).classList.remove("hidden"));
+
+ document.querySelector(".skip-link").setAttribute("href","#authGate");
+ $("authPassword").type="password";$("togglePassword").textContent="Mostrar";$("togglePassword").setAttribute("aria-label","Mostrar contraseña");$("togglePassword").setAttribute("aria-pressed","false");
+ $("authMessage").textContent="Acceso exclusivo para usuarios autorizados. No hay registro público.";$("authMessage").dataset.error="false";
+ $("serviceState").textContent="Acceso privado · IA";$("serviceState").dataset.state="";
+ document.querySelectorAll(".workflow-nav a").forEach(a=>a.removeAttribute("aria-current"));
+ $("stepUpload").setAttribute("aria-current","step");["stepReview","stepEdit"].forEach(id=>$(id).setAttribute("aria-disabled","true"));
+ $("download").disabled=true;$("draftDownload").disabled=true;msg("");syncBusy();$("authEmail").focus();
+}
+$("togglePassword").addEventListener("click",()=>{
+ const show=$("authPassword").type==="password";$("authPassword").type=show?"text":"password";
+ $("togglePassword").textContent=show?"Ocultar":"Mostrar";$("togglePassword").setAttribute("aria-label",show?"Ocultar contraseña":"Mostrar contraseña");$("togglePassword").setAttribute("aria-pressed",String(show));
+});
+$("restoreDraft").addEventListener("click",()=>{
+ if(!UX.dirty||!confirm("¿Restaurar el texto original? Se descartarán los cambios del cuadro de edición."))return;
+ $("draft").value=S.draft;$("checked").checked=false;$("download").disabled=true;
+ S.purpose=purposeAudit(S.draft,S.filename,S.kindOverride);renderPurpose();updateDraftState();
+});
+document.querySelectorAll("[data-severity]").forEach(button=>button.addEventListener("click",()=>{
+ UX.filter=button.dataset.severity;document.querySelectorAll("[data-severity]").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));filterFindings();
+}));
+$("textDownload").addEventListener("click",()=>{
+ if(!S.text)return;saveBlob(new Blob([$("draft").value],{type:"text/plain;charset=utf-8"}),S.filename.replace(/\.[^.]+$/,"")+"_TEXTO_TRABAJO.txt");
+ $("downloadStatus").textContent="Texto de trabajo descargado. Esta copia TXT no conserva el diseño del documento original.";
+ UX.savedText=$("draft").value;updateDraftState();
+});
+$("exportReview").addEventListener("click",()=>{
+ if(!AI.review)return;
+ const r=AI.review,lines=["SUSTENTA · REVISIÓN DOCUMENTAL",S.filename,"Fecha de descarga: "+new Date().toLocaleString("es-PE",{timeZone:"America/Lima"}),"Estado: "+r.estado_editorial,"Versión del texto: "+(UX.reviewText===$("draft").value?"Coincide con el texto de trabajo":"El texto cambió después de esta revisión"),"",r.proposito,r.analisis_narrativo,"",...((r.observaciones||[]).map(o=>[o.id+" · "+o.severidad+" · "+o.problema,"Ubicación: "+o.ubicacion,"Impacto: "+o.efecto_en_proposito,"Propuesta: "+o.propuesta,"Fuente: "+o.fuente,"Estado: "+o.estado].join("\n"))),"","CORRECCIONES PROPUESTAS",...((r.ediciones_propuestas||[]).map(e=>[e.id_bloque,"Original: "+e.texto_anterior,"Sugerido: "+e.texto_sugerido].join("\n"))),"","ACLARACIONES",...((r.preguntas_indispensables||[]).map(q=>q.pregunta)),"",r.recomendacion_final,"","Requiere validación profesional. No equivale a aprobación ni autorización de emisión."];
+ saveBlob(new Blob([lines.filter(x=>x!=null).join("\n\n")],{type:"text/plain;charset=utf-8"}),S.filename.replace(/\.[^.]+$/,"")+"_REVISION.txt");
+});
+$("exitDemo").addEventListener("click",leaveWorkspace);
+$("openDemo").addEventListener("click",()=>{
+ invalidateRequests();UX.demo=true;AI.available=false;AI.token=null;AI.review=null;AI.history=[];
+ document.querySelector(".skip-link").setAttribute("href","#mainApp");
+ $("authGate").classList.add("hidden");$("accessFooter").classList.add("hidden");$("authPassword").value="";
+ $("mainApp").classList.remove("hidden");$("demoBanner").classList.remove("hidden");
+ $("serviceState").textContent="Vista guiada · Sin IA";$("serviceState").dataset.state="";
+ S.originalDocx=null;S.originalLines=null;S.sourceFile=null;
+ start({name:"Carta_de_ejemplo.txt"},"CARTA DE EJEMPLO — DATOS FICTICIOS\n\nSeñor responsable del área de administración:\nAsunto: Solicitud de constancia de prestación de servicios.\n\nDe mi consideración:\nSolicito la emisión de la constancia de prestación de servicios correspondiente a la Orden de Servicio N.º 000000. Los datos de esta carta son ficticios y se utilizan únicamente para mostrar la aplicación.\n\nAtentamente,\nProfesional de ejemplo");
+ $("aiPanel").classList.remove("hidden");$("aiStructured").classList.add("hidden");
+ $("aiAnswer").textContent="Este es un recorrido por el espacio de revisión. Puedes explorar las comprobaciones locales, editar el texto de ejemplo y descargarlo como TXT. No hay un dictamen de IA ni se envía contenido a un servidor. Para analizar tus documentos, sal del ejemplo e ingresa con tu cuenta autorizada.";
+ $("aiState").textContent="Vista guiada: consultas IA deshabilitadas";
+ $("chat").replaceChildren();bubble("Aquí podrás consultar las observaciones de tu documento cuando ingreses con tu cuenta y el servicio de IA esté disponible.","assistant");
+ $("questionState").textContent="Ejemplo sin conversación con IA";syncBusy();
+});
+$("draft").addEventListener("focus",()=>{
+ document.querySelectorAll(".workflow-nav a").forEach(a=>a.removeAttribute("aria-current"));$("stepEdit").setAttribute("aria-current","step");
+});
+$("stepUpload").addEventListener("click",event=>{
+ event.preventDefault();if(UX.demo||UX.loading)return;
+ if(S.text){$("file").value="";$("file").click();}else $("drop").focus();
+});
+["stepReview","stepEdit"].forEach(id=>$(id).addEventListener("click",event=>{
+ if(!S.text){event.preventDefault();return;}
+ document.querySelectorAll(".workflow-nav a").forEach(a=>a.removeAttribute("aria-current"));$(id).setAttribute("aria-current","step");
+}));
+window.addEventListener("beforeunload",event=>{if(UX.dirty){event.preventDefault();event.returnValue="";}});
+
 })();
 </script></body></html>
