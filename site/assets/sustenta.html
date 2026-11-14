@@ -50,7 +50,7 @@
    <div class="actions"><button id="addAnswers" class="secondary" disabled>Incorporar respuestas al borrador</button></div>
    <div class="counter" id="questionState"></div>
   </div>
-  <div class="box"><h2 class="sectiontitle">Informe para descargar</h2><p class="sub">Revisa el texto corregido y ajusta lo que consideres necesario.</p>
+  <div class="box"><h2 class="sectiontitle" id="editorHeading">Documento para revisar y descargar</h2><p class="sub">Revisa el texto corregido y ajusta lo que consideres necesario.</p>
    <textarea id="draft" class="editor" spellcheck="true" aria-label="Borrador editable"></textarea>
    <label class="review"><input id="checked" type="checkbox">Confirmo que revisaré personalmente las afirmaciones y evidencias del documento antes de su emisión.</label>
    <div class="actions"><button id="download" class="primary" disabled>Descargar Word</button><button id="draftDownload" class="secondary">Descargar como borrador</button></div>
@@ -64,7 +64,7 @@
 (function(){
 "use strict";
 const $=id=>document.getElementById(id);
-const S={text:"",filename:"",draft:"",findings:[],questions:[],index:0,replies:[],added:0,score:0,purpose:null};
+const S={text:"",filename:"",draft:"",findings:[],questions:[],index:0,replies:[],added:0,score:0,purpose:null,kindOverride:null};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function msg(s,bad=false){$("loading").classList.toggle("hidden",!s);$("loading").classList.toggle("error",bad);$("loading").textContent=s||"";}
 function tidy(t){return String(t).replace(/\r/g,"").replace(/[ \t]+/g," ").replace(/\n[ \t]+/g,"\n").replace(/\n{4,}/g,"\n\n").trim();}
@@ -89,12 +89,22 @@ async function extract(file){
   throw Error("Formato no compatible. Selecciona DOCX, PDF o TXT.");
 }
 
-function docKind(t,filename) {
- const first=t.slice(0,750);
- if(/\b(carta|oficio|solicitud)\b/i.test(filename)||/^\s*(CARTA|OFICIO|SOLICITUD)\b/im.test(first)||/\bde mi consideraci[oó]n\b/i.test(first))return "carta";
- if(/\b(informe|reporte)\b/i.test(filename)||/^\s*(INFORME|REPORTE)\b/im.test(first))return "informe";
- if(/^\s*ASUNTO\s*:/im.test(first)&&/\b(estimad[oa]|señor[ea]s?)\b/i.test(first))return "carta";
+function docKind(t,filename,override){
+ if(override==="carta"||override==="informe")return override;
+ const front=t.slice(0,4200);
+ if(/^\s*(?:carta|oficio|solicitud)(?:\s+n[.°ºo]*)?\b/im.test(front)||
+    /\bde mi consideraci[oó]n\b/i.test(front)||
+    /\bme dirijo a (?:usted(?:es)?|su despacho|la entidad|la gerencia)\b/i.test(front)||
+    /\b(?:solicitar|solicito|solicitamos|se solicita|se sirva)\b[\s\S]{0,130}\b(?:constancia|certificado|emisi[oó]n|reconocimiento|documento|autorizaci[oó]n)\b/i.test(front)||
+    (/\b(?:señor(?:a|es)?|estimad[oa]s?|atentamente)\b/i.test(front)&&/\b(?:solicitar|solicito|me dirijo|de mi consideraci[oó]n)\b/i.test(front)))return "carta";
+ if(/\b(?:carta|oficio|solicitud)\b/i.test(filename)&&!/^\s*informe\b/im.test(front))return "carta";
+ if(/\b(?:informe|reporte)\b/i.test(filename)||/^\s*(?:INFORME|REPORTE)(?:\s+N[.°ºo]*)?\b/im.test(front))return "informe";
  return "documento";
+}
+function serviceDetail(t){
+ const os=(t.match(/\b(?:orden\s+de\s+servicio|O\.?\s*S\.?)\s*(?:n[.°ºo]*\s*[:\-]?\s*)?([0-9]{4,12}(?:[-\/][0-9]{2,6})?)/i)||[])[1]||"";
+ const isConstancia=/\bconstancia\b[\s\S]{0,100}\b(?:prestaci[oó]n|servicio|servicios|trabajo)\b|\b(?:prestaci[oó]n|servicio|servicios)\b[\s\S]{0,100}\bconstancia\b/i.test(t);
+ return {os,isConstancia};
 }
 function snippet(t,regex,max=225) {
  const m=regex.exec(t); if(!m)return "";
@@ -102,32 +112,33 @@ function snippet(t,regex,max=225) {
  const stop=after.search(/[\n\r](?=\S)|(?<=[.;])\s{1,3}(?=[A-ZÁÉÍÓÚ])/);
  return tidy((stop>34?after.slice(0,stop):after).slice(0,max));
 }
-function purposeAudit(text,filename){
- const t=tidy(text),kind=docKind(t,filename);
+function purposeAudit(text,filename,override){
+ const t=tidy(text),kind=docKind(t,filename,override),service=serviceDetail(t);
  const explicit=snippet(t,/^\s*(?:(?:OBJETIVO|FINALIDAD|OBJETO)(?:\s+DEL\s+(?:INFORME|DOCUMENTO))?\s*[:.\-]\s*|ASUNTO\s*:\s*)[^\n]+/im,230);
  const request=snippet(t,/\b(?:solicito|solicitamos|se solicita|se requiere|solicitar|se sirva|se solicita su|agradecer[ée]?)\b/i,230);
  const answer=snippet(t,/\b(?:en atenci[oó]n a|en respuesta a|respecto de su consulta|al respecto(?:\s*[:,])?|cumplo con informar|se comunica)\b/i,230);
  const result=snippet(t,/\b(?:concluimos|se concluye|conclusiones|se recomienda|no corresponde|es procedente|no es procedente|se determina|por lo expuesto)\b/i,230);
  const subject=explicit||request||answer||snippet(t,/\b(?:se informa|informo|se comunica|se evalu[oó]|se verific[oó])\b/i,200);
- const objective=subject||"No se pudo identificar con suficiente claridad qué resultado busca el documento.";
+ const objective=service.isConstancia?"Solicitar la constancia de prestación de servicios"+(service.os?" correspondiente a la Orden de Servicio N.º "+service.os:"")+".":subject||"No se pudo identificar con suficiente claridad qué resultado busca el documento.";
  const source=explicit?"Declarado en el texto":request?"Inferido a partir de una petición":answer?"Inferido de una comunicación o respuesta":"No demostrado de manera expresa";
  const intent=request?"solicitar una actuación o decisión":answer?"responder o comunicar una posición":result?"sustentar una conclusión":"informar o presentar resultados";
  const hasClosing=/conclusi[oó]n|concluimos|se concluye|se determina|por lo expuesto|en consecuencia|se recomienda|en s[ií]ntesis/i.test(t);
  const hasEvidence=/\b(?:anexo(?:s)?|acta(?:s)?|protocolo(?:s)?|registro(?:s)?|adjunt[oa]|fotograf[ií]a(?:s)?|evidencia(?:s)?|medici[oó]n(?:es)?|ensayo(?:s)?|aconex|acc|seg[uú]n el|conforme a)\b/i.test(t);
- const hasDecision=/\b(?:solicito|solicitamos|se solicita|se requiere|se sirva|se recomienda|se dispone|se concluye|se determina|se comunica|no corresponde|es procedente|no es procedente|se aprueba|se rechaza)\b/i.test(t);
+ const hasDecision=/\b(?:solicitar|solicito|solicitamos|se solicita|se requiere|se sirva|se recomienda|se dispone|se concluye|se determina|se comunica|no corresponde|es procedente|no es procedente|se aprueba|se rechaza)\b/i.test(t);
  const vague=/\b(?:xxxx|tbd|por completar|insertar aqu[ií]|pendiente de definir)\b/i.test(t);
  const actions=[];
  const add=x=>{if(!actions.includes(x))actions.push(x)};
  if(!subject)add("Expresar en una frase el propósito: qué se informa, solicita, responde o decide y para qué.");
  if(kind==="carta"){
-   if(!/\b(?:señor(?:a|es)?|estimad[oa]s?|a la atenci[oó]n|destinatario)\b/i.test(t.slice(0,900)))add("Identificar a quién se dirige la carta y por qué esa persona o área debe atenderla.");
+   if(!/\b(?:señor(?:a|es)?|estimad[oa]s?|a la atenci[oó]n|destinatario|gerencia|direcci[oó]n|jefatura|unidad|[áa]rea de)\b/i.test(t.slice(0,1100)))add("Verificar el funcionario o área competente que debe atender esta solicitud.");
    if(!hasDecision)add("Cerrar con una petición, respuesta o decisión inequívoca; especificar qué debe hacer o conocer el destinatario.");
-   if(request&&!/\b(?:plazo|hasta el|antes del|d[ií]as|fecha l[ií]mite)\b/i.test(t))add("Comprobar si corresponde indicar un plazo o una fecha para la respuesta; no agregar uno sin sustento.");
+   if(service.isConstancia&&!service.os)add("Identificar la Orden de Servicio y su número exacto; no inventarlo.");
+   if(service.isConstancia&&!/\b(?:atentamente|cordialmente|saludos cordiales)\b/i.test(t.slice(-600)))add("Verificar que exista un cierre formal y espacio de firma.");
  }else{
    if(!hasClosing)add("Incorporar una conclusión que responda expresamente al objetivo y esté respaldada por los resultados.");
    if(!/\b(?:resultado|actividad|verificaci[oó]n|evaluaci[oó]n|hallazgo|an[aá]lisis|inspecci[oó]n)\b/i.test(t))add("Relacionar las actividades o hechos constatados con los resultados y la conclusión.");
  }
- if(!hasEvidence)add("Vincular las afirmaciones importantes con los documentos, registros o anexos que efectivamente existen.");
+ if(!hasEvidence&&kind!=="carta")add("Vincular las afirmaciones importantes con los documentos, registros o anexos que efectivamente existen.");
  if(vague)add("Reemplazar los marcadores provisionales únicamente con datos verificados.");
  if(!result&&kind==="carta"&&answer)add("Expresar claramente la respuesta o el pronunciamiento, sin limitarse a citar antecedentes.");
  if(!actions.length)add("Contrastar el objetivo, el desarrollo y la parte final con las fuentes originales; confirmar que el destinatario pueda actuar sin interpretaciones ambiguas.");
@@ -135,9 +146,9 @@ function purposeAudit(text,filename){
  let verdict=structuralGap?"NO ES POSIBLE DARLO POR LISTO":"PROPÓSITO IDENTIFICABLE; VERIFICACIÓN PENDIENTE";
  let reason=structuralGap?"Faltan elementos formales relevantes para determinar si el destinatario podrá comprender y atender la finalidad.":"El texto presenta señales de finalidad y de cierre; su correspondencia real, suficiencia técnica y validez documental todavía no están comprobadas.";
  const actionTitle=kind==="carta"?(hasDecision?"Petición o pronunciamiento detectable":"No se identifica petición o decisión clara"):(hasClosing?"Señal de conclusión identificada":"Conclusión no identificada");
- const actionText=result||request||"No se localizó una frase de cierre inequívoca en el texto extraído.";
+ const actionText=kind==="carta"?(service.isConstancia?objective:(request||answer||"Petición concreta no identificada")):(result||"Conclusión no identificada");
  const evidenceTitle=hasEvidence?"Referencias documentales mencionadas":"Sustento explícito no localizado";
- const evidenceText=hasEvidence?"El texto menciona registros, anexos u otras fuentes. No se ha examinado su contenido, vigencia ni correspondencia con las afirmaciones.":"No se identificaron referencias reconocibles a soportes en el texto extraído. Podrían estar fuera del archivo o en elementos no extraíbles.";
+ const evidenceText=hasEvidence?"El texto menciona registros, anexos u otras fuentes. No se ha examinado su contenido, vigencia ni correspondencia con las afirmaciones.":kind==="carta"?"Una solicitud puede necesitar solamente antecedentes pertinentes; verificar la Orden de Servicio y otros sustentos disponibles si corresponden.":"No se identificaron referencias reconocibles a soportes en el texto extraído. Podrían estar fuera del archivo o en elementos no extraíbles.";
  const narrative=(kind==="carta"?"Se ha tratado el documento como carta. Su función principal debe ser comunicar con claridad una solicitud, respuesta o posición, de modo que el destinatario sepa qué debe hacer. ":"Se ha tratado el documento como "+(kind==="informe"?"informe. Debe permitir comprender el objeto, los hechos, los resultados y la conclusión. ":"documento. Su naturaleza requiere confirmación; no se debe imponer una estructura inadecuada. "))+
  (subject?"Se ha localizado una expresión que orienta su finalidad, pero no demuestra por sí sola que el desarrollo la atienda. ":"No se reconoce un propósito expreso suficientemente claro; esta es la principal debilidad para una revisión previa. ")+
  (hasDecision||hasClosing?"Existe una señal formal de cierre o decisión; debe verificarse que realmente responda al asunto planteado. ":"La parte resolutiva o la conclusión no es reconocible, por lo que el lector podría no saber qué se espera de él. ")+
@@ -150,15 +161,15 @@ function review(text,purpose){
  const add=(level,title,why,question)=>f.push({level,title,why,question,replied:false});
  if(p.source==="No demostrado de manera expresa")add("critica","Propósito no suficientemente definido","El lector debe saber desde el inicio qué finalidad tiene el documento.","¿Qué resultado concreto buscas: informar, solicitar, responder o sustentar una decisión?");
  if(p.kind==="carta"){
-   if(!p.hasDecision)add("critica","La carta no expresa claramente qué espera del destinatario","La redacción debe permitir identificar la solicitud, respuesta o decisión necesaria.","¿Qué actuación o respuesta exacta necesitas que realice el destinatario?");
-   if(!/señor(?:a|es)?|estimad[oa]s?|a la atenci[oó]n|destinatario/i.test(t.slice(0,900)))add("mayor","Destinatario no identificado","Conviene verificar que la carta vaya dirigida al responsable competente.","¿Quién debe recibir la carta y qué facultad tiene sobre lo solicitado?");
+   if(!p.hasDecision)add("critica","Petición no identificada","La carta debe permitir saber qué actuación se solicita.","¿Qué decisión o respuesta concreta debe dar el destinatario?");
+   if(!/señor(?:a|es)?|estimad[oa]s?|a la atenci[oó]n|destinatario|gerencia|direcci[oó]n|jefatura|unidad|[áa]rea de/i.test(t.slice(0,1100)))add("mayor","Destinatario por verificar","No se distingue al funcionario o área competente en el texto extraído.","¿A qué funcionario o área va dirigida esta carta?");
  }else{
    if(!p.hasClosing)add("critica","Conclusión no identificada","No basta describir actividades: el informe debe expresar qué se concluye y cómo se relaciona con su finalidad.","¿Qué conclusión deseas sostener a partir de los resultados efectivamente acreditados?");
    if(!/resultado|actividad|verificaci[oó]n|evaluaci[oó]n|hallazgo|an[aá]lisis|inspecci[oó]n/i.test(t))add("mayor","Desarrollo insuficiente para acreditar el objetivo","No se localiza una exposición reconocible de actuaciones, análisis o resultados.","¿Qué hechos concretos y resultados soportan tu conclusión?");
  }
- if(!p.hasEvidence)add("mayor","Sustento sin referencia explícita","No se identifican fuentes verificables dentro del texto extraído, aunque pueden existir en anexos no accesibles.","¿Qué evidencias reales respaldan las afirmaciones esenciales?");
+ if(!p.hasEvidence&&p.kind!=="carta")add("mayor","Sustento sin referencia explícita","No se identifican fuentes verificables dentro del texto extraído, aunque pueden existir en anexos no accesibles.","¿Qué evidencias reales respaldan las afirmaciones esenciales?");
  if(p.vague)add("critica","Datos provisionales","El archivo incluye marcadores por completar que impiden considerarlo apto para emisión.","¿Qué datos comprobados deben reemplazar los campos pendientes?");
- if(!f.length)add("leve","Verificación de la finalidad pendiente","La forma básica parece estructurada, pero no es posible acreditar correspondencia técnica o contractual únicamente con reglas locales.","¿La conclusión o solicitud responde exactamente a lo que debe resolver el destinatario y qué fuente lo demuestra?");
+ if(!f.length)add("leve","Verificación profesional final","El propósito resulta identificable. Debe comprobarse en el documento completo la exactitud de datos, el destinatario, anexos y firma.",null);
  return f;
 }
 function renderPurpose(){
@@ -191,24 +202,23 @@ function bubble(text,who){
 }
 function ask(){
  const q=S.questions[S.index];
- if(q){bubble(q.question,"assistant");$("questionState").textContent="Pregunta "+(S.index+1)+" de "+S.questions.length;}
- else{bubble("Gracias. Tus aclaraciones han quedado registradas. Puedes incorporarlas al borrador y revisar el Word; las respuestas no reemplazan la evidencia documental.","assistant");$("questionState").textContent="Preguntas iniciales completadas. Puedes añadir más precisiones en el chat.";}
+ if(q){bubble(q.question,"assistant");$("questionState").textContent="Aclaración necesaria "+(S.index+1)+" de "+S.questions.length;}
+ else{bubble("No identifico más preguntas indispensables con las comprobaciones locales. Revisa el documento antes de emitir.","assistant");$("questionState").textContent="Sin más preguntas imprescindibles en esta revisión preliminar.";}
 }
 function start(file,text){
- S.text=tidy(text);S.filename=file.name;S.purpose=purposeAudit(S.text,S.filename);S.findings=review(S.text,S.purpose);
- S.questions=S.findings.filter(x=>x.level!=="leve").slice(0,3);
- if(S.questions.length===0)S.questions=S.findings.slice(0,2);
+ S.text=tidy(text);S.filename=file.name;S.kindOverride=null;S.purpose=purposeAudit(S.text,S.filename,S.kindOverride);S.findings=review(S.text,S.purpose);
+ S.questions=S.findings.filter(x=>x.question&&x.level!=="leve").slice(0,2);
  S.index=0;S.replies=[];S.added=0;
  let score=10;
  S.findings.forEach(f=>{score-=f.level==="critica"?2:f.level==="mayor"?1:.4});
  S.score=Math.max(1,Math.min(10,score));
  S.draft=tidy(S.text).replace(/ {2,}/g," ").replace(/([,.!?])([^\s\n,.!?])/g,"$1 $2");
- $("fileName").textContent=file.name;
+ $("fileName").textContent=file.name;$("editorHeading").textContent=S.purpose.kind==="carta"?"Carta para revisar y descargar":S.purpose.kind==="informe"?"Informe para revisar y descargar":"Documento para revisar y descargar";
  $("score").textContent=S.score.toFixed(1)+"/10";
  $("outcome").textContent=S.purpose.verdict;
  $("summary").textContent="Índice heurístico de señales editoriales, NO calificación del cumplimiento técnico. "+S.findings.length+" observaciones.";
  $("chat").replaceChildren();renderPurpose();renderFindings();
- bubble("He revisado las señales formales del documento. Dictamen preliminar: "+S.purpose.verdict+". He encontrado "+S.findings.length+" puntos de control. Necesito aclarar únicamente lo que influye en su finalidad. Esta revisión todavía no utiliza ChatGPT.","assistant");
+ bubble("He leído tu "+(S.purpose.kind==="carta"?"carta":S.purpose.kind==="informe"?"informe":"documento")+". Propósito identificado: "+S.purpose.objective+"\n\n"+S.purpose.narrative+"\n\nEsta revisión preliminar no utiliza ChatGPT ni verifica fuentes externas.","assistant");
  ask();
  $("draft").value=S.draft;$("checked").checked=false;$("download").disabled=true;
  $("addAnswers").disabled=true;$("reply").value="";$("downloadStatus").textContent="";
@@ -231,23 +241,40 @@ $("drop").addEventListener("keydown",e=>{if(e.target===$("drop")&&(e.key==="Ente
 $("drop").addEventListener("dragover",e=>{e.preventDefault();$("drop").classList.add("dragging");});
 $("drop").addEventListener("dragleave",()=>$("drop").classList.remove("dragging"));
 $("drop").addEventListener("drop",e=>{e.preventDefault();$("drop").classList.remove("dragging");fileSelected(e.dataTransfer?.files?.[0]);});
+function classifyCorrection(kind){
+ S.kindOverride=kind;S.purpose=purposeAudit(S.text,S.filename,kind);S.findings=review(S.text,S.purpose);
+ S.questions=S.findings.filter(x=>x.question&&x.level!=="leve").slice(0,2);S.index=0;S.replies=[];S.added=0;
+ renderPurpose();renderFindings();$("outcome").textContent=S.purpose.verdict;
+ $("editorHeading").textContent=kind==="carta"?"Carta para revisar y descargar":"Informe para revisar y descargar";
+ $("addAnswers").disabled=true;
+ bubble("Gracias por la aclaración. He reclasificado el documento como "+(kind==="carta"?"CARTA":"INFORME")+". Su finalidad detectada es: "+S.purpose.objective+". No insistiré en preguntas propias de un formato distinto.","assistant");
+ if(S.questions.length)ask(); else bubble("La finalidad está identificada. Puedes revisar el texto y descargar el borrador sin responder más preguntas genéricas.","assistant");
+}
+function handleInstruction(text){
+ if(/\b(?:es|esto es|se trata de|es una|se trata de una)\s+(?:una\s+)?(?:carta|oficio|solicitud)\b/i.test(text)||/^\s*(?:carta|oficio)\s*[.!]?\s*$/i.test(text)){classifyCorrection("carta");return true}
+ if(/\b(?:es|esto es|se trata de|es un|se trata de un)\s+(?:un\s+)?(?:informe|reporte)\b/i.test(text)||/^\s*informe\s*[.!]?\s*$/i.test(text)){classifyCorrection("informe");return true}
+ if(/\b(?:lee|revisa|analiza|dime|que falta|qué falta|que opinas|qué opinas|vuelve a leer)\b/i.test(text)&&text.length<185){
+  bubble("Propósito identificado: "+S.purpose.objective+"\n\n"+S.purpose.narrative+"\n\nCorrecciones o comprobaciones pertinentes:\n"+S.purpose.actions.map((x,i)=>(i+1)+". "+x).join("\n")+"\n\nNo corresponden preguntas de conclusiones y resultados técnicos cuando se solicita una constancia mediante carta.","assistant");return true
+ }
+ return false;
+}
 $("chatForm").addEventListener("submit",e=>{
- e.preventDefault();const a=tidy($("reply").value);if(!a||!S.text)return;
- bubble(a,"user");$("reply").value="";
+ e.preventDefault();const answer=tidy($("reply").value);if(!answer||!S.text)return;
+ bubble(answer,"user");$("reply").value="";
+ if(handleInstruction(answer))return;
  if(S.index<S.questions.length){
-   const q=S.questions[S.index];q.replied=true;
-   S.replies.push({q:q.question,a});S.index++;renderFindings();ask();
- } else {S.replies.push({q:"Precisión complementaria del especialista",a});bubble("He registrado esta precisión. Puedes incorporarla al borrador después de verificarla.","assistant");}
+  const question=S.questions[S.index];question.replied=true;S.replies.push({q:question.question,a:answer});S.index++;renderFindings();ask();
+ }else{S.replies.push({q:"Precisión complementaria",a:answer});bubble("Precisión registrada. Verifica su pertinencia y sustento antes de incorporarla.","assistant");}
  $("addAnswers").disabled=S.replies.length===S.added;
 });
 $("addAnswers").addEventListener("click",()=>{
  const next=S.replies.slice(S.added);
  if(!next.length)return;
  const addition="\n\nACLARACIONES DEL ESPECIALISTA (PENDIENTES DE VERIFICACIÓN)\n\n"+next.map((x,i)=>(S.added+i+1)+". "+x.q+"\nRespuesta aportada: "+x.a).join("\n\n");
- $("draft").value=tidy($("draft").value)+addition;S.draft=$("draft").value;S.added=S.replies.length;S.purpose=purposeAudit(S.draft,S.filename);renderPurpose();
+ $("draft").value=tidy($("draft").value)+addition;S.draft=$("draft").value;S.added=S.replies.length;S.purpose=purposeAudit(S.draft,S.filename,S.kindOverride);renderPurpose();
  $("addAnswers").disabled=true;$("checked").checked=false;$("download").disabled=true;$("draft").scrollIntoView({behavior:"smooth",block:"center"});
 });
-$("draft").addEventListener("input",()=>{$("checked").checked=false;$("download").disabled=true;if(S.filename){S.purpose=purposeAudit($("draft").value,S.filename);renderPurpose();}});
+$("draft").addEventListener("input",()=>{$("checked").checked=false;$("download").disabled=true;if(S.filename){S.purpose=purposeAudit($("draft").value,S.filename,S.kindOverride);renderPurpose();}});
 $("checked").addEventListener("change",()=>{$("download").disabled=!$("checked").checked||!tidy($("draft").value);});
 function u16(v){return [v&255,(v>>8)&255]}function u32(v){return[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255]}
 function crc32(data){let c=0xffffffff;for(const b of data){c^=b;for(let k=0;k<8;k++)c=c&1?(c>>>1)^0xedb88320:c>>>1}return(c^0xffffffff)>>>0}
