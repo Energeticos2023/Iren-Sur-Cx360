@@ -161,6 +161,17 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.upload:focus-vi
 .loginbox{margin:28px auto;padding:24px 19px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+.local-diagnostics{margin-top:24px;border:1px solid #dce5ed;border-radius:13px;background:#fbfcfd;overflow:hidden}
+.local-diagnostics summary{padding:15px 18px;cursor:pointer;font-size:13px;font-weight:700;color:#425d73}
+.local-diagnostics summary:hover{background:#f0f5f8}
+.local-diagnostics-body{padding:17px 21px 22px;border-top:1px solid #e4ebf1}
+#aiPanel{border:1px solid #d6e8e8;background:#f7fbfb;border-radius:14px;padding:21px;margin-bottom:15px}
+#aiPanel .ai-answer{background:#fff}
+#aiPanel h2{margin-top:0}
+#recheckAI{border:1px solid #d1e0e6;background:#fff}
+#score{font-size:19px;color:#9baab5}
+@media(max-width:600px){.local-diagnostics-body{padding:14px}#aiPanel{padding:15px}}
 </style>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -210,19 +221,33 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.upload:focus-vi
  <section id="workspace" class="hidden">
  <div class="box">
    <div class="topline"><div><div class="small muted">DOCUMENTO CARGADO</div><div class="filename" id="fileName"></div></div><button id="newFile" class="ghost">Subir otro informe</button></div>
-   <h2 class="sectiontitle">¿Cumple el documento su propósito?</h2>
+   <div id="aiPanel" class="hidden">
+  <h2 class="sectiontitle">Dictamen de SUSTENTA IA</h2>
+  <p class="sub">Solo un análisis emitido por la IA conectada puede considerarse revisión inteligente. El autor debe contrastar los hechos y fuentes.</p>
+  <div id="aiAnswer" class="ai-answer" role="status"></div>
+  <div class="actions">
+   <button id="analyzeAI" class="primary" type="button">Analizar con IA</button>
+   <button id="recheckAI" class="secondary" type="button">Comprobar conexión IA</button>
+   <span id="aiState" class="small muted"></span>
+  </div>
+ </div>
+  <details id="localDiagnostics" class="local-diagnostics">
+   <summary>Comprobaciones automáticas básicas (sin IA ni calificación)</summary>
+   <div class="local-diagnostics-body">
+   <h2 class="sectiontitle">Indicios formales del documento</h2>
    <p class="sub">Análisis editorial del propósito y de la respuesta que necesita el destinatario. No sustituye una revisión semántica y técnica realizada con IA y documentos de respaldo.</p>
-   <div class="message" id="purposeLimit">El dictamen se basa en indicios del texto y no puede certificar que una petición o conclusión esté materialmente sustentada.</div>
+   <div class="message" id="purposeLimit">Estas reglas solo detectan palabras y estructuras. No comprenden el contenido ni acreditan su corrección técnica.</div>
    <div class="purpose-grid">
      <article class="purpose-card"><div class="purpose-label">TIPO Y FINALIDAD IDENTIFICADA</div><strong id="purposeKind">—</strong><p id="purposeText">—</p><p class="small muted" id="purposeOrigin"></p></article>
-     <article class="purpose-card"><div class="purpose-label">DICTAMEN SOBRE EL PROPÓSITO</div><strong id="purposeVerdict">—</strong><p id="purposeReason">—</p></article>
+     <article class="purpose-card"><div class="purpose-label">INDICIO FORMAL, NO DICTAMEN</div><strong id="purposeVerdict">—</strong><p id="purposeReason">—</p></article>
      <article class="purpose-card"><div class="purpose-label">RESPUESTA, PETICIÓN O CONCLUSIÓN</div><strong id="purposeActionTitle">—</strong><p id="purposeAction">—</p></article>
      <article class="purpose-card"><div class="purpose-label">FUNDAMENTO Y EVIDENCIAS</div><strong id="purposeEvidenceTitle">—</strong><p id="purposeEvidence">—</p></article>
    </div>
-   <div class="purpose-next"><h3>Mi análisis de la revisión</h3><p id="purposeNarrative"></p><h3>Qué corregir para que cumpla su finalidad</h3><ol id="purposeCorrections"></ol></div>
+   <div class="purpose-next"><h3>Lectura automática preliminar</h3><p id="purposeNarrative"></p><h3>Qué corregir para que cumpla su finalidad</h3><ol id="purposeCorrections"></ol></div>
    <hr class="divider"><h2 class="sectiontitle">Observaciones concretas</h2><p class="sub">Puntos que requieren aclaración. Se priorizan los que afectan la finalidad del documento.</p>
-   <div class="result"><div class="score" id="score">—</div><div><strong id="outcome">Revisión preliminar</strong><div class="small muted" id="summary"></div></div></div>
-   <div id="aiPanel" class="hidden"><hr class="divider"><h2 class="sectiontitle">Análisis profesional de SUSTENTA IA</h2><p class="sub">Dictamen sobre el propósito del documento. Comprueba sus afirmaciones antes de emitir.</p><div id="aiAnswer" class="ai-answer" role="status"></div><div class="actions"><button id="analyzeAI" class="primary" type="button">Reanalizar con IA</button><span id="aiState" class="small muted"></span></div></div><hr class="divider"><div id="findings" class="findings"></div>
+   <div class="result"><div class="score" id="score">—</div><div><strong id="outcome">Comprobación mecánica</strong><div class="small muted" id="summary"></div></div></div>
+   <div id="findings" class="findings"></div>
+  </div></details>
  </div>
  <div class="layout">
   <div class="box"><h2 class="sectiontitle">Aclaraciones y respuestas</h2><p class="sub">Conversa con SUSTENTA IA. Solo se pedirán aclaraciones necesarias.</p>
@@ -434,6 +459,7 @@ function ask(){
  else{bubble("No identifico más preguntas indispensables con las comprobaciones locales. Revisa el documento antes de emitir.","assistant");$("questionState").textContent="Sin más preguntas imprescindibles en esta revisión preliminar.";}
 }
 function start(file,text){
+ $("localDiagnostics").open=false;
  S.text=tidy(text);S.filename=file.name;S.kindOverride=null;S.purpose=purposeAudit(S.text,S.filename,S.kindOverride);S.findings=review(S.text,S.purpose);
  S.questions=S.findings.filter(x=>x.question&&x.level!=="leve").slice(0,2);
  S.index=0;S.replies=[];S.added=0;
@@ -442,9 +468,9 @@ function start(file,text){
  S.score=Math.max(1,Math.min(10,score));
  S.draft=S.originalDocx?S.originalLines.join("\n"):tidy(S.text);
  $("fileName").textContent=file.name;$("editorHeading").textContent=S.purpose.kind==="carta"?"Carta para revisar y descargar":S.purpose.kind==="informe"?"Informe para revisar y descargar":"Documento para revisar y descargar";
- $("score").textContent=S.score.toFixed(1)+"/10";
- $("outcome").textContent=S.purpose.verdict;
- $("summary").textContent="Índice heurístico de señales editoriales, NO calificación del cumplimiento técnico. "+S.findings.length+" observaciones.";
+ $("score").textContent="—";
+ $("outcome").textContent="SIN EVALUACIÓN INTELIGENTE";
+ $("summary").textContent="Se detectaron "+S.findings.length+" señales automáticas. Sin calificación de calidad ni aprobación de emisión.";
  $("chat").replaceChildren();renderPurpose();renderFindings();
  bubble("Archivo recibido. Las observaciones locales son orientativas. El dictamen contextual corresponde al bot IA.","assistant");
  $("draft").value=S.draft;$("checked").checked=false;$("download").disabled=!S.originalDocx;
@@ -567,7 +593,7 @@ $("drop").addEventListener("drop",e=>{e.preventDefault();$("drop").classList.rem
 function classifyCorrection(kind){
  S.kindOverride=kind;S.purpose=purposeAudit(S.text,S.filename,kind);S.findings=review(S.text,S.purpose);
  S.questions=S.findings.filter(x=>x.question&&x.level!=="leve").slice(0,2);S.index=0;S.replies=[];S.added=0;
- renderPurpose();renderFindings();$("outcome").textContent=S.purpose.verdict;
+ renderPurpose();renderFindings();$("outcome").textContent="SIN EVALUACIÓN INTELIGENTE";
  $("editorHeading").textContent=kind==="carta"?"Carta para revisar y descargar":"Informe para revisar y descargar";
  $("addAnswers").disabled=true;
  bubble("Gracias por la aclaración. He reclasificado el documento como "+(kind==="carta"?"CARTA":"INFORME")+". Su finalidad detectada es: "+S.purpose.objective+". No insistiré en preguntas propias de un formato distinto.","assistant");
