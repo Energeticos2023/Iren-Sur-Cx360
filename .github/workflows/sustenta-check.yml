@@ -1,10 +1,12 @@
-name: Validar interfaz SUSTENTA
+name: Validar SUSTENTA R3
 on:
   push:
     branches: [main]
     paths:
       - 'site/assets/sustenta.html'
-      - 'site/assets/sustenta-jszip.min.js'
+      - 'site/assets/sustenta-revision-20261114.html'
+      - 'supabase/functions/sustenta-ia/index.ts'
+      - 'docs/SUSTENTA_PROMPT_MAESTRO_V1.md'
       - '.github/workflows/sustenta-check.yml'
   workflow_dispatch:
 permissions:
@@ -17,19 +19,27 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validar JavaScript de SUSTENTA
+      - name: Verify frontends and prompt
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          text = Path('site/assets/sustenta.html').read_text()
-          p = text.rfind('<script>')
-          q = text.find('</script>', p)
-          assert p >= 0 and q > p, 'Script principal no encontrado'
-          js = text[p+len('<script>'):q]
-          assert 'async function analyzeWithAI' in js
-          assert 'async function chatWithAI' in js
-          assert 'loginForm' in js
-          assert 'sustenta-ia' in js
-          Path('sustenta-syntax.js').write_text(js)
+          prompt=Path('docs/SUSTENTA_PROMPT_MAESTRO_V1.md').read_text()
+          assert len(prompt)==13477, "Prompt maestro incompleto"
+          backend=Path('supabase/functions/sustenta-ia/index.ts').read_text()
+          assert '1.0-complete-13477' in backend
+          assert 'max_output_tokens' in backend
+          assert 'status==="incomplete"' in backend
+          for name in ('sustenta.html', 'sustenta-revision-20261114.html'):
+              source=Path('site/assets/'+name).read_text()
+              a=source.rfind('<script>')
+              b=source.find('</script>',a)
+              assert a!=-1 and b>a,name
+              assert 'function showStructuredReview' in source,name
+              assert 'async function analyzeWithAI' in source,name
+              assert 'async function chatWithAI' in source,name
+              assert 'loginForm' in source,name
+              assert 'sustenta-ia' in source,name
+              Path(name+'.js').write_text(source[a+len('<script>'):b])
           PY
-          node --check sustenta-syntax.js
+          node --check site/assets/sustenta.html.js
+          node --check site/assets/sustenta-revision-20261114.html.js
