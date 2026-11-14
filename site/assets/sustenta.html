@@ -460,6 +460,8 @@ function ask(){
 }
 function start(file,text){
  $("localDiagnostics").open=false;
+ $("reply").disabled=!AI.available;
+ $("chatForm").querySelector('button[type="submit"]').disabled=!AI.available;
  S.text=tidy(text);S.filename=file.name;S.kindOverride=null;S.purpose=purposeAudit(S.text,S.filename,S.kindOverride);S.findings=review(S.text,S.purpose);
  S.questions=S.findings.filter(x=>x.question&&x.level!=="leve").slice(0,2);
  S.index=0;S.replies=[];S.added=0;
@@ -504,6 +506,9 @@ async function checkAI(){
  if(!r.ok)throw Error(j.error||"Esta cuenta no tiene acceso a SUSTENTA IA");
  AI.available=Boolean(j.available);
  $("serviceState").textContent=AI.available?"Bot SUSTENTA IA · Disponible":"Bot IA · Pendiente de clave";
+ $("reply").disabled=!AI.available;
+ $("chatForm").querySelector('button[type="submit"]').disabled=!AI.available;
+ $("analyzeAI").disabled=!AI.available;
  return AI.available;
 }
 async function analyzeWithAI(){
@@ -563,6 +568,15 @@ $("logoutButton").addEventListener("click",()=>{
  $("file").value="";
 });
 $("analyzeAI").addEventListener("click",()=>{if(AI.available&&S.text)analyzeWithAI()});
+$("recheckAI").addEventListener("click",async()=>{
+ $("aiState").textContent="Verificando conexión...";
+ try {
+  await checkAI();
+  $("aiState").textContent=AI.available?"Servicio IA disponible":"Motor de IA pendiente de configuración";
+  if(AI.available&&S.text)await analyzeWithAI();
+  else $("aiAnswer").textContent="No se ha realizado revisión IA. Es necesario configurar una clave OpenAI válida en el servidor; no se configura desde esta página.";
+ }catch(e){$("aiState").textContent="No se pudo validar la conexión: "+(e.message||String(e))}
+});
 async function fileSelected(file){
  if(!file)return;
  S.originalDocx=null;S.originalLines=null;S.sourceFile=file;S.exportMode="blocked";
@@ -576,11 +590,13 @@ async function fileSelected(file){
    $("aiPanel").classList.remove("hidden");
    if(AI.available)await analyzeWithAI();
    else{
-    $("aiAnswer").textContent="El bot de IA requiere que el administrador configure OPENAI_API_KEY en los secretos de Supabase. SUSTENTA no simula una respuesta de ChatGPT.";
-    $("aiState").textContent="IA pendiente de configuración";
+    $("aiAnswer").textContent="ANÁLISIS CON IA NO DISPONIBLE. Aún falta configurar el servicio OpenAI en Supabase. No se ha realizado una evaluación profesional del contenido ni de su propósito.";
+    $("aiState").textContent="Pendiente de configuración";
     $("analyzeAI").disabled=true;
     $("chat").replaceChildren();
-    bubble("El motor IA aún no está configurado. La revisión local es orientativa y no reemplaza el análisis solicitado.","assistant");
+    $("reply").disabled=true;
+    $("chatForm").querySelector('button[type="submit"]').disabled=true;
+    bubble("El chat estará disponible cuando el motor de IA se encuentre configurado. No es posible revisar este documento inteligentemente todavía.","assistant");
    }
  }catch(e){msg(e.message||"No fue posible leer este documento.",true);}
 }
