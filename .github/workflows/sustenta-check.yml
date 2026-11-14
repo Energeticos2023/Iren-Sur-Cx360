@@ -41,5 +41,5 @@ jobs:
               assert 'sustenta-ia' in source,name
               Path(name+'.js').write_text(source[a+len('<script>'):b])
           PY
-          node --check site/assets/sustenta.html.js
-          node --check site/assets/sustenta-revision-20261114.html.js
+          node --check sustenta.html.js
+          node --check sustenta-revision-20261114.html.js
