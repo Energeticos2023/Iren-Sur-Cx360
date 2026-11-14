@@ -51,11 +51,11 @@
    <div class="actions"><button id="addAnswers" class="secondary" disabled>Incorporar respuestas al borrador</button></div>
    <div class="counter" id="questionState"></div>
   </div>
-  <div class="box"><h2 class="sectiontitle" id="editorHeading">Documento para revisar y descargar</h2><p class="sub" id="formatMessage">Edita con cuidado el documento antes de descargarlo.</p>
+  <div class="box"><h2 class="sectiontitle" id="editorHeading">Documento y revisión</h2><p class="sub" id="formatMessage">El cuadro siguiente muestra texto extraído, NO el aspecto del Word original.</p><div class="message" id="modeStatus" role="status">Solo se permite exportación con diseño preservado cuando se cargó el DOCX original.</div>
    <textarea id="draft" class="editor" spellcheck="true" aria-label="Borrador editable"></textarea>
    <label class="review"><input id="checked" type="checkbox">Confirmo que revisaré personalmente las afirmaciones y evidencias del documento antes de su emisión.</label>
-   <div class="actions"><button id="download" class="primary" disabled>Descargar Word</button><button id="draftDownload" class="secondary">Descargar como borrador</button></div>
-   <div id="downloadStatus" class="small muted" role="status"></div><div class="message" id="formatWarning">Cuando subas Word, SUSTENTA conservará el archivo original y su estructura.</div>
+   <div class="actions"><button id="download" class="primary" disabled>Guardar cambios en Word original</button><button id="draftDownload" class="secondary" disabled>Descargar copia original intacta</button></div>
+   <div id="downloadStatus" class="small muted" role="status"></div><div class="message" id="formatWarning">Nunca se convertirá texto plano o PDF en un supuesto Word revisado con formato intacto.</div>
   </div>
  </div>
  </section>
@@ -65,7 +65,7 @@
 (function(){
 "use strict";
 const $=id=>document.getElementById(id);
-const S={text:"",filename:"",draft:"",findings:[],questions:[],index:0,replies:[],added:0,score:0,purpose:null,kindOverride:null,originalDocx:null,originalLines:null};
+const S={text:"",filename:"",draft:"",findings:[],questions:[],index:0,replies:[],added:0,score:0,purpose:null,kindOverride:null,originalDocx:null,originalLines:null,sourceFile:null,exportMode:"blocked"};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function msg(s,bad=false){$("loading").classList.toggle("hidden",!s);$("loading").classList.toggle("error",bad);$("loading").textContent=s||"";}
 function tidy(t){return String(t).replace(/\r/g,"").replace(/[ \t]+/g," ").replace(/\n[ \t]+/g,"\n").replace(/\n{4,}/g,"\n\n").trim();}
@@ -81,23 +81,40 @@ async function readDocx(file){
  const lines=paragraphLines(parseXml(await part.async("string")));return {zip,lines};
 }
 async function preservedWord(){
- if(!S.originalDocx)throw Error("No hay Word original");
- const z=await JSZip.loadAsync(await S.originalDocx.zip.generateAsync({type:"uint8array"}));
- const xml=parseXml(await z.file("word/document.xml").async("string"));
+ if(!S.originalDocx||!S.sourceFile)throw Error("Carga el Word original.");
+ const original=await S.sourceFile.arrayBuffer();
+ const z=await JSZip.loadAsync(original),part=z.file("word/document.xml");
+ if(!part)throw Error("El documento Word no incluye word/document.xml.");
+ const xml=parseXml(await part.async("string"));
  const paras=byTag(xml.documentElement,"p"),edited=$("draft").value.replace(/\r/g,"").split("\n");
- if(edited.length!==paras.length)throw Error("El original contiene "+paras.length+" párrafos y el editor "+edited.length+". No agregues ni borres saltos de párrafo: los cambios podrían destruir el formato.");
- let changed=0;
- for(let i=0;i<paras.length;i++){
-   if(edited[i]===S.originalLines[i])continue;
+ if(edited.length!==paras.length)throw Error("El número de párrafos cambió ("+paras.length+" originales / "+edited.length+" editados). No puedo garantizar el formato. Solo se admite editar dentro de los párrafos originales.");
+ const different=[];
+ for(let i=0;i<paras.length;i++)if(edited[i]!==S.originalLines[i])different.push(i);
+ if(!different.length)throw Error("No hay cambios de texto. Utiliza «Descargar copia original intacta» para conservar el archivo exactamente.");
+ for(const i of different){
    const p=paras[i],runs=byTag(p,"t");
-   if(byTag(p,"drawing").length||byTag(p,"pict").length||byTag(p,"object").length||byTag(p,"rPr").length>1)throw Error("El párrafo "+(i+1)+" tiene objetos o estilos mixtos. No se exportará una versión que pueda perder su formato.");
-   if(!runs.length)throw Error("El párrafo "+(i+1)+" no tiene texto editable de forma segura.");
-   runs[0].textContent=edited[i];runs[0].setAttributeNS("http://www.w3.org/XML/1998/namespace","xml:space","preserve");
-   for(let j=1;j<runs.length;j++)runs[j].textContent="";
-   changed++;
+   // Un párrafo con estilos, saltos internos, códigos, enlaces u objetos no debe reconstruirse.
+   if(runs.length!==1||byTag(p,"br").length||byTag(p,"tab").length||
+      byTag(p,"drawing").length||byTag(p,"pict").length||
+      byTag(p,"object").length||byTag(p,"fldChar").length||
+      byTag(p,"instrText").length||byTag(p,"hyperlink").length||
+      byTag(p,"sdt").length||byTag(p,"del").length||
+      byTag(p,"ins").length){
+     throw Error("El párrafo "+(i+1)+" usa formato enriquecido, saltos, campos o varios fragmentos. Para evitar deformarlo, SUSTENTA no sustituirá ese contenido.");
+   }
+   const before=S.originalLines[i],after=edited[i];
+   if(after.includes("\n"))throw Error("No se admite partir el párrafo "+(i+1)+".");
+   if(after.length>before.length+200&&after.length>before.length*1.35){
+     throw Error("La edición del párrafo "+(i+1)+" es demasiado extensa: podría desplazar la paginación. Realiza el cambio en Word.");
+   }
+ }
+ for(const i of different){
+   const t=byTag(paras[i],"t")[0];
+   t.textContent=edited[i];
+   t.setAttributeNS("http://www.w3.org/XML/1998/namespace","xml:space","preserve");
  }
  z.file("word/document.xml",new XMLSerializer().serializeToString(xml));
- return {blob:await z.generateAsync({type:"blob",compression:"DEFLATE"}),changed};
+ return {blob:await z.generateAsync({type:"blob",compression:"DEFLATE"}),changed:different.length};
 }
 function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
 async function extract(file){
@@ -240,7 +257,7 @@ function start(file,text){
  let score=10;
  S.findings.forEach(f=>{score-=f.level==="critica"?2:f.level==="mayor"?1:.4});
  S.score=Math.max(1,Math.min(10,score));
- S.draft=S.originalDocx?S.originalLines.join("\n"):tidy(S.text).replace(/ {2,}/g," ").replace(/([,.!?])([^\s\n,.!?])/g,"$1 $2");
+ S.draft=S.originalDocx?S.originalLines.join("\n"):tidy(S.text);
  $("fileName").textContent=file.name;$("editorHeading").textContent=S.purpose.kind==="carta"?"Carta para revisar y descargar":S.purpose.kind==="informe"?"Informe para revisar y descargar":"Documento para revisar y descargar";
  $("score").textContent=S.score.toFixed(1)+"/10";
  $("outcome").textContent=S.purpose.verdict;
@@ -248,16 +265,18 @@ function start(file,text){
  $("chat").replaceChildren();renderPurpose();renderFindings();
  bubble("He leído tu "+(S.purpose.kind==="carta"?"carta":S.purpose.kind==="informe"?"informe":"documento")+". Propósito identificado: "+S.purpose.objective+"\n\n"+S.purpose.narrative+"\n\nEsta revisión preliminar no utiliza ChatGPT ni verifica fuentes externas.","assistant");
  ask();
- $("draft").value=S.draft;$("checked").checked=false;$("download").disabled=true;
-$("formatMessage").textContent=S.originalDocx?"Edita dentro de cada párrafo. Se conservarán el membrete, márgenes, tablas, encabezados, pies de página y secciones originales.":"Solo los DOCX permiten conservar su diseño original; PDF y TXT se reconstruyen.";
-$("formatWarning").textContent=S.originalDocx?"Se conserva el archivo Word original como base. No añadas ni elimines saltos de párrafo, y revisa visualmente cada página tras la descarga.":"La conversión de un PDF o TXT no conserva el formato de Word original.";
+ $("draft").value=S.draft;$("checked").checked=false;$("download").disabled=!S.originalDocx;
+ S.exportMode=S.originalDocx?"original-only":"blocked";$("draftDownload").disabled=!S.originalDocx;
+ $("modeStatus").textContent=S.originalDocx?"Modo Word original: copia exacta disponible. Los cambios solo se exportarán cuando sean compatibles con la estructura del archivo.":"Modo lectura: este archivo no es DOCX. Puedes leer el análisis, pero NO generaremos un Word falso que pierda el formato original.";
+$("formatMessage").textContent=S.originalDocx?"Este campo es una transcripción de párrafos; no muestra márgenes, tablas, encabezados ni diseño original. Solo las ediciones simples dentro de un párrafo podrán guardarse en el DOCX original.":"Texto extraído solo para análisis. Para producir un Word con idéntico formato, carga el DOCX original.";
+$("formatWarning").textContent=S.originalDocx?"La copia original se descarga byte por byte sin cambios. Las correcciones de texto se aplican solamente cuando no afectan objetos o formatos complejos; aun así debes cotejar visualmente el resultado en Word.":"Exportación de Word bloqueada desde PDF/TXT para evitar documentos de texto corrido y formato incorrecto.";
  $("addAnswers").disabled=true;$("reply").value="";$("downloadStatus").textContent="";
  $("workspace").classList.remove("hidden");
  $("workspace").scrollIntoView({behavior:"smooth",block:"start"});
 }
 async function fileSelected(file){
  if(!file)return;
- S.originalDocx=null;S.originalLines=null;
+ S.originalDocx=null;S.originalLines=null;S.sourceFile=file;S.exportMode="blocked";
  msg("Leyendo el informe y generando observaciones preliminares...");
  $("workspace").classList.add("hidden");
  try{
@@ -307,50 +326,29 @@ $("addAnswers").addEventListener("click",()=>{
  $("addAnswers").disabled=true;$("checked").checked=false;$("download").disabled=true;$("draft").scrollIntoView({behavior:"smooth",block:"center"});
 });
 $("draft").addEventListener("input",()=>{$("checked").checked=false;$("download").disabled=true;if(S.filename){S.purpose=purposeAudit($("draft").value,S.filename,S.kindOverride);renderPurpose();}});
-$("checked").addEventListener("change",()=>{$("download").disabled=!$("checked").checked||!tidy($("draft").value);});
-function u16(v){return [v&255,(v>>8)&255]}function u32(v){return[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255]}
-function crc32(data){let c=0xffffffff;for(const b of data){c^=b;for(let k=0;k<8;k++)c=c&1?(c>>>1)^0xedb88320:c>>>1}return(c^0xffffffff)>>>0}
-function makeZip(files){
- const enc=new TextEncoder(),chunks=[],centers=[];let offset=0;const append=(arr)=>{const a=Uint8Array.from(arr);chunks.push(a);offset+=a.length};
- for(const [name,content] of files){const n=enc.encode(name),d=enc.encode(content),crc=crc32(d),start=offset;
- append([...u32(0x04034b50),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(d.length),...u32(d.length),...u16(n.length),...u16(0)]);
- append(n);append(d);
- centers.push([...u32(0x02014b50),...u16(20),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(d.length),...u32(d.length),...u16(n.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(start),...n]);
- }
- const centralOffset=offset;centers.forEach(append);const centralSize=offset-centralOffset;
- append([...u32(0x06054b50),...u16(0),...u16(0),...u16(centers.length),...u16(centers.length),...u32(centralSize),...u32(centralOffset),...u16(0)]);
- return new Blob(chunks,{type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
-}
-function escapeXml(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;")}
-function wordPara(t){
- const isHeading=/^(INFORME\b|OBJETO$|CONTENIDO DEL INFORME$|PRECISIONES DEL ESPECIALISTA|CONCLUSIONES$|RECOMENDACIONES$|RESULTADOS$|ANTECEDENTES$)/i.test(t.trim());
- const pr=isHeading?'<w:pPr><w:spacing w:before="240" w:after="120"/><w:jc w:val="left"/></w:pPr>':'<w:pPr><w:spacing w:after="120" w:line="310" w:lineRule="auto"/><w:jc w:val="both"/></w:pPr>';
- return '<w:p>'+pr+'<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="'+(isHeading?"24":"21")+'"/>'+(isHeading?"<w:b/>":"")+'</w:rPr><w:t xml:space="preserve">'+escapeXml(t)+'</w:t></w:r></w:p>';
-}
-function createDocx(text,watermark){
- const content=(watermark?"BORRADOR PARA REVISIÓN — NO EMITIR\n\n":"")+text;
- const paragraphs=content.split(/\n/).map(wordPara).join("");
- const doc='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+paragraphs+'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1417" w:bottom="1417" w:left="1417"/></w:sectPr></w:body></w:document>';
- const ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>';
- const rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
- return makeZip([["[Content_Types].xml",ct],["_rels/.rels",rels],["word/document.xml",doc]]);
-}
-
+$("checked").addEventListener("change",()=>{$("download").disabled=!S.originalDocx||!$("checked").checked||!$("draft").value.trim();});
 async function download(asDraft){
- if(!S.text)return;
- const text=$("draft").value;if(!text.trim()){$("downloadStatus").textContent="Documento vacío.";return;}
- if(!asDraft&&!$("checked").checked){$("downloadStatus").textContent="Confirma tu revisión.";return;}
- const name=S.filename.replace(/\.[^.]+$/,"").replace(/[^a-zA-Z0-9_-]+/g,"_").slice(0,65)+(asDraft?"_BORRADOR":"_REVISION_PERSONAL")+".docx";
+ if(!S.sourceFile)return;
+ if(!S.originalDocx){
+   $("downloadStatus").textContent="Exportación bloqueada. La conversión de PDF o TXT a Word no conserva la estructura original. Sube el archivo .docx editable.";
+   return;
+ }
+ const base=S.filename.replace(/\.docx$/i,"").replace(/[^a-zA-Z0-9_-]+/g,"_").slice(0,65);
+ if(asDraft){
+   // Se descarga el contenido ORIGINAL, sin regenerar ni reescribir el paquete DOCX.
+   saveBlob(S.sourceFile,base+"_COPIA_ORIGINAL_INTACTA.docx");
+   $("downloadStatus").textContent="Se descargó una copia EXACTA de tu DOCX original. No contiene correcciones. Conserva íntegramente el formato, las tablas y los anexos.";
+   return;
+ }
+ if(!$("checked").checked){$("downloadStatus").textContent="Confirma tu revisión antes de guardar los cambios.";return}
  try{
-  if(S.originalDocx){
+   $("downloadStatus").textContent="Comprobando la estructura de los párrafos...";
    const result=await preservedWord();
-   saveBlob(result.blob,name);
-   $("downloadStatus").textContent="Copia original preservada con "+result.changed+" párrafos editados. Revisa márgenes, tablas, membrete y distribución visual antes de emitir.";
-  }else{
-   saveBlob(createDocx(text,asDraft),name);
-   $("downloadStatus").textContent="Documento reconstruido desde texto; no preserva el formato de un PDF.";
-  }
- }catch(e){$("downloadStatus").textContent="Exportación bloqueada para proteger el diseño: "+(e.message||String(e));}
+   saveBlob(result.blob,base+"_CAMBIOS_COMPATIBLES.docx");
+   $("downloadStatus").textContent="Se editaron "+result.changed+" párrafos simples dentro del Word original. Este archivo requiere una comparación visual de páginas antes de su emisión.";
+ }catch(e){
+   $("downloadStatus").textContent="No se generó ningún Word alterado: "+(e.message||String(e))+" Descarga la copia original y aplica las correcciones en Word.";
+ }
 }
 $("download").addEventListener("click",()=>download(false));
 $("draftDownload").addEventListener("click",()=>download(true));
