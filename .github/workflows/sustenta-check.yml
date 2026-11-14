@@ -1,0 +1,35 @@
+name: Validar interfaz SUSTENTA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/assets/sustenta.html'
+      - 'site/assets/sustenta-jszip.min.js'
+      - '.github/workflows/sustenta-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validar JavaScript de SUSTENTA
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('site/assets/sustenta.html').read_text()
+          p = text.rfind('<script>')
+          q = text.find('</script>', p)
+          assert p >= 0 and q > p, 'Script principal no encontrado'
+          js = text[p+len('<script>'):q]
+          assert 'async function analyzeWithAI' in js
+          assert 'async function chatWithAI' in js
+          assert 'loginForm' in js
+          assert 'sustenta-ia' in js
+          Path('sustenta-syntax.js').write_text(js)
+          PY
+          node --check sustenta-syntax.js
