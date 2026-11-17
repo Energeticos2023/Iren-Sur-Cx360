@@ -1,3 +1,14 @@
+# CX360 v2.7 — Cronograma CMT V01 y reunión de coordinación del 16/11/2026
+
+- Incorporada pestaña **Control → Cronograma V01 y reuniones** y acceso rápido **Reuniones**. Consulta a través de `cx_cmt_review_snapshot()` con sesión de miembro activo; si falla la consulta, no muestra datos obsoletos ni supone avance.
+- Registro privado `cx_private.cmt_review_records` con RLS, acceso directo revocado a anon y authenticated y auditoría de las modificaciones en `cx_private.cmt_review_audit`. Tres referencias: cronograma JYS-CMT-FOR-001 V01, reunión del 16/11/2026 y procedimiento DACI / ACONEX ANIN-EC-PCom-008336 / revisión ACC 2641. Las fotografías, el acta y los documentos originales NO fueron cargados a la base ni al repositorio público porque `custody_authorized=false`.
+- Cronograma importado **solo como referencia de revisión**, con 39 actividades: IIEE 9, IIMM 9, IISS 6, TIC 14, Equipamiento Médico 1. Fechas 05/12/2026 a 12/01/2027; se conservan los códigos fuente, incluido 01.01.01 duplicado, y la inconsistencia de fechas 01.04.13. Equivalencias de sistema provisionales. No se modifica el catálogo de 40 sistemas ni se crea programa aceptado; `cx_records(kind='schedule')` permanece en cero al corte.
+- Reunión **realizada según declaración del usuario** el 16/11/2026, en la franja 11:00–12:00 de la presentación. La foto fechada marca 12:02 p. m. Los compromisos A1–A7 y la reunión 23/11/2026 11:00 siguen como **propuestos y pendientes de ratificación**; no se aportó acta aprobada. No equivalen a instrucción del GP ni a un acuerdo formal.
+- Se incorporó para TI-07 el estado de 6 incidencias ACC aportadas; su presencia no supone cierre ni aceptación de procedimientos. El cronograma y la reunión se presentan como fuente interna de planificación, nunca como decisiones contractuales.
+- Verificación: consulta del contenido privado devolvió los 3 registros y 39 actividades; rol anon sin permiso EXECUTE para RPC, authenticated con permiso y restricción adicional de membresía activa; se verificaron 3 eventos de auditoría. Build/CI de commit `9c40525c2171a809890ad608fbd1ac6cc52a4a35` completado exitosamente en GitHub Actions. Sin prueba de acceso con cuenta real de usuario ni aprobación de custodia documental.
+
+---
+
 # CX360 v2.6 — Piloto nominal y PWA Android/iPhone, 12/11/2026
 
 - Nómina de 11 profesionales adicionales (5 ANIN, 6 Supervisión) registrada en `public.cx_pilot_roster`, con RLS, lectura solo del administrador y sin correos en el repositorio. Administrador previo: 1. Las invitaciones NO han sido enviadas: requieren sesión real de administrador, MFA AAL2, confirmación individual y correo saliente funcional.
