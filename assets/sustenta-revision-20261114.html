@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0C2340"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><title>SUSTENTA | Revisión de informes</title>
+<meta name="description" content="Sube tu informe, revisa observaciones y obtén un Word editable. Acceso privado, análisis con IA y edición compatible con el Word original.">
+<style>
+:root{--navy:#102a43;--navy-dark:#0b2035;--blue:#24506c;--teal:#187d81;--gold:#e5a449;--gold-soft:#fff1d8;--ink:#20364b;--muted:#667b8f;--line:#dce5ed;--bg:#f4f7fa;--white:#fff;--red:#b84c53;--green:#227b5b;--shadow:0 14px 38px rgba(16,42,67,.06)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;margin:0;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit}
+button{border:0;cursor:pointer;font-weight:700;border-radius:10px;padding:11px 17px;transition:background .2s,transform .2s,box-shadow .2s}
+button:disabled{opacity:.48;cursor:not-allowed}
+button:focus-visible,input:focus-visible,textarea:focus-visible,.upload:focus-visible{outline:3px solid rgba(32,127,139,.35);outline-offset:3px}
+.primary{background:var(--navy);color:#fff;box-shadow:0 5px 12px rgba(16,42,67,.12)}
+.primary:hover:not(:disabled){background:#214664;transform:translateY(-1px)}
+.secondary{background:#e9f0f5;color:var(--navy)}
+.secondary:hover:not(:disabled){background:#dbe7ee}
+.ghost{background:#fff;border:1px solid var(--line);color:var(--navy)}
+.ghost:hover:not(:disabled){background:#f7fafc}
+.hidden{display:none!important}
+.wrap{width:min(1160px,calc(100% - 48px));max-width:none;margin:0 auto;padding:0}
+.header{background:#fff;border-bottom:1px solid #e7edf2;box-shadow:0 2px 14px rgba(16,42,67,.025);position:relative;z-index:2}
+.header .wrap{display:flex;align-items:center;justify-content:space-between;min-height:82px;gap:16px}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.logo{width:46px;height:46px;flex:0 0 46px;border-radius:13px;background:var(--navy);display:grid;place-items:center;color:#f4bc64;font-weight:900;font-size:25px;letter-spacing:-.07em;box-shadow:inset 0 -3px 0 rgba(255,255,255,.08)}
+.brand-copy strong{display:block;color:var(--navy);font-size:20px;letter-spacing:.15em;line-height:1.15;font-weight:800}
+.brand-copy span{display:block;font-size:11px;letter-spacing:.012em;color:var(--muted);margin-top:5px}
+.header-right{display:flex;align-items:center;gap:15px}
+.header-kicker{font-size:11px;color:#718697;letter-spacing:.055em;text-transform:uppercase;font-weight:700}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;line-height:1.3;color:#8b5a19;background:#fff8ed;border:1px solid #f2d9b1;padding:9px 13px;border-radius:99px;white-space:nowrap}
+.pill::before{content:"";display:inline-block;width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#d59a3f}
+.main{padding-top:22px;padding-bottom:52px}
+.session-toolbar{display:flex;align-items:center;justify-content:space-between;margin:0 2px 14px;gap:12px}
+.session-caption{font-size:11px;font-weight:700;color:#6b8397;text-transform:uppercase;letter-spacing:.08em}
+.session-toolbar .ghost{font-size:12px;padding:8px 13px;background:transparent;border-color:transparent}
+.session-toolbar .ghost:hover{background:#e7edf3;border-color:#d7e2ec}
+.intro{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.24fr) minmax(260px,.76fr);gap:36px;align-items:center;background:linear-gradient(120deg,#0e2944 0%,#193d58 70%,#1b4a63 100%);border-radius:22px;padding:38px 42px;color:white;box-shadow:0 18px 36px rgba(10,35,58,.11);margin-bottom:20px}
+.intro::before{content:"";position:absolute;z-index:-1;width:460px;height:460px;border:1px solid rgba(255,255,255,.075);border-radius:50%;right:-195px;top:-180px;box-shadow:0 0 0 67px rgba(255,255,255,.025),0 0 0 130px rgba(255,255,255,.013)}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:800;color:#eac58d}
+.eyebrow::before{content:"";width:18px;height:2px;background:var(--gold);border-radius:4px}
+.intro h1{font-size:clamp(27px,3.15vw,41px);line-height:1.12;letter-spacing:-.025em;margin:15px 0 12px;max-width:590px;color:#fff}
+.intro h1 span{color:#f4c780}
+.intro p{color:#d6e1eb;font-size:14px;max-width:530px;line-height:1.72;margin:0}
+.hero-benefits{display:flex;gap:18px;flex-wrap:wrap;margin-top:25px}
+.hero-benefits span{display:inline-flex;gap:7px;align-items:center;font-size:11px;color:#d9e5ed;font-weight:600}
+.hero-benefits svg{color:#eac27f;flex:0 0 16px}
+.flow-card{background:rgba(255,255,255,.075);border:1px solid rgba(223,237,245,.16);border-radius:17px;padding:21px 23px;backdrop-filter:blur(4px)}
+.flow-card h3{font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:#eac58d;margin:0 0 13px}
+.flow-card ol{margin:0;padding:0;list-style:none}
+.flow-card li{display:flex;gap:11px;align-items:center;color:#eaf2f7;font-size:12px;padding:9px 0;border-top:1px solid rgba(255,255,255,.09)}
+.flow-card li:first-child{border-top:0}
+.flow-card li b{font-size:10px;letter-spacing:.05em;display:grid;place-items:center;width:27px;height:27px;flex:0 0 27px;border-radius:9px;background:rgba(255,255,255,.12);color:#f7c879}
+.box{background:var(--white);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:17px;padding:27px;margin-top:18px}
+.upload-panel{margin-top:0;padding:25px 29px 20px}
+.upload-panel-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:17px}
+.upload-panel-head h2{color:var(--navy);font-size:21px;letter-spacing:-.025em;margin:4px 0}
+.upload-panel-head p{font-size:12px;color:var(--muted);margin:0}
+.upload-kicker{color:#217a7b;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:800}
+.filetypes{font-size:11px;color:#47657a;font-weight:700;border:1px solid #dfebf1;border-radius:99px;padding:7px 13px;background:#f7fafb;white-space:nowrap}
+.upload{width:100%;min-height:245px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:9px;cursor:pointer;text-align:center;padding:27px 20px;border:1.5px dashed #a9c2d2;border-radius:13px;background:#f7fafc;transition:background .2s,border-color .2s,box-shadow .2s;outline:none}
+.upload:hover,.upload.dragging,.upload:focus-within,.upload:focus{border-color:#1d7d84;background:#f0f8f8;box-shadow:inset 0 0 0 1px rgba(29,125,132,.08)}
+.drop-icon{display:grid;place-items:center;width:54px;height:54px;border-radius:16px;background:#e3eef2;color:#1d7282;margin-bottom:3px}
+.drop-icon svg{width:27px;height:27px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.upload strong{font-size:17px;color:var(--navy);line-height:1.3}
+.upload p{font-size:12px;color:#667f90;margin:-3px 0 4px}
+.upload-cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--navy);color:white;padding:10px 18px;border-radius:9px;font-weight:700;font-size:12px;min-width:165px;box-shadow:0 5px 12px rgba(16,42,67,.11)}
+.upload-cta svg{height:14px;width:14px;fill:none;stroke:#fff;stroke-width:2}
+.upload small{font-size:11px;color:#788b9a;margin-top:2px}
+.upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.upload-notes{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:15px 3px 0}
+.privacy-line{display:inline-flex;align-items:flex-start;gap:7px;max-width:820px;color:#718596}
+.privacy-line svg{width:16px;height:16px;stroke:#7b9aa5;fill:none;stroke-width:1.7;flex:0 0 16px;margin-top:1px}
+.tip{font-size:11px;line-height:1.5;color:#778a9a;margin:0;text-align:left}
+.format-label{white-space:nowrap;font-size:11px;font-weight:700;color:#7a8996}
+.message{border-left:3px solid #e4a34a;background:#fff9ed;color:#76552c;padding:12px 14px;margin:15px 0;font-size:12px;border-radius:8px}
+.message.error{border-color:var(--red);background:#fff0f1;color:#883e44}
+.message.good{border-color:var(--green);background:#edf8f3;color:#296a54}
+.filename{color:var(--navy);font-weight:700;font-size:16px;overflow-wrap:anywhere}
+.small{font-size:11px}.muted{color:var(--muted)}
+.topline{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.sectiontitle{font-size:20px;color:var(--navy);margin:0 0 7px;letter-spacing:-.025em}
+.sub{font-size:12px;color:var(--muted);margin:0 0 16px;line-height:1.65}
+.result{display:grid;grid-template-columns:80px minmax(0,1fr);gap:15px;align-items:center;border:1px solid #dde7ef;border-radius:11px;background:#f7fafc;padding:14px;margin:16px 0}
+.score{width:66px;height:66px;border-radius:13px;background:#e3eef2;color:var(--navy);display:grid;place-items:center;font-size:19px;font-weight:800}
+.result strong{display:block;color:var(--navy)}
+.purpose-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:18px 0}
+.purpose-card{background:#f7fafb;border:1px solid #e0e8ef;border-radius:11px;min-width:0;padding:17px 19px}
+.purpose-label{font-size:10px;letter-spacing:.09em;color:#5f8594;font-weight:800;margin-bottom:10px}
+.purpose-card strong{display:block;color:var(--navy);font-size:14px;line-height:1.4}
+.purpose-card p{font-size:12px;color:#4c6173;line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap;margin:7px 0 0}
+.purpose-next{border:1px solid #ece5d8;border-left:3px solid var(--gold);border-radius:10px;background:#fffaf2;padding:19px 23px}
+.purpose-next h3{font-size:14px;color:var(--navy);margin:0 0 8px}
+.purpose-next h3:not(:first-child){margin-top:15px}
+.purpose-next p,.purpose-next li{font-size:12px;line-height:1.75;text-align:justify}
+.purpose-next p{margin:0}
+.purpose-next ol{margin:0;padding-left:22px}
+.purpose-next li{margin:5px 0}
+.findings{display:grid;gap:10px}
+.finding{background:#fff;border:1px solid #e1e8ee;border-left:3px solid var(--gold);border-radius:10px;padding:13px 16px}
+.finding.critica{border-left-color:var(--red)}.finding.leve{border-left-color:#6e98b2}
+.finding h3{font-size:13px;margin:0;color:var(--navy)}
+.finding p{font-size:12px;color:#52697b;margin:5px 0 0}
+.finding .state{font-size:11px;color:#8696a3;font-weight:700}
+.ai-answer{white-space:pre-wrap;line-height:1.8;text-align:justify;font-size:13px;color:#253f54;background:#f3f8fa;border:1px solid #d8e8ec;border-left:4px solid var(--teal);border-radius:11px;padding:19px 21px}
+.layout{display:grid;grid-template-columns:minmax(0,.98fr) minmax(0,1.02fr);gap:18px;align-items:start}
+.layout .box{height:100%;min-width:0}
+.chat{display:flex;flex-direction:column;gap:11px;overflow:auto;max-height:390px;min-height:290px;padding:16px;background:#f7fafb;border:1px solid var(--line);border-radius:12px}
+.bubble{max-width:92%;padding:12px 14px;border-radius:12px;font-size:12px;line-height:1.7;white-space:pre-wrap}
+.bubble.assistant{align-self:flex-start;background:#e6f0f3;color:#20495d;border-bottom-left-radius:4px}
+.bubble.user{align-self:flex-end;color:white;background:var(--navy);border-bottom-right-radius:4px}
+.chatbar{display:flex;gap:9px;margin-top:11px;align-items:stretch}
+.chatbar textarea{min-width:0;flex:1;min-height:60px;max-height:175px;resize:vertical;border:1px solid #cedbe5;border-radius:10px;padding:11px 12px;background:#fff;color:var(--ink)}
+.chatbar button{align-self:stretch;min-width:104px}
+.editor{display:block;width:100%;min-height:340px;line-height:1.7;font-size:13px;font-family:Arial,Helvetica,sans-serif;text-align:justify;color:var(--ink);background:#fff;border:1px solid #cad8e1;border-radius:10px;padding:15px 17px;resize:vertical}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}
+.review{display:flex;align-items:flex-start;gap:9px;margin:15px 0;font-size:12px;color:#546b7a}
+.review input{margin-top:3px;accent-color:#167c7f}
+.divider{border:0;border-top:1px solid #e7edf2;margin:24px 0}
+.counter{font-size:11px;color:#7c8d9a;margin-top:9px}
+.footer{font-size:11px;color:#8795a3;text-align:center;margin-top:25px;line-height:1.6}
+.loginbox{max-width:470px;margin:60px auto;padding:34px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.loginbox h2{font-size:22px;letter-spacing:-.02em;color:var(--navy);margin:0 0 7px}
+.loginbox p{font-size:12px;color:var(--muted);line-height:1.7}
+.loginbox label{display:block;color:var(--navy);font-size:12px;font-weight:700;margin:16px 0 7px}
+.loginbox input{display:block;width:100%;padding:12px;border:1px solid #cbd9e3;border-radius:9px;color:var(--ink)}
+.loginbox button{width:100%;margin-top:20px}
+#authMessage{margin:12px 0 0;color:#728694;font-size:11px}
+@media(max-width:850px){
+.intro{grid-template-columns:1fr;gap:23px;padding:30px}
+.flow-card{padding:18px 22px}.flow-card ol{display:grid;grid-template-columns:repeat(2,1fr);column-gap:16px}
+.flow-card li:nth-child(2){border-top:0}
+.header-kicker{display:none}
+.layout{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+.wrap{width:calc(100% - 28px)}
+.header .wrap{min-height:72px}
+.logo{width:41px;height:41px;flex-basis:41px;font-size:23px}
+.brand-copy strong{font-size:17px}
+.brand-copy span{font-size:10px}
+.pill{max-width:155px;white-space:normal;font-size:10px;padding:7px 10px}
+.main{padding-top:12px}
+.session-toolbar{margin-bottom:9px}
+.intro{padding:27px 23px;gap:19px;border-radius:17px}
+.intro h1{font-size:28px}
+.intro p{font-size:13px}
+.hero-benefits{gap:11px;margin-top:19px}
+.hero-benefits span{font-size:10px}
+.flow-card{display:none}
+.upload-panel{padding:18px 16px}
+.upload-panel-head h2{font-size:19px}
+.upload-panel-head{align-items:flex-start}
+.filetypes{display:none}
+.upload{min-height:248px;padding:24px 13px}
+.upload-notes{display:block}
+.format-label{margin-top:10px;display:block}
+.box{padding:19px 16px;border-radius:12px}
+.purpose-grid{grid-template-columns:1fr}
+.chatbar{flex-wrap:wrap}
+.chatbar button{width:100%}
+.loginbox{margin:28px auto;padding:24px 19px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+.local-diagnostics{margin-top:24px;border:1px solid #dce5ed;border-radius:13px;background:#fbfcfd;overflow:hidden}
+.local-diagnostics summary{padding:15px 18px;cursor:pointer;font-size:13px;font-weight:700;color:#425d73}
+.local-diagnostics summary:hover{background:#f0f5f8}
+.local-diagnostics-body{padding:17px 21px 22px;border-top:1px solid #e4ebf1}
+#aiPanel{border:1px solid #d6e8e8;background:#f7fbfb;border-radius:14px;padding:21px;margin-bottom:15px}
+#aiPanel .ai-answer{background:#fff}
+#aiPanel h2{margin-top:0}
+#recheckAI{border:1px solid #d1e0e6;background:#fff}
+#score{font-size:19px;color:#9baab5}
+@media(max-width:600px){.local-diagnostics-body{padding:14px}#aiPanel{padding:15px}}
+
+/* Menú del ecosistema ENERGÉTICOS: vínculos externos, sin combinar sesiones ni bases de datos */
+.platform-tabs{display:flex;align-items:center;gap:4px;padding:5px;background:#f1f5f8;border:1px solid #e1e9ef;border-radius:11px;margin:0 12px;white-space:nowrap}
+.platform-tabs__item{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:8px;font:700 12px/1.3 Arial,Helvetica,sans-serif;text-decoration:none;color:#4d6578;transition:background .15s,color .15s}
+.platform-tabs__item:hover{background:#e1eaf1;color:#14344f}
+.platform-tabs__item:focus-visible{outline:2px solid #217e87;outline-offset:2px}
+.platform-tabs__item--active,.platform-tabs__item--active:hover{background:#fff;box-shadow:0 1px 5px rgba(16,42,67,.08);color:#102a43;cursor:default}
+.platform-tabs__item span[aria-hidden]{color:#738b9c;font-size:13px;line-height:1}
+@media(max-width:1150px){.header .wrap{flex-wrap:wrap;row-gap:7px;padding-top:11px;padding-bottom:11px}.platform-tabs{order:3;flex:1 0 100%;margin:0;justify-content:center}.header-right{margin-left:auto}}
+@media(max-width:600px){.platform-tabs{justify-content:stretch;gap:0}.platform-tabs__item{flex:1;padding:9px 5px;font-size:11px}.platform-tabs__item span[aria-hidden]{display:none}.header-right{margin-left:auto}}
+</style>
+<link rel="stylesheet" href="sustenta-ui.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script defer src="sustenta-jszip.min.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#authGate">Ir al contenido principal</a>
+<header class="header"><div class="wrap"><div class="brand"><div class="logo" aria-hidden="true">S</div><div class="brand-copy"><strong>SUSTENTA</strong><span>Informes claros. Decisiones sustentadas.</span></div></div><nav class="platform-tabs" aria-label="Accesos a aplicaciones">
+  <span class="platform-tabs__item platform-tabs__item--active" aria-current="page">SUSTENTA</span>
+  <a class="platform-tabs__item" href="https://energeticos2023.github.io/YACUSOL/" target="_blank" rel="noopener noreferrer" title="Abrir página web YACUSOL en otra pestaña">Web YACUSOL <span aria-hidden="true">↗</span></a>
+  <a class="platform-tabs__item" href="https://energeticos2023.github.io/Yacusol-app/" target="_blank" rel="noopener noreferrer" title="Abrir aplicación YACUSOL en otra pestaña">App YACUSOL <span aria-hidden="true">↗</span></a>
+ </nav>
+ <div class="header-right"><span class="header-kicker">Revisión documental profesional</span><span class="pill" id="serviceState">Acceso privado · IA</span></div></div></header>
+<section class="wrap loginbox" id="authGate" aria-labelledby="accessHeading">
+ <div class="access-story"><div class="eyebrow">Tu criterio. Mejor sustentado.</div><h1>Del primer borrador<br>a un documento<br><span>que se entiende.</span></h1><p>Un espacio para revisar el propósito, precisar el sustento y mejorar cada comunicación antes de emitirla.</p><ol class="access-points"><li><b>01</b> Carga tu documento original</li><li><b>02</b> Revisa hallazgos y propuestas con IA</li><li><b>03</b> Valida los cambios con tu criterio profesional</li></ol></div>
+ <div class="access-form"><div class="access-label">Espacio de revisión documental</div><h2 id="accessHeading">Bienvenido a SUSTENTA</h2><p>Ingresa con tu cuenta autorizada para comenzar.</p><form id="loginForm"><label for="authEmail">Correo electrónico</label><input type="email" id="authEmail" required autocomplete="username" placeholder="nombre@organizacion.pe" maxlength="254"><label for="authPassword">Contraseña</label><div class="password-field"><input type="password" id="authPassword" required autocomplete="current-password"><button type="button" id="togglePassword" aria-label="Mostrar contraseña" aria-pressed="false">Mostrar</button></div><button class="primary" id="loginButton" type="submit">Ingresar a mi espacio →</button></form><p id="authMessage" role="status" aria-live="polite">Acceso exclusivo para usuarios autorizados. No hay registro público.</p><div class="demo-access"><button id="openDemo" class="ghost" type="button">Explorar con un documento de ejemplo ↗</button><p>Vista guiada · Datos ficticios · Sin consultas a IA</p></div></div>
+</section><p class="access-footer" id="accessFooter">SUSTENTA · Informes claros. Decisiones sustentadas.</p><main id="mainApp" class="wrap main hidden">
+ <div class="demo-banner hidden" id="demoBanner" role="status"><span><strong>Vista guiada.</strong> Documento ficticio; no se ha realizado un análisis con IA. Ingresa para revisar tus archivos.</span><button id="exitDemo" class="ghost" type="button">Salir del ejemplo</button></div>
+ <div class="session-toolbar"><span class="session-caption">Espacio de trabajo privado</span><button id="logoutButton" class="ghost" type="button">Cerrar sesión</button></div>
+ <section class="intro" aria-label="Presentación de SUSTENTA">
+  <div class="intro-copy">
+   <div class="eyebrow">Control de calidad documental</div>
+   <h1>Que cada documento <span>cumpla su propósito.</span></h1>
+   <p>Revisa cartas, oficios, memorandos e informes con un criterio claro: que el destinatario comprenda el mensaje, su fundamento y la acción que corresponde.</p>
+   <div class="hero-benefits">
+    <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg> Propósito y coherencia</span>
+    <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg> Observaciones útiles</span>
+    <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg> Word protegido</span>
+   </div>
+  </div>
+  <aside class="flow-card" aria-label="Proceso de trabajo">
+   <h3>Así trabajamos tu documento</h3>
+   <ol>
+    <li><b>01</b> Subes el archivo original</li>
+    <li><b>02</b> Revisamos su finalidad</li>
+    <li><b>03</b> Respondes lo indispensable</li>
+    <li><b>04</b> Validamos las correcciones</li>
+   </ol>
+  </aside>
+ </section>
+ <ol class="workflow-nav" aria-label="Etapas de revisión"><li><a id="stepUpload" href="#uploader" aria-current="step"><b>1</b> Cargar documento</a></li><li><a id="stepReview" href="#workspace" aria-disabled="true"><b>2</b> Revisar hallazgos</a></li><li><a id="stepEdit" href="#editorHeading" aria-disabled="true"><b>3</b> Preparar descarga</a></li></ol>
+ <section class="box upload-panel" id="uploader" aria-labelledby="uploadHeading">
+  <div class="upload-panel-head"><div><span class="upload-kicker">Comenzar una revisión</span><h2 id="uploadHeading">Sube tu documento</h2><p>Una sola acción para comenzar. No necesitas completar formularios.</p></div><span class="filetypes">DOCX · PDF · TXT</span></div>
+  <label class="upload" id="drop" tabindex="0" role="button" aria-label="Seleccionar un documento Word, PDF o TXT">
+   <span class="drop-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2"/></svg></span>
+   <strong>Arrastra tu archivo aquí</strong>
+   <p>o selecciónalo desde tu equipo</p>
+   <span class="upload-cta">Elegir documento <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></span>
+   <small>Formatos admitidos: Word, PDF o texto · Máximo 12 MB</small>
+   <input id="file" type="file" accept=".docx,.pdf,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+  </label>
+  <div id="loading" class="message hidden" role="status"></div>
+  <div class="upload-notes">
+   <div class="privacy-line"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><p class="tip">El archivo se lee en el navegador; con IA habilitada, el texto se transmite a OpenAI mediante un servidor protegido. Carga únicamente documentos autorizados para tratamiento externo.</p></div>
+   <span class="format-label">Documento original protegido</span>
+  </div>
+ </section>
+ <section id="workspace" class="hidden">
+ <div class="box">
+   <div class="topline"><div><div class="small muted">DOCUMENTO CARGADO</div><div class="filename" id="fileName"></div><div class="doc-meta"><span id="docWords"></span><span id="docType"></span><span id="editStatus">Sin cambios</span></div></div><button id="newFile" class="ghost">Subir otro informe</button></div>
+   <div id="aiPanel" class="hidden">
+  <h2 class="sectiontitle">Revisión de SUSTENTA IA</h2><div id="staleReview" class="message hidden" role="status">El texto cambió después del análisis. Vuelve a analizarlo para obtener observaciones sobre esta versión.</div>
+  <p class="sub">Solo un análisis emitido por la IA conectada puede considerarse revisión inteligente. El autor debe contrastar los hechos y fuentes.</p>
+  <div id="aiAnswer" class="ai-answer" role="status"></div><div id="aiStructured" class="hidden">
+  <div id="aiReviewStatus" class="message"></div>
+  <div class="review-tools"><div class="filter-group" role="group" aria-label="Filtrar hallazgos por severidad"><button type="button" data-severity="all" aria-pressed="true">Todos</button><button type="button" data-severity="critica" aria-pressed="false">Críticos</button><button type="button" data-severity="mayor" aria-pressed="false">Mayores</button><button type="button" data-severity="menor" aria-pressed="false">Menores</button></div><button id="exportReview" class="ghost" type="button">Descargar revisión TXT ↓</button></div><p id="filterCount" class="small muted" role="status"></p><div id="aiReviewFindings" class="findings"></div>
+  <h3 class="sectiontitle" style="margin-top:20px">Correcciones sugeridas</h3>
+  <p class="sub">Cada propuesta requiere la validación del especialista. Se puede copiar, pero no se insertará automáticamente ni alterará la estructura del Word.</p>
+  <div id="aiReviewEdits" class="findings"></div>
+  <div id="aiReviewQuestions" class="message hidden"></div>
+ </div>
+  <div class="actions">
+   <button id="analyzeAI" class="primary" type="button">Analizar con IA</button>
+   <button id="recheckAI" class="secondary" type="button">Comprobar conexión IA</button>
+   <span id="aiState" class="small muted"></span>
+  </div>
+ </div>
+  <details id="localDiagnostics" class="local-diagnostics">
+   <summary>Comprobaciones automáticas básicas (sin IA ni calificación)</summary>
+   <div class="local-diagnostics-body">
+   <h2 class="sectiontitle">Indicios formales del documento</h2>
+   <p class="sub">Análisis editorial del propósito y de la respuesta que necesita el destinatario. No sustituye una revisión semántica y técnica realizada con IA y documentos de respaldo.</p>
+   <div class="message" id="purposeLimit">Estas reglas solo detectan palabras y estructuras. No comprenden el contenido ni acreditan su corrección técnica.</div>
+   <div class="purpose-grid">
+     <article class="purpose-card"><div class="purpose-label">TIPO Y FINALIDAD IDENTIFICADA</div><strong id="purposeKind">—</strong><p id="purposeText">—</p><p class="small muted" id="purposeOrigin"></p></article>
+     <article class="purpose-card"><div class="purpose-label">INDICIO FORMAL, NO DICTAMEN</div><strong id="purposeVerdict">—</strong><p id="purposeReason">—</p></article>
+     <article class="purpose-card"><div class="purpose-label">RESPUESTA, PETICIÓN O CONCLUSIÓN</div><strong id="purposeActionTitle">—</strong><p id="purposeAction">—</p></article>
+     <article class="purpose-card"><div class="purpose-label">FUNDAMENTO Y EVIDENCIAS</div><strong id="purposeEvidenceTitle">—</strong><p id="purposeEvidence">—</p></article>
+   </div>
+   <div class="purpose-next"><h3>Lectura automática preliminar</h3><p id="purposeNarrative"></p><h3>Qué corregir para que cumpla su finalidad</h3><ol id="purposeCorrections"></ol></div>
+   <hr class="divider"><h2 class="sectiontitle">Observaciones concretas</h2><p class="sub">Puntos que requieren aclaración. Se priorizan los que afectan la finalidad del documento.</p>
+   <div class="result"><div class="score" id="score">—</div><div><strong id="outcome">Comprobación mecánica</strong><div class="small muted" id="summary"></div></div></div>
+   <div id="findings" class="findings"></div>
+  </div></details>
+ </div>
+ <div class="layout">
+  <div class="box"><h2 class="sectiontitle">Aclaraciones y respuestas</h2><p class="sub">Conversa con SUSTENTA IA. Solo se pedirán aclaraciones necesarias.</p>
+   <div class="chat" id="chat" aria-live="polite"></div>
+   <form id="chatForm" class="chatbar"><textarea id="reply" aria-label="Consulta sobre el documento" placeholder="Pregunta por un hallazgo o aclara un dato…" maxlength="3000"></textarea><button type="submit" class="primary">Responder</button></form>
+   <div class="actions"><button id="addAnswers" class="secondary" disabled>Incorporar respuestas al borrador</button></div>
+   <div class="counter" id="questionState"></div>
+  </div>
+  <div class="box"><h2 class="sectiontitle" id="editorHeading">Documento y revisión</h2><p class="sub" id="formatMessage">El cuadro siguiente muestra texto extraído, NO el aspecto del Word original.</p><div class="message" id="modeStatus" role="status">Solo se permite exportación con diseño preservado cuando se cargó el DOCX original.</div>
+   <div class="editor-tools"><span id="draftCount">Texto de trabajo</span><button id="restoreDraft" class="ghost" type="button" disabled>Restaurar texto original</button></div>
+   <textarea id="draft" class="editor" spellcheck="true" aria-label="Borrador editable"></textarea>
+   <label class="review"><input id="checked" type="checkbox">Confirmo que revisaré personalmente las afirmaciones y evidencias del documento antes de su emisión.</label>
+   <div class="actions"><button id="download" class="primary" disabled>Guardar cambios en Word original</button><button id="draftDownload" class="secondary" disabled>Descargar copia original intacta</button></div>
+   <div class="actions"><button id="textDownload" class="ghost" type="button">Descargar texto de trabajo TXT ↓</button></div><div id="downloadStatus" class="small muted" role="status"></div><div class="message" id="formatWarning">Nunca se convertirá texto plano o PDF en un supuesto Word revisado con formato intacto.</div>
+  </div>
+ </div>
+ </section>
+ <footer class="footer">SUSTENTA · Versión 2026.11.14-R4 · Piloto de revisión. No acredita conformidad técnica, contractual o institucional. La descarga no equivale a autorización de emisión.</footer>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const S={text:"",filename:"",draft:"",findings:[],questions:[],index:0,replies:[],added:0,score:0,purpose:null,kindOverride:null,originalDocx:null,originalLines:null,sourceFile:null,exportMode:"blocked"};
+const AI={token:null,available:false,history:[],busy:false,review:null};
+const UX={epoch:0,controllers:new Set(),demo:false,loading:false,analyzing:false,checking:false,reviewText:null,filter:"all",dirty:false};
+const API_URL="https://azajuquqksrjyfbtcujq.supabase.co";
+const PUBLIC_KEY="sb_publishable_U0SSbONBfry7O3YPB2DAzw_d_C5kmEF";
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function msg(s,bad=false){$("loading").classList.toggle("hidden",!s);$("loading").classList.toggle("error",bad);$("loading").textContent=s||"";}
+function tidy(t){return String(t).replace(/\r/g,"").replace(/[ \t]+/g," ").replace(/\n[ \t]+/g,"\n").replace(/\n{4,}/g,"\n\n").trim();}
+
+const WNS="http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+const byTag=(el,tag)=>Array.from(el.getElementsByTagNameNS(WNS,tag));
+function parseXml(src){const d=new DOMParser().parseFromString(src,"application/xml");if(d.getElementsByTagName("parsererror").length)throw Error("XML de Word ilegible");return d}
+function paragraphLines(xml){return byTag(xml.documentElement,"p").map(p=>byTag(p,"t").map(t=>t.textContent||"").join(""))}
+async function readDocx(file){
+ if(!window.JSZip)throw Error("No se pudo cargar el lector DOCX. Recarga la aplicación.");
+ const zip=await JSZip.loadAsync(await file.arrayBuffer()),part=zip.file("word/document.xml");
+ if(!part)throw Error("El archivo no contiene word/document.xml");
+ const lines=paragraphLines(parseXml(await part.async("string")));return {zip,lines};
+}
+async function preservedWord(textSnapshot=$("draft").value){
+ if(!S.originalDocx||!S.sourceFile)throw Error("Carga el Word original.");
+ const originalLines=S.originalLines.slice();
+ const original=await S.sourceFile.arrayBuffer();
+ const z=await JSZip.loadAsync(original),part=z.file("word/document.xml");
+ if(!part)throw Error("El documento Word no incluye word/document.xml.");
+ const xml=parseXml(await part.async("string"));
+ const paras=byTag(xml.documentElement,"p"),edited=textSnapshot.replace(/\r/g,"").split("\n");
+ if(edited.length!==paras.length)throw Error("El número de párrafos cambió ("+paras.length+" originales / "+edited.length+" editados). No puedo garantizar el formato. Solo se admite editar dentro de los párrafos originales.");
+ const different=[];
+ for(let i=0;i<paras.length;i++)if(edited[i]!==originalLines[i])different.push(i);
+ if(!different.length)throw Error("No hay cambios de texto. Utiliza «Descargar copia original intacta» para conservar el archivo exactamente.");
+ for(const i of different){
+   const p=paras[i],runs=byTag(p,"t");
+   // Un párrafo con estilos, saltos internos, códigos, enlaces u objetos no debe reconstruirse.
+   if(runs.length!==1||byTag(p,"br").length||byTag(p,"tab").length||
+      byTag(p,"drawing").length||byTag(p,"pict").length||
+      byTag(p,"object").length||byTag(p,"fldChar").length||
+      byTag(p,"instrText").length||byTag(p,"hyperlink").length||
+      byTag(p,"sdt").length||byTag(p,"del").length||
+      byTag(p,"ins").length){
+     throw Error("El párrafo "+(i+1)+" usa formato enriquecido, saltos, campos o varios fragmentos. Para evitar deformarlo, SUSTENTA no sustituirá ese contenido.");
+   }
+   const before=originalLines[i],after=edited[i];
+   if(after.includes("\n"))throw Error("No se admite partir el párrafo "+(i+1)+".");
+   if(after.length>before.length+200&&after.length>before.length*1.35){
+     throw Error("La edición del párrafo "+(i+1)+" es demasiado extensa: podría desplazar la paginación. Realiza el cambio en Word.");
+   }
+ }
+ for(const i of different){
+   const t=byTag(paras[i],"t")[0];
+   t.textContent=edited[i];
+   t.setAttributeNS("http://www.w3.org/XML/1998/namespace","xml:space","preserve");
+ }
+ z.file("word/document.xml",new XMLSerializer().serializeToString(xml));
+ return {blob:await z.generateAsync({type:"blob",compression:"DEFLATE"}),changed:different.length};
+}
+function saveBlob(blob,name){const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
+async function extract(file,epoch=UX.epoch){
+  if(file.size>12*1024*1024)throw Error("El archivo supera los 12 MB permitidos.");
+  const n=file.name.toLowerCase();
+  if(n.endsWith(".txt"))return await file.text();
+  if(n.endsWith(".docx")){const doc=await readDocx(file);if(epoch!==UX.epoch)throw Error("Carga cancelada.");S.originalDocx=doc;S.originalLines=doc.lines;return S.originalLines.join("\n");}
+  if(n.endsWith(".pdf")){
+    if(!window.pdfjsLib)throw Error("No se pudo cargar el lector PDF.");
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+    if(pdf.numPages>75)throw Error("Este piloto admite hasta 75 páginas en un PDF.");
+    const pages=[];
+    for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const tc=await page.getTextContent();pages.push(tc.items.map(x=>x.str).join(" "));}
+    return pages.join("\n\n");
+  }
+  throw Error("Formato no compatible. Selecciona DOCX, PDF o TXT.");
+}
+
+function docKind(t,filename,override){
+ if(override==="carta"||override==="informe")return override;
+ const front=t.slice(0,4200);
+ if(/^\s*(?:carta|oficio|solicitud)(?:\s+n[.°ºo]*)?\b/im.test(front)||
+    /\bde mi consideraci[oó]n\b/i.test(front)||
+    /\bme dirijo a (?:usted(?:es)?|su despacho|la entidad|la gerencia)\b/i.test(front)||
+    /\b(?:solicitar|solicito|solicitamos|se solicita|se sirva)\b[\s\S]{0,130}\b(?:constancia|certificado|emisi[oó]n|reconocimiento|documento|autorizaci[oó]n)\b/i.test(front)||
+    (/\b(?:señor(?:a|es)?|estimad[oa]s?|atentamente)\b/i.test(front)&&/\b(?:solicitar|solicito|me dirijo|de mi consideraci[oó]n)\b/i.test(front)))return "carta";
+ if(/\b(?:carta|oficio|solicitud)\b/i.test(filename)&&!/^\s*informe\b/im.test(front))return "carta";
+ if(/\b(?:informe|reporte)\b/i.test(filename)||/^\s*(?:INFORME|REPORTE)(?:\s+N[.°ºo]*)?\b/im.test(front))return "informe";
+ return "documento";
+}
+function serviceDetail(t){
+ const os=(t.match(/\b(?:orden\s+de\s+servicio|O\.?\s*S\.?)\s*(?:n[.°ºo]*\s*[:\-]?\s*)?([0-9]{4,12}(?:[-\/][0-9]{2,6})?)/i)||[])[1]||"";
+ const isConstancia=/\bconstancia\b[\s\S]{0,100}\b(?:prestaci[oó]n|servicio|servicios|trabajo)\b|\b(?:prestaci[oó]n|servicio|servicios)\b[\s\S]{0,100}\bconstancia\b/i.test(t);
+ return {os,isConstancia};
+}
+function snippet(t,regex,max=225) {
+ const m=regex.exec(t); if(!m)return "";
+ const begin=m.index, after=t.slice(begin,begin+max+65);
+ const stop=after.search(/[\n\r](?=\S)|(?<=[.;])\s{1,3}(?=[A-ZÁÉÍÓÚ])/);
+ return tidy((stop>34?after.slice(0,stop):after).slice(0,max));
+}
+function purposeAudit(text,filename,override){
+ const t=tidy(text),kind=docKind(t,filename,override),service=serviceDetail(t);
+ const explicit=snippet(t,/^\s*(?:(?:OBJETIVO|FINALIDAD|OBJETO)(?:\s+DEL\s+(?:INFORME|DOCUMENTO))?\s*[:.\-]\s*|ASUNTO\s*:\s*)[^\n]+/im,230);
+ const request=snippet(t,/\b(?:solicito|solicitamos|se solicita|se requiere|solicitar|se sirva|se solicita su|agradecer[ée]?)\b/i,230);
+ const answer=snippet(t,/\b(?:en atenci[oó]n a|en respuesta a|respecto de su consulta|al respecto(?:\s*[:,])?|cumplo con informar|se comunica)\b/i,230);
+ const result=snippet(t,/\b(?:concluimos|se concluye|conclusiones|se recomienda|no corresponde|es procedente|no es procedente|se determina|por lo expuesto)\b/i,230);
+ const subject=explicit||request||answer||snippet(t,/\b(?:se informa|informo|se comunica|se evalu[oó]|se verific[oó])\b/i,200);
+ const objective=service.isConstancia?"Solicitar la constancia de prestación de servicios"+(service.os?" correspondiente a la Orden de Servicio N.º "+service.os:"")+".":subject||"No se pudo identificar con suficiente claridad qué resultado busca el documento.";
+ const source=explicit?"Declarado en el texto":request?"Inferido a partir de una petición":answer?"Inferido de una comunicación o respuesta":"No demostrado de manera expresa";
+ const intent=request?"solicitar una actuación o decisión":answer?"responder o comunicar una posición":result?"sustentar una conclusión":"informar o presentar resultados";
+ const hasClosing=/conclusi[oó]n|concluimos|se concluye|se determina|por lo expuesto|en consecuencia|se recomienda|en s[ií]ntesis/i.test(t);
+ const hasEvidence=/\b(?:anexo(?:s)?|acta(?:s)?|protocolo(?:s)?|registro(?:s)?|adjunt[oa]|fotograf[ií]a(?:s)?|evidencia(?:s)?|medici[oó]n(?:es)?|ensayo(?:s)?|aconex|acc|seg[uú]n el|conforme a)\b/i.test(t);
+ const hasDecision=/\b(?:solicitar|solicito|solicitamos|se solicita|se requiere|se sirva|se recomienda|se dispone|se concluye|se determina|se comunica|no corresponde|es procedente|no es procedente|se aprueba|se rechaza)\b/i.test(t);
+ const vague=/\b(?:xxxx|tbd|por completar|insertar aqu[ií]|pendiente de definir)\b/i.test(t);
+ const actions=[];
+ const add=x=>{if(!actions.includes(x))actions.push(x)};
+ if(!subject)add("Expresar en una frase el propósito: qué se informa, solicita, responde o decide y para qué.");
+ if(kind==="carta"){
+   if(!/\b(?:señor(?:a|es)?|estimad[oa]s?|a la atenci[oó]n|destinatario|gerencia|direcci[oó]n|jefatura|unidad|[áa]rea de)\b/i.test(t.slice(0,1100)))add("Verificar el funcionario o área competente que debe atender esta solicitud.");
+   if(!hasDecision)add("Cerrar con una petición, respuesta o decisión inequívoca; especificar qué debe hacer o conocer el destinatario.");
+   if(service.isConstancia&&!service.os)add("Identificar la Orden de Servicio y su número exacto; no inventarlo.");
+   if(service.isConstancia&&!/\b(?:atentamente|cordialmente|saludos cordiales)\b/i.test(t.slice(-600)))add("Verificar que exista un cierre formal y espacio de firma.");
+ }else{
+   if(!hasClosing)add("Incorporar una conclusión que responda expresamente al objetivo y esté respaldada por los resultados.");
+   if(!/\b(?:resultado|actividad|verificaci[oó]n|evaluaci[oó]n|hallazgo|an[aá]lisis|inspecci[oó]n)\b/i.test(t))add("Relacionar las actividades o hechos constatados con los resultados y la conclusión.");
+ }
+ if(!hasEvidence&&kind!=="carta")add("Vincular las afirmaciones importantes con los documentos, registros o anexos que efectivamente existen.");
+ if(vague)add("Reemplazar los marcadores provisionales únicamente con datos verificados.");
+ if(!result&&kind==="carta"&&answer)add("Expresar claramente la respuesta o el pronunciamiento, sin limitarse a citar antecedentes.");
+ if(!actions.length)add("Contrastar el objetivo, el desarrollo y la parte final con las fuentes originales; confirmar que el destinatario pueda actuar sin interpretaciones ambiguas.");
+ const structuralGap=!subject||(kind==="carta"&&!hasDecision)||(kind!=="carta"&&!hasClosing)||vague;
+ let verdict=structuralGap?"NO ES POSIBLE DARLO POR LISTO":"PROPÓSITO IDENTIFICABLE; VERIFICACIÓN PENDIENTE";
+ let reason=structuralGap?"Faltan elementos formales relevantes para determinar si el destinatario podrá comprender y atender la finalidad.":"El texto presenta señales de finalidad y de cierre; su correspondencia real, suficiencia técnica y validez documental todavía no están comprobadas.";
+ const actionTitle=kind==="carta"?(hasDecision?"Petición o pronunciamiento detectable":"No se identifica petición o decisión clara"):(hasClosing?"Señal de conclusión identificada":"Conclusión no identificada");
+ const actionText=kind==="carta"?(service.isConstancia?objective:(request||answer||"Petición concreta no identificada")):(result||"Conclusión no identificada");
+ const evidenceTitle=hasEvidence?"Referencias documentales mencionadas":"Sustento explícito no localizado";
+ const evidenceText=hasEvidence?"El texto menciona registros, anexos u otras fuentes. No se ha examinado su contenido, vigencia ni correspondencia con las afirmaciones.":kind==="carta"?"Una solicitud puede necesitar solamente antecedentes pertinentes; verificar la Orden de Servicio y otros sustentos disponibles si corresponden.":"No se identificaron referencias reconocibles a soportes en el texto extraído. Podrían estar fuera del archivo o en elementos no extraíbles.";
+ const narrative=(kind==="carta"?"Se ha tratado el documento como carta. Su función principal debe ser comunicar con claridad una solicitud, respuesta o posición, de modo que el destinatario sepa qué debe hacer. ":"Se ha tratado el documento como "+(kind==="informe"?"informe. Debe permitir comprender el objeto, los hechos, los resultados y la conclusión. ":"documento. Su naturaleza requiere confirmación; no se debe imponer una estructura inadecuada. "))+
+ (subject?"Se ha localizado una expresión que orienta su finalidad, pero no demuestra por sí sola que el desarrollo la atienda. ":"No se reconoce un propósito expreso suficientemente claro; esta es la principal debilidad para una revisión previa. ")+
+ (hasDecision||hasClosing?"Existe una señal formal de cierre o decisión; debe verificarse que realmente responda al asunto planteado. ":"La parte resolutiva o la conclusión no es reconocible, por lo que el lector podría no saber qué se espera de él. ")+
+ (hasEvidence?"Existen referencias documentales en el texto, aún sin comprobar.":"No se han reconocido citas de evidencia que permitan contrastar las afirmaciones centrales.")+
+ " El dictamen es preliminar: un motor de reglas no comprende ni verifica por sí solo la finalidad material del documento.";
+ return {kind,objective,source,intent,verdict,reason,actionTitle,actionText,evidenceTitle,evidenceText,narrative,actions,hasClosing,hasEvidence,hasDecision,vague};
+}
+function review(text,purpose){
+ const t=tidy(text),p=purpose,f=[];
+ const add=(level,title,why,question)=>f.push({level,title,why,question,replied:false});
+ if(p.source==="No demostrado de manera expresa")add("critica","Propósito no suficientemente definido","El lector debe saber desde el inicio qué finalidad tiene el documento.","¿Qué resultado concreto buscas: informar, solicitar, responder o sustentar una decisión?");
+ if(p.kind==="carta"){
+   if(!p.hasDecision)add("critica","Petición no identificada","La carta debe permitir saber qué actuación se solicita.","¿Qué decisión o respuesta concreta debe dar el destinatario?");
+   if(!/señor(?:a|es)?|estimad[oa]s?|a la atenci[oó]n|destinatario|gerencia|direcci[oó]n|jefatura|unidad|[áa]rea de/i.test(t.slice(0,1100)))add("mayor","Destinatario por verificar","No se distingue al funcionario o área competente en el texto extraído.","¿A qué funcionario o área va dirigida esta carta?");
+ }else{
+   if(!p.hasClosing)add("critica","Conclusión no identificada","No basta describir actividades: el informe debe expresar qué se concluye y cómo se relaciona con su finalidad.","¿Qué conclusión deseas sostener a partir de los resultados efectivamente acreditados?");
+   if(!/resultado|actividad|verificaci[oó]n|evaluaci[oó]n|hallazgo|an[aá]lisis|inspecci[oó]n/i.test(t))add("mayor","Desarrollo insuficiente para acreditar el objetivo","No se localiza una exposición reconocible de actuaciones, análisis o resultados.","¿Qué hechos concretos y resultados soportan tu conclusión?");
+ }
+ if(!p.hasEvidence&&p.kind!=="carta")add("mayor","Sustento sin referencia explícita","No se identifican fuentes verificables dentro del texto extraído, aunque pueden existir en anexos no accesibles.","¿Qué evidencias reales respaldan las afirmaciones esenciales?");
+ if(p.vague)add("critica","Datos provisionales","El archivo incluye marcadores por completar que impiden considerarlo apto para emisión.","¿Qué datos comprobados deben reemplazar los campos pendientes?");
+ if(!f.length)add("leve","Verificación profesional final","El propósito resulta identificable. Debe comprobarse en el documento completo la exactitud de datos, el destinatario, anexos y firma.",null);
+ return f;
+}
+function renderPurpose(){
+ const p=S.purpose;if(!p)return;
+ $("purposeKind").textContent=({carta:"Carta / comunicación",informe:"Informe",documento:"Documento no clasificado"}[p.kind])+" · "+p.intent;
+ $("purposeText").textContent=p.objective;
+ $("purposeOrigin").textContent=p.source;
+ $("purposeVerdict").textContent=p.verdict;
+ $("purposeReason").textContent=p.reason;
+ $("purposeActionTitle").textContent=p.actionTitle;
+ $("purposeAction").textContent=p.actionText;
+ $("purposeEvidenceTitle").textContent=p.evidenceTitle;
+ $("purposeEvidence").textContent=p.evidenceText;
+ $("purposeNarrative").textContent=p.narrative;
+ $("purposeCorrections").replaceChildren();
+ p.actions.forEach(item=>{let li=document.createElement("li");li.textContent=item;$("purposeCorrections").append(li)});
+}
+function renderFindings(){
+ $("findings").replaceChildren();
+ S.findings.forEach((f,i)=>{
+  const d=document.createElement("article");d.className="finding "+f.level;
+  const h=document.createElement("h3");h.textContent=(i+1)+". "+f.title;d.append(h);
+  const p=document.createElement("p");p.textContent=f.why;d.append(p);
+  const state=document.createElement("div");state.className="state";state.textContent=f.replied?"Aclaración recibida · pendiente de verificación documental":"Pendiente de aclaración";d.append(state);
+  $("findings").append(d);
+ });
+}
+function bubble(text,who){
+ const d=document.createElement("div");d.className="bubble "+who;d.textContent=text;$("chat").append(d);$("chat").scrollTop=$("chat").scrollHeight;
+}
+function ask(){
+ const q=S.questions[S.index];
+ if(q){bubble(q.question,"assistant");$("questionState").textContent="Aclaración necesaria "+(S.index+1)+" de "+S.questions.length;}
+ else{bubble("No identifico más preguntas indispensables con las comprobaciones locales. Revisa el documento antes de emitir.","assistant");$("questionState").textContent="Sin más preguntas imprescindibles en esta revisión preliminar.";}
+}
+function start(file,text){
+ $("localDiagnostics").open=false;
+ $("reply").disabled=!AI.available;
+ $("chatForm").querySelector('button[type="submit"]').disabled=!AI.available;
+ S.text=tidy(text);S.filename=file.name;S.kindOverride=null;S.purpose=purposeAudit(S.text,S.filename,S.kindOverride);S.findings=review(S.text,S.purpose);
+ S.questions=S.findings.filter(x=>x.question&&x.level!=="leve").slice(0,2);
+ S.index=0;S.replies=[];S.added=0;
+ let score=10;
+ S.findings.forEach(f=>{score-=f.level==="critica"?2:f.level==="mayor"?1:.4});
+ S.score=Math.max(1,Math.min(10,score));
+ UX.savedText=null;S.draft=S.originalDocx?S.originalLines.join("\n"):tidy(S.text);
+ $("fileName").textContent=file.name;$("editorHeading").textContent=S.purpose.kind==="carta"?"Carta para revisar y descargar":S.purpose.kind==="informe"?"Informe para revisar y descargar":"Documento para revisar y descargar";
+ $("score").textContent="—";
+ $("outcome").textContent="SIN EVALUACIÓN INTELIGENTE";
+ $("summary").textContent="Se detectaron "+S.findings.length+" señales automáticas. Sin calificación de calidad ni aprobación de emisión.";
+ $("chat").replaceChildren();renderPurpose();renderFindings();
+ bubble("Archivo recibido. Las observaciones locales son orientativas. El dictamen contextual corresponde al bot IA.","assistant");
+ $("draft").value=S.draft;$("checked").checked=false;$("download").disabled=true;
+ S.exportMode=S.originalDocx?"original-only":"blocked";$("draftDownload").disabled=!S.originalDocx;
+ $("modeStatus").textContent=S.originalDocx?"Modo Word original: copia exacta disponible. Los cambios solo se exportarán cuando sean compatibles con la estructura del archivo.":"Modo lectura: este archivo no es DOCX. Puedes leer el análisis, pero para guardar con el diseño original, carga el archivo DOCX.";
+$("formatMessage").textContent=S.originalDocx?"Este campo es una transcripción de párrafos; no muestra márgenes, tablas, encabezados ni diseño original. Solo las ediciones simples dentro de un párrafo podrán guardarse en el DOCX original.":"Texto extraído para revisión y edición. Para producir un Word con idéntico formato, carga el DOCX original.";
+$("formatWarning").textContent=S.originalDocx?"La copia original se descarga byte por byte sin cambios. Las correcciones de texto se aplican solamente cuando no afectan objetos o formatos complejos; aun así debes cotejar visualmente el resultado en Word.":"Exportación de Word bloqueada desde PDF/TXT para evitar documentos de texto corrido y formato incorrecto.";
+ $("addAnswers").disabled=true;$("reply").value="";$("downloadStatus").textContent="";
+ $("workspace").classList.remove("hidden");
+ $("uploader").classList.add("hidden");
+ document.querySelectorAll(".workflow-nav a").forEach(a=>{a.removeAttribute("aria-current");a.removeAttribute("aria-disabled")});$("stepReview").setAttribute("aria-current","step");
+ updateDraftState();
+ $("workspace").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+async function aiRequest(action,question=""){
+ if(!AI.token)throw Error("Primero ingresa a SUSTENTA");
+ if(UX.demo)throw Error("La vista guiada no realiza consultas a IA.");
+ const documentText=tidy($("draft").value);
+ if(documentText.length<40||documentText.length>180000)throw Error("El texto de trabajo debe tener entre 40 y 180000 caracteres.");
+ const response=await request(API_URL+"/functions/v1/sustenta-ia",{
+  method:"POST",
+  headers:{"Content-Type":"application/json","apikey":PUBLIC_KEY,"Authorization":"Bearer "+AI.token},
+  body:JSON.stringify({action,document:documentText,filename:S.filename,question,history:AI.history.slice(-8)})
+ });
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw Error(data.error||"No se pudo completar la consulta");
+ return data;
+}
+async function checkAI(){
+ if(UX.demo||!AI.token)throw Error("Ingresa con tu cuenta para comprobar la conexión.");
+ const r=await request(API_URL+"/functions/v1/sustenta-ia",{
+  method:"POST",
+  headers:{"Content-Type":"application/json","apikey":PUBLIC_KEY,"Authorization":"Bearer "+AI.token},
+  body:JSON.stringify({action:"status"})
+ });
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok)throw Error(r.status===401?"La sesión venció. Vuelve a ingresar.":r.status===403?"Esta cuenta no tiene autorización para SUSTENTA.":j.error||"No se pudo comprobar el servicio. Intenta de nuevo.");
+ AI.available=Boolean(j.available);
+ $("serviceState").dataset.state=AI.available?"ready":"error";
+ $("serviceState").textContent=AI.available?"Bot SUSTENTA IA · Disponible":"Bot IA · Pendiente de clave";
+ syncBusy();
+ return AI.available;
+}
+
+function showStructuredReview(data) {
+ AI.review=data;const container=$("aiStructured");container.classList.remove("hidden");
+ $("aiReviewStatus").textContent="Dictamen: "+(data.estado_editorial||"NO DETERMINABLE")+" · Propósito: "+(data.dictamen_proposito||"no determinado")+
+ (typeof data.puntuacion_1_a_10==="number"?" · Calificación IA: "+data.puntuacion_1_a_10+"/10":" · Calificación no determinable");
+ const findings=$("aiReviewFindings");findings.replaceChildren();
+ const title=document.createElement("h3");title.className="sectiontitle";title.textContent="Hallazgos del análisis IA";findings.append(title);
+ const observations=Array.isArray(data.observaciones)?data.observaciones:[];
+ UX.filter="all";document.querySelectorAll("[data-severity]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.severity==="all")));
+ if(!observations.length){const p=document.createElement("p");p.className="muted";p.textContent="No se emitieron observaciones específicas.";findings.append(p)}
+ observations.forEach(obs=>{
+  const article=document.createElement("article");article.className="finding "+(obs.severidad==="critica"?"critica":obs.severidad==="menor"?"leve":"");
+  article.dataset.severity=obs.severidad||"sin_clasificar";
+  const badge=document.createElement("span");badge.className="severity";badge.textContent=({critica:"Crítica",mayor:"Mayor",menor:"Menor"}[obs.severidad]||"Por clasificar")+" · "+(obs.estado||"ABIERTO");article.append(badge);
+  const h=document.createElement("h3");h.textContent=(obs.id||"Observación")+" · "+(obs.problema||"Hallazgo");article.append(h);
+  for(const line of ["Ubicación: "+(obs.ubicacion||"no localizable"),"Impacto: "+(obs.efecto_en_proposito||""),"Corrección: "+(obs.propuesta||""),"Evidencia: "+(obs.fuente||"NO VERIFICADA")]){const p=document.createElement("p");p.textContent=line;article.append(p)}
+  findings.append(article);
+ });
+ const edits=$("aiReviewEdits");edits.replaceChildren();
+ const proposals=Array.isArray(data.ediciones_propuestas)?data.ediciones_propuestas:[];
+ if(!proposals.length){const p=document.createElement("p");p.className="muted";p.textContent="No se han propuesto sustituciones aplicables.";edits.append(p)}
+ proposals.forEach((edit,index)=>{
+  const article=document.createElement("article");article.className="finding";
+  const h=document.createElement("h3");h.textContent="Propuesta "+(index+1)+" · "+(edit.id_bloque||"Ubicación pendiente");article.append(h);
+  const old=document.createElement("p");old.textContent="Original: "+(edit.texto_anterior||"");article.append(old);
+  const next=document.createElement("p");next.textContent="Sugerido: "+(edit.texto_sugerido||"");article.append(next);
+  const btn=document.createElement("button");btn.type="button";btn.className="secondary";btn.textContent="Copiar texto propuesto";
+  btn.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(edit.texto_sugerido||"");btn.textContent="Copiado"}catch{btn.textContent="No se pudo copiar"}});article.append(btn);edits.append(article);
+ });
+ const questions=Array.isArray(data.preguntas_indispensables)?data.preguntas_indispensables:[];
+ $("aiReviewQuestions").classList.toggle("hidden",!questions.length);
+ $("aiReviewQuestions").textContent=questions.length?"Aclaraciones imprescindibles: "+questions.map(q=>q.pregunta).join(" · "):"";
+ filterFindings();
+}
+async function analyzeWithAI(){
+ if(UX.analyzing||AI.busy||UX.demo||!AI.available)return;
+ const epoch=UX.epoch,reviewText=$("draft").value;UX.analyzing=true;AI.history=[];UX.reviewText=null;$("staleReview").classList.add("hidden");syncBusy();
+ $("aiPanel").classList.remove("hidden");$("aiStructured").classList.add("hidden");$("aiAnswer").textContent="Analizando el propósito y el sustento del documento...";$("aiStructured").classList.add("hidden");AI.review=null;
+ $("analyzeAI").disabled=true;$("aiState").textContent="Análisis en curso";
+ try{
+  const j=await aiRequest("analyze");
+  if(epoch!==UX.epoch)return;
+  if(!j.structured&&!j.answer)throw Error("El servicio devolvió una respuesta vacía.");
+  UX.reviewText=reviewText;updateDraftState();
+  $("aiAnswer").textContent=j.structured?[(j.structured.proposito||""),(j.structured.analisis_narrativo||""),(j.structured.recomendacion_final||"")].filter(Boolean).join("\n\n"):j.answer;
+  if(j.structured)showStructuredReview(j.structured);
+  $("aiState").textContent="Dictamen IA. Contrasta las afirmaciones con los originales.";
+  AI.history=[{role:"assistant",content:(j.answer||"").slice(0,2000)}];
+  $("chat").replaceChildren();
+  bubble("Ya he revisado el propósito del documento. Pregúntame por las observaciones, o indícame qué deseas mejorar. No modificaré tu Word sin tu autorización.","assistant");
+  $("questionState").textContent="Chat IA activo";
+ }catch(e){
+  if(epoch!==UX.epoch)return;
+  $("aiAnswer").textContent="No se pudo completar el análisis con IA: "+(e.message||String(e));
+  $("aiState").textContent="Motor IA no disponible";
+ }finally{if(epoch===UX.epoch){UX.analyzing=false;syncBusy();}}
+}
+async function chatWithAI(question){
+ if(AI.busy||UX.analyzing||UX.demo||!AI.available)return;
+ const epoch=UX.epoch;AI.busy=true;syncBusy();
+ const send=$("chatForm").querySelector('button[type="submit"]');
+ send.disabled=true;
+ bubble("Estoy revisando tu consulta...","assistant");
+ const target=$("chat").lastElementChild;
+ try{
+  const j=await aiRequest("chat",question);
+  if(epoch!==UX.epoch)return;
+  if(!j.answer)throw Error("El servicio devolvió una respuesta vacía.");
+  target.textContent=j.answer;
+  AI.history.push({role:"user",content:question},{role:"assistant",content:j.answer});
+  AI.history=AI.history.slice(-8);
+  $("questionState").textContent="Chat IA activo. Revisa las fuentes antes de emitir.";
+ }catch(e){if(epoch===UX.epoch)target.textContent="No se pudo obtener respuesta: "+(e.message||String(e))}
+ finally{if(epoch===UX.epoch){AI.busy=false;syncBusy();}}
+}
+$("loginForm").addEventListener("submit",async e=>{
+ e.preventDefault();const epoch=UX.epoch;$("authMessage").dataset.error="false";$("loginButton").disabled=true;$("openDemo").disabled=true;$("authMessage").textContent="Comprobando acceso...";
+ try{
+  const res=await request(API_URL+"/auth/v1/token?grant_type=password",{
+   method:"POST",headers:{"Content-Type":"application/json","apikey":PUBLIC_KEY},
+   body:JSON.stringify({email:$("authEmail").value.trim(),password:$("authPassword").value})
+  });
+  const data=await res.json().catch(()=>({}));
+  if(epoch!==UX.epoch)return;
+  if(!res.ok||!data.access_token)throw Error(res.status===429?"Demasiados intentos. Espera un momento y vuelve a intentar.":res.status>=500?"El servicio de acceso no responde. Intenta de nuevo en unos minutos.":"No se pudo iniciar sesión. Comprueba tu correo y contraseña.");
+  AI.token=data.access_token;
+  $("authPassword").value="";
+  await checkAI();
+  if(epoch!==UX.epoch)return;
+  document.querySelector(".skip-link").setAttribute("href","#mainApp");
+  $("accessFooter").classList.add("hidden");
+  $("authGate").classList.add("hidden");
+  $("mainApp").classList.remove("hidden");
+  $("authMessage").textContent="Acceso validado.";
+ }catch(e){if(epoch===UX.epoch){AI.token=null;AI.available=false;$("authMessage").dataset.error="true";$("authMessage").textContent=e.message||String(e)}}
+ finally{if(epoch===UX.epoch){$("loginButton").disabled=false;$("openDemo").disabled=false;}}
+});
+$("logoutButton").addEventListener("click",leaveWorkspace);
+$("analyzeAI").addEventListener("click",()=>{if(AI.available&&S.text)analyzeWithAI()});
+$("recheckAI").addEventListener("click",async()=>{
+ if(UX.checking||UX.analyzing||AI.busy||UX.demo)return;
+ const epoch=UX.epoch;UX.checking=true;syncBusy();$("aiState").textContent="Verificando conexión…";
+ try{await checkAI();if(epoch!==UX.epoch)return;$("aiState").textContent=AI.available?"Servicio disponible. Pulsa Analizar con IA cuando lo necesites.":"Servicio de IA pendiente de configuración.";}
+ catch(e){if(epoch===UX.epoch){AI.available=false;$("serviceState").dataset.state="error";$("serviceState").textContent="IA · Sin conexión";$("aiState").textContent=e.message||String(e);}}
+ finally{if(epoch===UX.epoch){UX.checking=false;syncBusy();}}
+});
+async function fileSelected(file){
+ if(!file||UX.loading||UX.demo||!AI.token)return;
+ if(UX.dirty&&!confirm("Hay cambios sin descargar. ¿Deseas cargar otro documento?"))return;
+ invalidateRequests();const epoch=UX.epoch;UX.loading=true;syncBusy();
+ const previous={...S};
+ S.originalDocx=null;S.originalLines=null;S.sourceFile=file;S.exportMode="blocked";
+ msg("Leyendo el informe y generando observaciones preliminares...");
+ $("uploader").classList.remove("hidden");
+ $("drop").setAttribute("aria-busy","true");
+ try{
+   const content=await extract(file,epoch);
+   if(epoch!==UX.epoch)return;
+   if(tidy(content).length<45)throw Error("No pude extraer suficiente texto. Si el PDF está escaneado, requiere OCR; todavía no disponible.");
+   if(content.length>180000)throw Error("El texto tiene "+content.length+" caracteres. El límite IA es 180000; divide el expediente en partes.");
+   start(file,content);msg("");
+   AI.history=[];AI.review=null;$("aiStructured").classList.add("hidden");
+   $("aiPanel").classList.remove("hidden");
+   if(AI.available)await analyzeWithAI();
+   else{
+    $("aiAnswer").textContent="ANÁLISIS CON IA NO DISPONIBLE. Aún falta configurar el servicio OpenAI en Supabase. No se ha realizado una evaluación profesional del contenido ni de su propósito.";
+    $("aiState").textContent="Pendiente de configuración";
+    $("analyzeAI").disabled=true;
+    $("chat").replaceChildren();
+    $("reply").disabled=true;
+    $("chatForm").querySelector('button[type="submit"]').disabled=true;
+    bubble("El chat estará disponible cuando el motor de IA se encuentre configurado. No es posible revisar este documento inteligentemente todavía.","assistant");
+   }
+ }catch(e){if(epoch===UX.epoch){Object.assign(S,previous);msg(e.message||"No fue posible leer este documento.",true);}}
+ finally{if(epoch===UX.epoch){UX.loading=false;$("drop").setAttribute("aria-busy","false");syncBusy();}}
+}
+$("file").addEventListener("change",e=>fileSelected(e.target.files?.[0]));
+$("newFile").addEventListener("click",()=>{if(UX.demo||UX.loading)return;$("file").value="";$("file").click();});
+$("drop").addEventListener("keydown",e=>{if(e.target===$("drop")&&(e.key==="Enter"||e.key===" ")){e.preventDefault();$("file").click();}});
+$("drop").addEventListener("dragover",e=>{e.preventDefault();$("drop").classList.add("dragging");});
+$("drop").addEventListener("dragleave",()=>$("drop").classList.remove("dragging"));
+$("drop").addEventListener("drop",e=>{e.preventDefault();$("drop").classList.remove("dragging");fileSelected(e.dataTransfer?.files?.[0]);});
+function classifyCorrection(kind){
+ S.kindOverride=kind;S.purpose=purposeAudit(S.text,S.filename,kind);S.findings=review(S.text,S.purpose);
+ S.questions=S.findings.filter(x=>x.question&&x.level!=="leve").slice(0,2);S.index=0;S.replies=[];S.added=0;
+ renderPurpose();renderFindings();$("outcome").textContent="SIN EVALUACIÓN INTELIGENTE";
+ $("editorHeading").textContent=kind==="carta"?"Carta para revisar y descargar":"Informe para revisar y descargar";
+ $("addAnswers").disabled=true;
+ bubble("Gracias por la aclaración. He reclasificado el documento como "+(kind==="carta"?"CARTA":"INFORME")+". Su finalidad detectada es: "+S.purpose.objective+". No insistiré en preguntas propias de un formato distinto.","assistant");
+ if(S.questions.length)ask(); else bubble("La finalidad está identificada. Puedes revisar el texto y descargar el borrador sin responder más preguntas genéricas.","assistant");
+}
+function handleInstruction(text){
+ if(/\b(?:es|esto es|se trata de|es una|se trata de una)\s+(?:una\s+)?(?:carta|oficio|solicitud)\b/i.test(text)||/^\s*(?:carta|oficio)\s*[.!]?\s*$/i.test(text)){classifyCorrection("carta");return true}
+ if(/\b(?:es|esto es|se trata de|es un|se trata de un)\s+(?:un\s+)?(?:informe|reporte)\b/i.test(text)||/^\s*informe\s*[.!]?\s*$/i.test(text)){classifyCorrection("informe");return true}
+ if(/\b(?:lee|revisa|analiza|dime|que falta|qué falta|que opinas|qué opinas|vuelve a leer)\b/i.test(text)&&text.length<185){
+  bubble("Propósito identificado: "+S.purpose.objective+"\n\n"+S.purpose.narrative+"\n\nCorrecciones o comprobaciones pertinentes:\n"+S.purpose.actions.map((x,i)=>(i+1)+". "+x).join("\n")+"\n\nNo corresponden preguntas de conclusiones y resultados técnicos cuando se solicita una constancia mediante carta.","assistant");return true
+ }
+ return false;
+}
+$("chatForm").addEventListener("submit",async e=>{
+ e.preventDefault();const answer=tidy($("reply").value);if(!answer||!S.text||AI.busy||UX.analyzing||!AI.available||UX.demo)return;
+ bubble(answer,"user");$("reply").value="";
+ if(AI.available){await chatWithAI(answer);return;}
+ bubble("El bot IA está pendiente de configuración y no puede responder.","assistant");
+});
+$("addAnswers").addEventListener("click",()=>{
+ const next=S.replies.slice(S.added);
+ if(!next.length)return;
+ if(S.originalDocx){$("downloadStatus").textContent="Para conservar el formato, incorpora las aclaraciones dentro del párrafo correspondiente, sin crear párrafos nuevos.";return;}
+ const addition="\n\nACLARACIONES DEL ESPECIALISTA (PENDIENTES DE VERIFICACIÓN)\n\n"+next.map((x,i)=>(S.added+i+1)+". "+x.q+"\nRespuesta aportada: "+x.a).join("\n\n");
+ $("draft").value=tidy($("draft").value)+addition;S.draft=$("draft").value;S.added=S.replies.length;S.purpose=purposeAudit(S.draft,S.filename,S.kindOverride);renderPurpose();
+ $("addAnswers").disabled=true;$("checked").checked=false;$("download").disabled=true;$("draft").scrollIntoView({behavior:"smooth",block:"center"});
+});
+$("draft").addEventListener("input",()=>{updateDraftState();$("checked").checked=false;$("download").disabled=true;if(S.filename){S.purpose=purposeAudit($("draft").value,S.filename,S.kindOverride);renderPurpose();}});
+$("checked").addEventListener("change",()=>{$("download").disabled=!S.originalDocx||!$("checked").checked||!$("draft").value.trim();});
+async function download(asDraft){
+ const epoch=UX.epoch,exportText=$("draft").value;
+ if(!S.sourceFile)return;
+ if(!S.originalDocx){
+   $("downloadStatus").textContent="Exportación bloqueada. La conversión de PDF o TXT a Word no conserva la estructura original. Sube el archivo .docx editable.";
+   return;
+ }
+ const base=S.filename.replace(/\.docx$/i,"").replace(/[^a-zA-Z0-9_-]+/g,"_").slice(0,65);
+ if(asDraft){
+   // Se descarga el contenido ORIGINAL, sin regenerar ni reescribir el paquete DOCX.
+   saveBlob(S.sourceFile,base+"_COPIA_ORIGINAL_INTACTA.docx");
+   $("downloadStatus").textContent="Se descargó una copia EXACTA de tu DOCX original. No contiene correcciones. Conserva íntegramente el formato, las tablas y los anexos.";
+   return;
+ }
+ if(!$("checked").checked){$("downloadStatus").textContent="Confirma tu revisión antes de guardar los cambios.";return}
+ try{
+   $("downloadStatus").textContent="Comprobando la estructura de los párrafos...";
+   const result=await preservedWord(exportText);
+   if(epoch!==UX.epoch)return;
+   UX.savedText=exportText;updateDraftState();
+   saveBlob(result.blob,base+"_CAMBIOS_COMPATIBLES.docx");
+   $("downloadStatus").textContent="Se editaron "+result.changed+" párrafos simples dentro del Word original. Este archivo requiere una comparación visual de páginas antes de su emisión.";
+ }catch(e){
+   $("downloadStatus").textContent="No se generó ningún Word alterado: "+(e.message||String(e))+" Descarga la copia original y aplica las correcciones en Word.";
+ }
+}
+$("download").addEventListener("click",()=>download(false));
+$("draftDownload").addEventListener("click",()=>download(true));
+
+
+async function request(url,options){
+ const epoch=UX.epoch,controller=new AbortController();UX.controllers.add(controller);
+ const timer=setTimeout(()=>controller.abort(),options.body?.includes('"action":"analyze"')?240000:45000);
+ try{
+  const response=await fetch(url,{...options,signal:controller.signal});
+  // Consume the response before clearing the timeout: the body can stall too.
+  const body=await response.text();
+  if(epoch!==UX.epoch)throw Error("Solicitud cancelada al cambiar de documento o sesión.");
+  return {ok:response.ok,status:response.status,json:async()=>JSON.parse(body)};
+ }catch(e){
+  if(e.name==="AbortError")throw Error("La consulta se canceló o superó el tiempo de espera. Puedes volver a intentar.");
+  if(e instanceof TypeError)throw Error("No se pudo conectar con el servicio. Comprueba tu conexión e intenta de nuevo.");
+  throw e;
+ }finally{clearTimeout(timer);UX.controllers.delete(controller);}
+}
+function invalidateRequests(){
+ UX.epoch++;UX.controllers.forEach(c=>c.abort());UX.controllers.clear();
+ UX.analyzing=false;UX.checking=false;AI.busy=false;UX.reviewText=null;
+}
+function syncBusy(){
+ const blocked=UX.analyzing||AI.busy||UX.checking;
+ $("analyzeAI").disabled=!AI.available||blocked||UX.demo;
+ $("recheckAI").disabled=blocked||UX.demo;
+ $("reply").disabled=!AI.available||blocked||UX.demo;
+ $("chatForm").querySelector('button[type="submit"]').disabled=!AI.available||blocked||UX.demo;
+ $("aiPanel").setAttribute("aria-busy",String(UX.analyzing));
+ $("analyzeAI").textContent=UX.analyzing?"Analizando…":"Analizar con IA";
+ $("newFile").disabled=UX.loading||UX.demo;
+ $("file").disabled=UX.loading||UX.demo;
+ $("drop").setAttribute("aria-disabled",String(UX.loading||UX.demo));
+}
+function updateDraftState(){
+ const text=$("draft").value,words=text.trim()?text.trim().split(/\s+/u).length:0;
+ UX.dirty=text!==(UX.savedText??S.draft);
+ $("docWords").textContent=words.toLocaleString("es-PE")+" palabras";
+ $("docType").textContent=S.filename.split(".").pop().toUpperCase()+" · "+(S.sourceFile?(S.sourceFile.size/1024).toFixed(1)+" KB":"Ejemplo ficticio");
+ $("draftCount").textContent=text.length.toLocaleString("es-PE")+" caracteres · "+text.split("\n").length+" párrafos de texto";
+ $("editStatus").textContent=UX.dirty?"Cambios sin descargar":text!==S.draft?"Cambios descargados":"Sin cambios";
+ $("restoreDraft").disabled=text===S.draft;
+ $("staleReview").classList.toggle("hidden",!UX.reviewText||UX.reviewText===text);
+}
+function filterFindings(){
+ const articles=Array.from($("aiReviewFindings").querySelectorAll("article"));let count=0;
+ articles.forEach(a=>{const visible=UX.filter==="all"||a.dataset.severity===UX.filter;a.classList.toggle("hidden",!visible);if(visible)count++;});
+ $("filterCount").textContent=count+" de "+articles.length+" hallazgos"+(count===0&&articles.length?" · No hay hallazgos en esta categoría.":"");
+}
+function leaveWorkspace(){
+ if(UX.dirty&&!confirm("Hay cambios sin descargar. ¿Deseas salir de este espacio?"))return;
+ invalidateRequests();UX.demo=false;UX.dirty=false;UX.loading=false;UX.savedText=null;
+ AI.token=null;AI.available=false;AI.history=[];AI.review=null;
+ Object.assign(S,{text:"",filename:"",draft:"",findings:[],questions:[],replies:[],originalDocx:null,originalLines:null,sourceFile:null,purpose:null,exportMode:"blocked"});
+ ["draft","reply","file","authPassword"].forEach(id=>$(id).value="");
+ ["chat","aiReviewFindings","aiReviewEdits"].forEach(id=>$(id).replaceChildren());
+ ["fileName","aiAnswer","aiReviewStatus","aiReviewQuestions","questionState","downloadStatus","aiState"].forEach(id=>$(id).textContent="");
+ ["workspace","mainApp","demoBanner","aiStructured","staleReview"].forEach(id=>$(id).classList.add("hidden"));
+ ["authGate","accessFooter","uploader"].forEach(id=>$(id).classList.remove("hidden"));
+
+ document.querySelector(".skip-link").setAttribute("href","#authGate");
+ $("authPassword").type="password";$("togglePassword").textContent="Mostrar";$("togglePassword").setAttribute("aria-label","Mostrar contraseña");$("togglePassword").setAttribute("aria-pressed","false");
+ $("authMessage").textContent="Acceso exclusivo para usuarios autorizados. No hay registro público.";$("authMessage").dataset.error="false";
+ $("serviceState").textContent="Acceso privado · IA";$("serviceState").dataset.state="";
+ document.querySelectorAll(".workflow-nav a").forEach(a=>a.removeAttribute("aria-current"));
+ $("stepUpload").setAttribute("aria-current","step");["stepReview","stepEdit"].forEach(id=>$(id).setAttribute("aria-disabled","true"));
+ $("download").disabled=true;$("draftDownload").disabled=true;msg("");syncBusy();$("authEmail").focus();
+}
+$("togglePassword").addEventListener("click",()=>{
+ const show=$("authPassword").type==="password";$("authPassword").type=show?"text":"password";
+ $("togglePassword").textContent=show?"Ocultar":"Mostrar";$("togglePassword").setAttribute("aria-label",show?"Ocultar contraseña":"Mostrar contraseña");$("togglePassword").setAttribute("aria-pressed",String(show));
+});
+$("restoreDraft").addEventListener("click",()=>{
+ if(!UX.dirty||!confirm("¿Restaurar el texto original? Se descartarán los cambios del cuadro de edición."))return;
+ $("draft").value=S.draft;$("checked").checked=false;$("download").disabled=true;
+ S.purpose=purposeAudit(S.draft,S.filename,S.kindOverride);renderPurpose();updateDraftState();
+});
+document.querySelectorAll("[data-severity]").forEach(button=>button.addEventListener("click",()=>{
+ UX.filter=button.dataset.severity;document.querySelectorAll("[data-severity]").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));filterFindings();
+}));
+$("textDownload").addEventListener("click",()=>{
+ if(!S.text)return;saveBlob(new Blob([$("draft").value],{type:"text/plain;charset=utf-8"}),S.filename.replace(/\.[^.]+$/,"")+"_TEXTO_TRABAJO.txt");
+ $("downloadStatus").textContent="Texto de trabajo descargado. Esta copia TXT no conserva el diseño del documento original.";
+ UX.savedText=$("draft").value;updateDraftState();
+});
+$("exportReview").addEventListener("click",()=>{
+ if(!AI.review)return;
+ const r=AI.review,lines=["SUSTENTA · REVISIÓN DOCUMENTAL",S.filename,"Fecha de descarga: "+new Date().toLocaleString("es-PE",{timeZone:"America/Lima"}),"Estado: "+r.estado_editorial,"Versión del texto: "+(UX.reviewText===$("draft").value?"Coincide con el texto de trabajo":"El texto cambió después de esta revisión"),"",r.proposito,r.analisis_narrativo,"",...((r.observaciones||[]).map(o=>[o.id+" · "+o.severidad+" · "+o.problema,"Ubicación: "+o.ubicacion,"Impacto: "+o.efecto_en_proposito,"Propuesta: "+o.propuesta,"Fuente: "+o.fuente,"Estado: "+o.estado].join("\n"))),"","CORRECCIONES PROPUESTAS",...((r.ediciones_propuestas||[]).map(e=>[e.id_bloque,"Original: "+e.texto_anterior,"Sugerido: "+e.texto_sugerido].join("\n"))),"","ACLARACIONES",...((r.preguntas_indispensables||[]).map(q=>q.pregunta)),"",r.recomendacion_final,"","Requiere validación profesional. No equivale a aprobación ni autorización de emisión."];
+ saveBlob(new Blob([lines.filter(x=>x!=null).join("\n\n")],{type:"text/plain;charset=utf-8"}),S.filename.replace(/\.[^.]+$/,"")+"_REVISION.txt");
+});
+$("exitDemo").addEventListener("click",leaveWorkspace);
+$("openDemo").addEventListener("click",()=>{
+ invalidateRequests();UX.demo=true;AI.available=false;AI.token=null;AI.review=null;AI.history=[];
+ document.querySelector(".skip-link").setAttribute("href","#mainApp");
+ $("authGate").classList.add("hidden");$("accessFooter").classList.add("hidden");$("authPassword").value="";
+ $("mainApp").classList.remove("hidden");$("demoBanner").classList.remove("hidden");
+ $("serviceState").textContent="Vista guiada · Sin IA";$("serviceState").dataset.state="";
+ S.originalDocx=null;S.originalLines=null;S.sourceFile=null;
+ start({name:"Carta_de_ejemplo.txt"},"CARTA DE EJEMPLO — DATOS FICTICIOS\n\nSeñor responsable del área de administración:\nAsunto: Solicitud de constancia de prestación de servicios.\n\nDe mi consideración:\nSolicito la emisión de la constancia de prestación de servicios correspondiente a la Orden de Servicio N.º 000000. Los datos de esta carta son ficticios y se utilizan únicamente para mostrar la aplicación.\n\nAtentamente,\nProfesional de ejemplo");
+ $("aiPanel").classList.remove("hidden");$("aiStructured").classList.add("hidden");
+ $("aiAnswer").textContent="Este es un recorrido por el espacio de revisión. Puedes explorar las comprobaciones locales, editar el texto de ejemplo y descargarlo como TXT. No hay un dictamen de IA ni se envía contenido a un servidor. Para analizar tus documentos, sal del ejemplo e ingresa con tu cuenta autorizada.";
+ $("aiState").textContent="Vista guiada: consultas IA deshabilitadas";
+ $("chat").replaceChildren();bubble("Aquí podrás consultar las observaciones de tu documento cuando ingreses con tu cuenta y el servicio de IA esté disponible.","assistant");
+ $("questionState").textContent="Ejemplo sin conversación con IA";syncBusy();
+});
+$("draft").addEventListener("focus",()=>{
+ document.querySelectorAll(".workflow-nav a").forEach(a=>a.removeAttribute("aria-current"));$("stepEdit").setAttribute("aria-current","step");
+});
+$("stepUpload").addEventListener("click",event=>{
+ event.preventDefault();if(UX.demo||UX.loading)return;
+ if(S.text){$("file").value="";$("file").click();}else $("drop").focus();
+});
+["stepReview","stepEdit"].forEach(id=>$(id).addEventListener("click",event=>{
+ if(!S.text){event.preventDefault();return;}
+ document.querySelectorAll(".workflow-nav a").forEach(a=>a.removeAttribute("aria-current"));$(id).setAttribute("aria-current","step");
+}));
+window.addEventListener("beforeunload",event=>{if(UX.dirty){event.preventDefault();event.returnValue="";}});
+
+})();
+</script></body></html>
